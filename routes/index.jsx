@@ -2,6 +2,7 @@
 
 import express from 'express';
 import ReactDOMServer from "react-dom/server";
+import React from "react";
 
 import Main from "../components/Main";
 
