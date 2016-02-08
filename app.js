@@ -6,9 +6,12 @@ import favicon from 'serve-favicon';
 import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
+import injectTapEventPlugin from 'react-tap-event-plugin';
 
 import routes from './routes/index';
 import users from './routes/users';
+
+injectTapEventPlugin();
 
 let app = express();
 
