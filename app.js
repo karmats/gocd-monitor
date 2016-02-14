@@ -6,12 +6,9 @@ import favicon from 'serve-favicon';
 import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
-import injectTapEventPlugin from 'react-tap-event-plugin';
 
 import routes from './routes/index';
 import users from './routes/users';
-
-injectTapEventPlugin();
 
 let app = express();
 
@@ -26,7 +23,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.use('/', routes);
 app.use('/users', users);
 
@@ -60,6 +56,5 @@ app.use((err, req, res, next) => {
     error: {}
   });
 });
-
 
 module.exports = app;
