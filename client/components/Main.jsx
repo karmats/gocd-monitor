@@ -10,6 +10,7 @@ import Colors from 'material-ui/lib/styles/colors';
 import FlatButton from 'material-ui/lib/flat-button';
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
+import TestComponent from './TestComponent';
 
 const styles = {
   container: {
@@ -19,9 +20,7 @@ const styles = {
 };
 
 const muiTheme = getMuiTheme({
-  palette: {
-    accent1Color: Colors.deepOrange500,
-  },
+
 });
 
 export default class Main extends React.Component {
@@ -59,12 +58,12 @@ export default class Main extends React.Component {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div style={styles.container}>
+          <TestComponent />
           <Dialog
             open={this.state.open}
             title="Super Secret Password"
             actions={standardActions}
-            onRequestClose={this.handleRequestClose}
-          >
+            onRequestClose={this.handleRequestClose}>
             1-2-3-4-5
           </Dialog>
           <h1>material-ui</h1>
@@ -72,8 +71,7 @@ export default class Main extends React.Component {
           <RaisedButton
             label="Super Secret Password"
             primary={true}
-            onTouchTap={this.handleTouchTap}
-          />
+            onTouchTap={this.handleTouchTap} />
         </div>
       </MuiThemeProvider>
     );
