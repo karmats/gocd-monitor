@@ -6,10 +6,13 @@ import favicon from 'serve-favicon';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 
-import routes from './routes/index';
-import users from './routes/users';
+let routes = require('./routes/index'),
+    users = require('./routes/users'),
+    dev = require('./routes/dev');
 
 let app = express();
+
+let devMode = app.get('env') === 'development';
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -19,6 +22,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+// Use webpack server to serve static assets in development and express.static 
+// for all other stages
+if (devMode) {
+  app.use('/assets/js', dev);
+}
 app.use('/assets', express.static(path.join(__dirname, '../assets')));
 app.use('/', routes);
 app.use('/users', users);

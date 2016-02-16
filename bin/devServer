@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+let webpack = require('webpack');
+let WebpackDevServer = require('webpack-dev-server');
+let config = require('../webpack.config.dev');
+let conf = require('../app-config').config;
+
+new WebpackDevServer(webpack(config), {
+  publicPath: config.output.publicPath,
+  hot: true,
+  historyApiFallback: true
+}).listen(conf.devPort, 'localhost', function (err, result) {
+  if (err) {
+    console.log(err);
+  }
+
+  console.log('Listening at localhost:' + conf.devPort);
+});

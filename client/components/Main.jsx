@@ -4,10 +4,11 @@
  */
 
 import React from 'react';
-import RaisedButton from 'material-ui/lib/raised-button';
 import Dialog from 'material-ui/lib/dialog';
 import Colors from 'material-ui/lib/styles/colors';
 import FlatButton from 'material-ui/lib/flat-button';
+import FloatingActionButton from 'material-ui/lib/floating-action-button';
+import ContentAdd from 'material-ui/lib/svg-icons/content/add';
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
 import TestComponent from './TestComponent';
@@ -15,8 +16,13 @@ import TestComponent from './TestComponent';
 const styles = {
   container: {
     textAlign: 'center',
-    paddingTop: 200,
+    paddingTop: 200
   },
+  fab: {
+    position: 'absolute',
+    right: 50,
+    bottom: 50
+  }
 };
 
 const muiTheme = getMuiTheme({
@@ -66,12 +72,11 @@ export default class Main extends React.Component {
             onRequestClose={this.handleRequestClose}>
             1-2-3-4-5
           </Dialog>
-          <h1>material-ui</h1>
-          <h2>example project</h2>
-          <RaisedButton
-            label="Super Secret Password"
+          <FloatingActionButton style={styles.fab}
             primary={true}
-            onTouchTap={this.handleTouchTap} />
+            onTouchTap={this.handleTouchTap}>
+           <ContentAdd />
+         </FloatingActionButton>
         </div>
       </MuiThemeProvider>
     );
