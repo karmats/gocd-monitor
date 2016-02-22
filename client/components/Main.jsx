@@ -12,44 +12,20 @@ import ContentAdd from 'material-ui/lib/svg-icons/content/add';
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
 import { Line as LineChart } from 'react-chartjs';
+import { Responsive, WidthProvider } from 'react-grid-layout';
 import TestComponent from './TestComponent';
+import pipelines from 'json!../../assets/data/pipelines.json';
+
+const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 const styles = {
   container: {
-    textAlign: 'center',
-    paddingTop: 200
   },
   fab: {
     position: 'absolute',
     right: 50,
     bottom: 50
   }
-};
-
-const chartData = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
-    datasets: [
-        {
-            label: "My First dataset",
-            fillColor: "rgba(220,220,220,0.2)",
-            strokeColor: "rgba(220,220,220,1)",
-            pointColor: "rgba(220,220,220,1)",
-            pointStrokeColor: "#fff",
-            pointHighlightFill: "#fff",
-            pointHighlightStroke: "rgba(220,220,220,1)",
-            data: [65, 59, 80, 81, 56, 55, 40]
-        },
-        {
-            label: "My Second dataset",
-            fillColor: "rgba(151,187,205,0.2)",
-            strokeColor: "rgba(151,187,205,1)",
-            pointColor: "rgba(151,187,205,1)",
-            pointStrokeColor: "#fff",
-            pointHighlightFill: "#fff",
-            pointHighlightStroke: "rgba(151,187,205,1)",
-            data: [28, 48, 40, 19, 86, 27, 90]
-        }
-    ]
 };
 
 const chartOptions = {
@@ -115,9 +91,65 @@ export default class Main extends React.Component {
 
     this.state = {
       open: false,
+      layout: this.generateLayout()
     };
+    this.props = {
+      className: "layout",
+      rowHeight: 30,
+      cols: {
+        lg: 12, md: 10, sm: 6, xs: 4, xxs: 2
+      }
+    }
   }
 
+  chartData() {
+    return pipelines.pipelines.map((pipeline) => {
+      let data = {};
+      data.labels = pipeline.build;
+      data.datasets = [];
+      // Success
+      data.datasets[0] = {
+        label: "Success",
+        fillColor: Colors.green500,
+        strokeColor: Colors.green600,
+        pointColor: "rgba(220,220,220,1)",
+        pointStrokeColor: "#fff",
+        pointHighlightFill: "#fff",
+        pointHighlightStroke: "rgba(220,220,220,1)",
+        data: pipeline.success
+      };
+      // Errors
+      data.datasets[1] = {
+        label: "Errors",
+        fillColor: Colors.red500,
+        strokeColor: Colors.red600,
+        pointColor: "rgba(220,220,220,1)",
+        pointStrokeColor: "#fff",
+        pointHighlightFill: "#fff",
+        pointHighlightStroke: "rgba(220,220,220,1)",
+        data: pipeline.error
+      };
+      return data;
+    });
+  };
+
+  generateDOM() {
+    return this.chartData().map((cd, idx) => {
+      return (
+        <div key={idx}>
+          <LineChart data={cd} options={chartOptions} width="300" height="125" />
+        </div>
+        )
+    });
+  }
+
+  generateLayout() {
+    var p = this.props;
+    return pipelines.pipelines.map((item, i) => {
+      return {x: i*2, y: 0, w: 2, h: 2, i: i.toString()};
+    });
+  }
+  
   handleRequestClose() {
     this.setState({
       open: false,
@@ -142,8 +174,10 @@ export default class Main extends React.Component {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div style={styles.container}>
-          <TestComponent />
-          <LineChart data={chartData} options={chartOptions} width="600" height="250" />
+         <ResponsiveReactGridLayout layout={this.state.layout}
+            {...this.props}>
+          {this.generateDOM()}
+        </ResponsiveReactGridLayout>
           <Dialog
             open={this.state.open}
             title="Super Secret Password"
