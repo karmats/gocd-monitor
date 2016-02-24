@@ -20,12 +20,8 @@ module.exports = {
   module: {
     loaders: [{
       test: /.jsx?$/,
-      loaders: ['react-hot', 'babel', 'json'],
+      loaders: ['react-hot', 'babel'],
       include: path.join(__dirname, 'client')
-    },
-    {
-      test: /\.json$/,
-      loader: 'json'
     }]
   },
   resolve: {

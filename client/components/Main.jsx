@@ -12,14 +12,31 @@ import ContentAdd from 'material-ui/lib/svg-icons/content/add';
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
 import { Line as LineChart } from 'react-chartjs';
-import { Responsive, WidthProvider } from 'react-grid-layout';
 import TestComponent from './TestComponent';
-import pipelines from 'json!../../assets/data/pipelines.json';
 
-const ResponsiveReactGridLayout = WidthProvider(Responsive);
+const pipelines = {
+    "pipelines": [
+        {
+            "id": "scx-4.1",
+            "build": ["#102", "#103", "#104", "#105", "#106"],
+            "tests": [100, 100, 102, 105, 105],
+            "success": [89, 90, 102, 100, 105],
+            "error": [11, 10, 0, 5, 0]
+        },
+        {
+            "id": "scx-5.0",
+            "build": ["#202", "#203", "#204", "#205", "#206"],
+            "tests": [125, 125, 127, 130, 130],
+            "success": [125, 120, 120, 127, 130],
+            "error": [0, 5, 7, 3, 0]
+        }
+    ]
+}
 
 const styles = {
   container: {
+    textAlign: 'center',
+    paddingTop: 200
   },
   fab: {
     position: 'absolute',
@@ -86,20 +103,15 @@ const muiTheme = getMuiTheme({
 export default class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
+
+    // Setup event handlers
     this.handleRequestClose = this.handleRequestClose.bind(this);
     this.handleTouchTap = this.handleTouchTap.bind(this);
 
+    // Setup initial state
     this.state = {
-      open: false,
-      layout: this.generateLayout()
+      open: false
     };
-    this.props = {
-      className: "layout",
-      rowHeight: 30,
-      cols: {
-        lg: 12, md: 10, sm: 6, xs: 4, xxs: 2
-      }
-    }
   }
 
   chartData() {
@@ -133,23 +145,16 @@ export default class Main extends React.Component {
     });
   };
 
-  generateDOM() {
+  generateChartDOM() {
     return this.chartData().map((cd, idx) => {
       return (
-        <div key={idx}>
+        <div className="col-md-6 col-sm-8 col-xs-12">
           <LineChart data={cd} options={chartOptions} width="300" height="125" />
         </div>
         )
     });
   }
 
-  generateLayout() {
-    var p = this.props;
-    return pipelines.pipelines.map((item, i) => {
-      return {x: i*2, y: 0, w: 2, h: 2, i: i.toString()};
-    });
-  }
-  
   handleRequestClose() {
     this.setState({
       open: false,
@@ -174,10 +179,9 @@ export default class Main extends React.Component {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div style={styles.container}>
-         <ResponsiveReactGridLayout layout={this.state.layout}
-            {...this.props}>
-          {this.generateDOM()}
-        </ResponsiveReactGridLayout>
+          <div className="row">
+            {this.generateChartDOM()}
+          </div>
           <Dialog
             open={this.state.open}
             title="Super Secret Password"
