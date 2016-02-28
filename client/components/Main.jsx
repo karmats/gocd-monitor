@@ -5,6 +5,7 @@
 
 import React from 'react';
 import Dialog from 'material-ui/lib/dialog';
+import { Card, CardHeader, CardText } from 'material-ui/lib/card';
 import Colors from 'material-ui/lib/styles/colors';
 import FlatButton from 'material-ui/lib/flat-button';
 import FloatingActionButton from 'material-ui/lib/floating-action-button';
@@ -36,7 +37,7 @@ const pipelines = {
 const styles = {
   container: {
     textAlign: 'center',
-    paddingTop: 200
+    padding: 20
   },
   fab: {
     position: 'absolute',
@@ -117,13 +118,14 @@ export default class Main extends React.Component {
   chartData() {
     return pipelines.pipelines.map((pipeline) => {
       let data = {};
+      data.name = pipeline.id;
       data.labels = pipeline.build;
       data.datasets = [];
       // Success
       data.datasets[0] = {
         label: "Success",
-        fillColor: Colors.green500,
-        strokeColor: Colors.green600,
+        fillColor: Colors.green300,
+        strokeColor: Colors.green500,
         pointColor: "rgba(220,220,220,1)",
         pointStrokeColor: "#fff",
         pointHighlightFill: "#fff",
@@ -133,8 +135,8 @@ export default class Main extends React.Component {
       // Errors
       data.datasets[1] = {
         label: "Errors",
-        fillColor: Colors.red500,
-        strokeColor: Colors.red600,
+        fillColor: Colors.red300,
+        strokeColor: Colors.red500,
         pointColor: "rgba(220,220,220,1)",
         pointStrokeColor: "#fff",
         pointHighlightFill: "#fff",
@@ -148,8 +150,15 @@ export default class Main extends React.Component {
   generateChartDOM() {
     return this.chartData().map((cd, idx) => {
       return (
-        <div className="col-md-6 col-sm-8 col-xs-12">
-          <LineChart data={cd} options={chartOptions} width="300" height="125" />
+        <div className="col-md-4 col-sm-6 col-xs-12">
+          <Card>
+            <CardHeader
+              title={cd.name}
+              subtitle="Status: Success" />
+            <CardText>
+              <LineChart data={cd} options={chartOptions} width="300" height="125" />
+            </CardText>
+          </Card>
         </div>
         )
     });
