@@ -19,6 +19,7 @@ const pipelines = {
     "pipelines": [
         {
             "id": "scx-4.1",
+            "status": "success",
             "build": ["#102", "#103", "#104", "#105", "#106"],
             "tests": [100, 100, 102, 105, 105],
             "success": [89, 90, 102, 100, 105],
@@ -26,6 +27,7 @@ const pipelines = {
         },
         {
             "id": "scx-5.0",
+            "status": "failed",
             "build": ["#202", "#203", "#204", "#205", "#206"],
             "tests": [125, 125, 127, 130, 130],
             "success": [125, 120, 120, 127, 130],
@@ -36,8 +38,18 @@ const pipelines = {
 
 const styles = {
   container: {
-    textAlign: 'center',
-    padding: 20
+    textAlign: 'left',
+    padding: 20,
+    color: '#fff'
+  },
+  cardSuccess: {
+    color: '#fff',
+    background: Colors.green400,
+    fontSize: '1.2em'
+  },
+  cardFailure: {
+    color: '#fff',
+    background: Colors.red400
   },
   fab: {
     position: 'absolute',
@@ -150,11 +162,15 @@ export default class Main extends React.Component {
   generateChartDOM() {
     return this.chartData().map((cd, idx) => {
       return (
-        <div className="col-md-4 col-sm-6 col-xs-12">
-          <Card>
+        <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+          <Card style={styles.cardSuccess}>
             <CardHeader
               title={cd.name}
-              subtitle="Status: Success" />
+              subtitle="Status: Success"
+              titleStyle={styles.cardSuccess}
+              subtitleStyle={styles.cardSuccess}>
+              <i className="wi wi-day-sunny"></i>
+            </CardHeader>
             <CardText>
               <LineChart data={cd} options={chartOptions} width="300" height="125" />
             </CardText>

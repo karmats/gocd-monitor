@@ -6,3 +6,8 @@ body {
 a {
   color: #00B7FF;
 }
+
+i.wi {
+  float: right;
+  font-size: 3em;
+}
