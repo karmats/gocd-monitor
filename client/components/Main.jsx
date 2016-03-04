@@ -7,6 +7,7 @@ import React from 'react';
 import Dialog from 'material-ui/lib/dialog';
 import { Card, CardHeader, CardText } from 'material-ui/lib/card';
 import Colors from 'material-ui/lib/styles/colors';
+import Moment from 'moment';
 import FlatButton from 'material-ui/lib/flat-button';
 import FloatingActionButton from 'material-ui/lib/floating-action-button';
 import ContentAdd from 'material-ui/lib/svg-icons/content/add';
@@ -20,6 +21,7 @@ const pipelines = {
         {
             "id": "scx-4.1",
             "status": "success",
+            "buildtime": 1457085089646,
             "build": ["#102", "#103", "#104", "#105", "#106"],
             "tests": [100, 100, 102, 105, 105],
             "success": [89, 90, 102, 100, 105],
@@ -28,6 +30,7 @@ const pipelines = {
         {
             "id": "scx-5.0",
             "status": "failed",
+            "buildtime": 1318781876406,
             "build": ["#202", "#203", "#204", "#205", "#206"],
             "tests": [125, 125, 127, 130, 130],
             "success": [125, 120, 120, 127, 130],
@@ -44,12 +47,17 @@ const styles = {
   },
   cardSuccess: {
     color: '#fff',
-    background: Colors.green400,
+    background: Colors.green500,
     fontSize: '1.2em'
+  },
+  cardSuccessSub: {
+    color: '#fff',
+    fontSize: '1em',
+    fontWeight: 100
   },
   cardFailure: {
     color: '#fff',
-    background: Colors.red400
+    background: Colors.red500
   },
   fab: {
     position: 'absolute',
@@ -61,19 +69,19 @@ const styles = {
 const chartOptions = {
 
     ///Boolean - Whether grid lines are shown across the chart
-    scaleShowGridLines : true,
+    scaleShowGridLines : false,
 
     //String - Colour of the grid lines
-    scaleGridLineColor : "rgba(0,0,0,.05)",
+    scaleGridLineColor : "#fff",
 
     //Number - Width of the grid lines
     scaleGridLineWidth : 1,
 
     //Boolean - Whether to show horizontal lines (except X axis)
-    scaleShowHorizontalLines: true,
+    scaleShowHorizontalLines: false,
 
     //Boolean - Whether to show vertical lines (except Y axis)
-    scaleShowVerticalLines: true,
+    scaleShowVerticalLines: false,
 
     //Boolean - Whether the line is curved between points
     bezierCurve : true,
@@ -82,7 +90,7 @@ const chartOptions = {
     bezierCurveTension : 0.4,
 
     //Boolean - Whether to show a dot for each point
-    pointDot : true,
+    pointDot : false,
 
     //Number - Radius of each point dot in pixels
     pointDotRadius : 4,
@@ -94,10 +102,10 @@ const chartOptions = {
     pointHitDetectionRadius : 20,
 
     //Boolean - Whether to show a stroke for datasets
-    datasetStroke : true,
+    datasetStroke : false,
 
     //Number - Pixel width of dataset stroke
-    datasetStrokeWidth : 2,
+    datasetStrokeWidth : 1,
 
     //Boolean - Whether to fill the dataset with a colour
     datasetFill : true,
@@ -136,23 +144,23 @@ export default class Main extends React.Component {
       // Success
       data.datasets[0] = {
         label: "Success",
-        fillColor: Colors.green300,
-        strokeColor: Colors.green500,
-        pointColor: "rgba(220,220,220,1)",
+        fillColor: "rgba(255,255,255,0.5)",
+        strokeColor: "#fff",
+        pointColor: "#fff",
         pointStrokeColor: "#fff",
         pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(220,220,220,1)",
+        pointHighlightStroke: "#fff",
         data: pipeline.success
       };
       // Errors
       data.datasets[1] = {
         label: "Errors",
-        fillColor: Colors.red300,
-        strokeColor: Colors.red500,
-        pointColor: "rgba(220,220,220,1)",
+        fillColor: "#fff",
+        strokeColor: "#fff",
+        pointColor: "#fff",
         pointStrokeColor: "#fff",
         pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(220,220,220,1)",
+        pointHighlightStroke: "#fff",
         data: pipeline.error
       };
       return data;
@@ -166,13 +174,22 @@ export default class Main extends React.Component {
           <Card style={styles.cardSuccess}>
             <CardHeader
               title={cd.name}
-              subtitle="Status: Success"
               titleStyle={styles.cardSuccess}
-              subtitleStyle={styles.cardSuccess}>
-              <i className="wi wi-day-sunny"></i>
+              subtitle="finished"
+              subtitleStyle={styles.cardSuccessSub}>
+              <i className="mdi mdi-weather-sunny mdi-48px buildstatus"></i>
             </CardHeader>
             <CardText>
-              <LineChart data={cd} options={chartOptions} width="300" height="125" />
+              <div className="buildinfo">
+                <div>
+                  <i className="mdi mdi-clock mdi-24px"></i>
+                  <span>{ Moment(cd.buildtime).fromNow() }</span>
+                </div>
+                <div>
+                  <i className="mdi mdi-worker mdi-24px"></i>
+                  <span>Mats R</span>
+                </div>
+              </div>
             </CardText>
           </Card>
         </div>

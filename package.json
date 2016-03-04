@@ -8,7 +8,8 @@
     "start-dev": "node_modules/.bin/babel-node ./bin/devServer",
     "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore assets/js",
     "add-flexbox": "cp node_modules/flexboxgrid/css/index.css assets/stylesheets/flexbox.css",
-    "add-weather-icons": "cp node_modules/weather-icons/css/weather-icons.css assets/stylesheets/weather-icons.css && cp -r node_modules/weather-icons/font/ assets/font"
+    "add-roboto-font": "cp -r node_modules/roboto-font/fonts/Roboto/* assets/fonts",
+    "add-material-icons": "cp node_modules/mdi/css/materialdesignicons.css assets/stylesheets/materialdesignicons.css && cp -r node_modules/mdi/fonts/ assets/fonts"
   },
   "dependencies": {
     "body-parser": "~1.13.2",
@@ -18,13 +19,15 @@
     "express": "~4.13.1",
     "flexboxgrid": "^6.3.0",
     "material-ui": "^0.14.4",
+    "mdi": "^1.4.57",
+    "moment": "^2.11.2",
     "react": "^0.14.7",
     "react-chartjs": "^0.7.3",
     "react-dom": "^0.14.7",
     "react-tap-event-plugin": "^0.2.2",
     "request": "^2.69.0",
-    "serve-favicon": "~2.3.0",
-    "weather-icons": "^1.3.2"
+    "roboto-font": "^0.1.0",
+    "serve-favicon": "~2.3.0"
   },
   "eslintConfig": {
     "parser": "babel-eslint",
