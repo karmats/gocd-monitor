@@ -111,9 +111,10 @@ i.buildstatus {
 div.buildinfo {
   color: #fff;
 }
-div.buildinfo >div {
-  padding-top: 5px;
+div.buildinfo >p {
+  margin: 0;
 }
 div.buildinfo span {
   padding-left: 10px;
+  vertical-align: text-bottom;
 }

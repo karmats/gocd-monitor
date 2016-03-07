@@ -4,15 +4,12 @@
  */
 
 import React from 'react';
-import Dialog from 'material-ui/lib/dialog';
+import { CircularProgress, Dialog, FlatButton, FloatingActionButton, MuiThemeProvider } from 'material-ui/lib';
 import { Card, CardHeader, CardText } from 'material-ui/lib/card';
 import Colors from 'material-ui/lib/styles/colors';
 import Moment from 'moment';
-import FlatButton from 'material-ui/lib/flat-button';
-import FloatingActionButton from 'material-ui/lib/floating-action-button';
 import ContentAdd from 'material-ui/lib/svg-icons/content/add';
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
 import { Line as LineChart } from 'react-chartjs';
 import TestComponent from './TestComponent';
 
@@ -64,6 +61,8 @@ const pipelines = [
         }
     ];
 
+const weatherIcons = ['mdi-weather-sunny', 'mdi-weather-cloudy', 'mdi-weather-pouring', 'mdi-weather-lightning', 'mdi-weather-partlycloudy'];
+
 const styles = {
   container: {
     textAlign: 'left',
@@ -77,7 +76,7 @@ const styles = {
   },
   cardFailure: {
     color: '#fff',
-    background: Colors.red500,
+    background: Colors.redA700,
     marginBottom: '1rem'
   },
   cardTitle: {
@@ -88,6 +87,10 @@ const styles = {
     color: '#fff',
     fontSize: '1em',
     fontWeight: 100
+  },
+  progress: {
+    color: '#fff',
+    float: 'right'
   },
   fab: {
     position: 'fixed',
@@ -197,6 +200,11 @@ export default class Main extends React.Component {
     });
   };
 
+  randomWeatherIcon() {
+    let idx = Math.floor(Math.random() * weatherIcons.length);
+    return weatherIcons[idx]; 
+  }
+
   generateDOM() {
     return pipelines.map((pipeline, idx) => {
       return (
@@ -207,18 +215,18 @@ export default class Main extends React.Component {
               titleStyle={styles.cardTitle}
               subtitle={pipeline.status}
               subtitleStyle={styles.cardSubTitle}>
-              <i className="mdi mdi-weather-sunny mdi-48px buildstatus"></i>
+              <i className={this.randomWeatherIcon() + ' mdi mdi-48px buildstatus'}></i>
             </CardHeader>
             <CardText>
               <div className="buildinfo">
-                <div>
-                  <i className="mdi mdi-clock mdi-18px"></i>
+                <p>
+                  <i className="mdi mdi-clock mdi-24px"></i>
                   <span>{ Moment(pipeline.buildtime).fromNow() }</span>
-                </div>
-                <div>
-                  <i className="mdi mdi-worker mdi-18px"></i>
+                </p>
+                <p>
+                  <i className="mdi mdi-worker mdi-24px"></i>
                   <span>Mats R</span>
-                </div>
+                </p>
               </div>
             </CardText>
           </Card>
