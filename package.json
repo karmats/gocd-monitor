@@ -5,8 +5,8 @@
   "scripts": {
     "lint": "node_modules/.bin/eslint server/app.js",
     "start": "node_modules/.bin/babel-node ./bin/appServer",
-    "start-dev": "node_modules/.bin/babel-node ./bin/devServer",
-    "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore assets/js",
+    "dev-start": "node_modules/.bin/babel-node ./bin/devServer",
+    "auto-start": "dev-start && nodemon --exec \"npm run lint && npm start\" --ignore assets/js",
     "add-flexbox": "cp node_modules/flexboxgrid/css/index.css assets/stylesheets/flexbox.css",
     "add-roboto-font": "cp -r node_modules/roboto-font/fonts/Roboto/* assets/fonts",
     "add-material-icons": "cp node_modules/mdi/css/materialdesignicons.css assets/stylesheets/materialdesignicons.css && cp -r node_modules/mdi/fonts/ assets/fonts"

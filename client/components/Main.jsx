@@ -16,11 +16,10 @@ import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
 import { Line as LineChart } from 'react-chartjs';
 import TestComponent from './TestComponent';
 
-const pipelines = {
-    "pipelines": [
+const pipelines = [
         {
-            "id": "scx-4.1",
-            "status": "success",
+            "id": "scx-back-4.1",
+            "status": "passed",
             "buildtime": 1457085089646,
             "build": ["#102", "#103", "#104", "#105", "#106"],
             "tests": [100, 100, 102, 105, 105],
@@ -28,16 +27,42 @@ const pipelines = {
             "error": [11, 10, 0, 5, 0]
         },
         {
-            "id": "scx-5.0",
+            "id": "scx-gui-4.1",
+            "status": "passed",
+            "buildtime": 1457359890796,
+            "build": ["#102", "#103", "#104", "#105", "#106"],
+            "tests": [100, 100, 102, 105, 105],
+            "success": [89, 90, 102, 100, 105],
+            "error": [11, 10, 0, 5, 0]
+        },
+        {
+            "id": "scx-back-5.0",
             "status": "failed",
             "buildtime": 1318781876406,
             "build": ["#202", "#203", "#204", "#205", "#206"],
             "tests": [125, 125, 127, 130, 130],
             "success": [125, 120, 120, 127, 130],
             "error": [0, 5, 7, 3, 0]
+        },
+        {
+            "id": "scx-gui-5.0",
+            "status": "passed",
+            "buildtime": 1457359890796,
+            "build": ["#202", "#203", "#204", "#205", "#206"],
+            "tests": [125, 125, 127, 130, 130],
+            "success": [125, 120, 120, 127, 130],
+            "error": [0, 5, 7, 3, 0]
+        },
+        {
+          "id": "scx-back-duplicate-detection",
+          "status": "passed",
+          "buildtime": 1457359890796,
+          "build": ["#202", "#203", "#204", "#205", "#206"],
+          "tests": [125, 125, 127, 130, 130],
+          "success": [125, 120, 120, 127, 130],
+          "error": [0, 5, 7, 3, 0]
         }
-    ]
-}
+    ];
 
 const styles = {
   container: {
@@ -47,20 +72,25 @@ const styles = {
   },
   cardSuccess: {
     color: '#fff',
-    background: Colors.green500,
+    background: Colors.greenA700,
+    marginBottom: '1rem'
+  },
+  cardFailure: {
+    color: '#fff',
+    background: Colors.red500,
+    marginBottom: '1rem'
+  },
+  cardTitle: {
+    color: '#fff',
     fontSize: '1.2em'
   },
-  cardSuccessSub: {
+  cardSubTitle: {
     color: '#fff',
     fontSize: '1em',
     fontWeight: 100
   },
-  cardFailure: {
-    color: '#fff',
-    background: Colors.red500
-  },
   fab: {
-    position: 'absolute',
+    position: 'fixed',
     right: 50,
     bottom: 50
   }
@@ -136,7 +166,7 @@ export default class Main extends React.Component {
   }
 
   chartData() {
-    return pipelines.pipelines.map((pipeline) => {
+    return pipelines.map((pipeline) => {
       let data = {};
       data.name = pipeline.id;
       data.labels = pipeline.build;
@@ -167,26 +197,26 @@ export default class Main extends React.Component {
     });
   };
 
-  generateChartDOM() {
-    return this.chartData().map((cd, idx) => {
+  generateDOM() {
+    return pipelines.map((pipeline, idx) => {
       return (
         <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-          <Card style={styles.cardSuccess}>
+          <Card style={pipeline.status === 'passed' ? styles.cardSuccess : styles.cardFailure}>
             <CardHeader
-              title={cd.name}
-              titleStyle={styles.cardSuccess}
-              subtitle="finished"
-              subtitleStyle={styles.cardSuccessSub}>
+              title={pipeline.id}
+              titleStyle={styles.cardTitle}
+              subtitle={pipeline.status}
+              subtitleStyle={styles.cardSubTitle}>
               <i className="mdi mdi-weather-sunny mdi-48px buildstatus"></i>
             </CardHeader>
             <CardText>
               <div className="buildinfo">
                 <div>
-                  <i className="mdi mdi-clock mdi-24px"></i>
-                  <span>{ Moment(cd.buildtime).fromNow() }</span>
+                  <i className="mdi mdi-clock mdi-18px"></i>
+                  <span>{ Moment(pipeline.buildtime).fromNow() }</span>
                 </div>
                 <div>
-                  <i className="mdi mdi-worker mdi-24px"></i>
+                  <i className="mdi mdi-worker mdi-18px"></i>
                   <span>Mats R</span>
                 </div>
               </div>
@@ -222,7 +252,7 @@ export default class Main extends React.Component {
       <MuiThemeProvider muiTheme={muiTheme}>
         <div style={styles.container}>
           <div className="row">
-            {this.generateChartDOM()}
+            {this.generateDOM()}
           </div>
           <Dialog
             open={this.state.open}
