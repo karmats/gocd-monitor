@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { CircularProgress, Dialog, FlatButton, FloatingActionButton, MuiThemeProvider } from 'material-ui/lib';
+import { CircularProgress, Dialog, FlatButton, FloatingActionButton } from 'material-ui/lib';
+import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
 import { Card, CardHeader, CardText } from 'material-ui/lib/card';
 import Colors from 'material-ui/lib/styles/colors';
 import Moment from 'moment';
