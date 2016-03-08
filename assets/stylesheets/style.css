@@ -110,8 +110,16 @@ i.buildstatus {
 
 div.buildinfo {
   color: #fff;
+  display: flex;
 }
-div.buildinfo >p {
+div.buildinfo > div {
+  width: 50%;
+}
+div.buildinfo .progress {
+  float: right;
+  color: #fff;
+}
+div.buildinfo > div > p {
   margin: 0;
 }
 div.buildinfo span {

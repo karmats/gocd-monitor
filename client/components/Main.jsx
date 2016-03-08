@@ -11,7 +11,6 @@ import Colors from 'material-ui/lib/styles/colors';
 import Moment from 'moment';
 import ContentAdd from 'material-ui/lib/svg-icons/content/add';
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
-import { Line as LineChart } from 'react-chartjs';
 import TestComponent from './TestComponent';
 
 const pipelines = [
@@ -19,46 +18,26 @@ const pipelines = [
             "id": "scx-back-4.1",
             "status": "passed",
             "buildtime": 1457085089646,
-            "build": ["#102", "#103", "#104", "#105", "#106"],
-            "tests": [100, 100, 102, 105, 105],
-            "success": [89, 90, 102, 100, 105],
-            "error": [11, 10, 0, 5, 0]
         },
         {
             "id": "scx-gui-4.1",
             "status": "passed",
-            "buildtime": 1457359890796,
-            "build": ["#102", "#103", "#104", "#105", "#106"],
-            "tests": [100, 100, 102, 105, 105],
-            "success": [89, 90, 102, 100, 105],
-            "error": [11, 10, 0, 5, 0]
+            "buildtime": 1457359890796
         },
         {
             "id": "scx-back-5.0",
             "status": "failed",
-            "buildtime": 1318781876406,
-            "build": ["#202", "#203", "#204", "#205", "#206"],
-            "tests": [125, 125, 127, 130, 130],
-            "success": [125, 120, 120, 127, 130],
-            "error": [0, 5, 7, 3, 0]
+            "buildtime": 1318781876406
         },
         {
             "id": "scx-gui-5.0",
-            "status": "passed",
-            "buildtime": 1457359890796,
-            "build": ["#202", "#203", "#204", "#205", "#206"],
-            "tests": [125, 125, 127, 130, 130],
-            "success": [125, 120, 120, 127, 130],
-            "error": [0, 5, 7, 3, 0]
+            "status": "building",
+            "buildtime": 1457359890796
         },
         {
           "id": "scx-back-duplicate-detection",
           "status": "passed",
-          "buildtime": 1457359890796,
-          "build": ["#202", "#203", "#204", "#205", "#206"],
-          "tests": [125, 125, 127, 130, 130],
-          "success": [125, 120, 120, 127, 130],
-          "error": [0, 5, 7, 3, 0]
+          "buildtime": 1457359890796
         }
     ];
 
@@ -100,55 +79,6 @@ const styles = {
   }
 };
 
-const chartOptions = {
-
-    ///Boolean - Whether grid lines are shown across the chart
-    scaleShowGridLines : false,
-
-    //String - Colour of the grid lines
-    scaleGridLineColor : "#fff",
-
-    //Number - Width of the grid lines
-    scaleGridLineWidth : 1,
-
-    //Boolean - Whether to show horizontal lines (except X axis)
-    scaleShowHorizontalLines: false,
-
-    //Boolean - Whether to show vertical lines (except Y axis)
-    scaleShowVerticalLines: false,
-
-    //Boolean - Whether the line is curved between points
-    bezierCurve : true,
-
-    //Number - Tension of the bezier curve between points
-    bezierCurveTension : 0.4,
-
-    //Boolean - Whether to show a dot for each point
-    pointDot : false,
-
-    //Number - Radius of each point dot in pixels
-    pointDotRadius : 4,
-
-    //Number - Pixel width of point dot stroke
-    pointDotStrokeWidth : 1,
-
-    //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-    pointHitDetectionRadius : 20,
-
-    //Boolean - Whether to show a stroke for datasets
-    datasetStroke : false,
-
-    //Number - Pixel width of dataset stroke
-    datasetStrokeWidth : 1,
-
-    //Boolean - Whether to fill the dataset with a colour
-    datasetFill : true,
-
-    //String - A legend template
-    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
-
-};
-
 const muiTheme = getMuiTheme({
   palette: {
      accent1Color: Colors.purple700
@@ -169,38 +99,6 @@ export default class Main extends React.Component {
     };
   }
 
-  chartData() {
-    return pipelines.map((pipeline) => {
-      let data = {};
-      data.name = pipeline.id;
-      data.labels = pipeline.build;
-      data.datasets = [];
-      // Success
-      data.datasets[0] = {
-        label: "Success",
-        fillColor: "rgba(255,255,255,0.5)",
-        strokeColor: "#fff",
-        pointColor: "#fff",
-        pointStrokeColor: "#fff",
-        pointHighlightFill: "#fff",
-        pointHighlightStroke: "#fff",
-        data: pipeline.success
-      };
-      // Errors
-      data.datasets[1] = {
-        label: "Errors",
-        fillColor: "#fff",
-        strokeColor: "#fff",
-        pointColor: "#fff",
-        pointStrokeColor: "#fff",
-        pointHighlightFill: "#fff",
-        pointHighlightStroke: "#fff",
-        data: pipeline.error
-      };
-      return data;
-    });
-  };
-
   randomWeatherIcon() {
     let idx = Math.floor(Math.random() * weatherIcons.length);
     return weatherIcons[idx]; 
@@ -208,9 +106,10 @@ export default class Main extends React.Component {
 
   generateDOM() {
     return pipelines.map((pipeline, idx) => {
+      let progressBtn = pipeline.status === 'building' ?  <CircularProgress className="progress" color="#fff" size={0.5} /> : null;
       return (
         <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-          <Card style={pipeline.status === 'passed' ? styles.cardSuccess : styles.cardFailure}>
+          <Card style={pipeline.status === 'failed' ? styles.cardFailure : styles.cardSuccess}>
             <CardHeader
               title={pipeline.id}
               titleStyle={styles.cardTitle}
@@ -220,14 +119,19 @@ export default class Main extends React.Component {
             </CardHeader>
             <CardText>
               <div className="buildinfo">
-                <p>
-                  <i className="mdi mdi-clock mdi-24px"></i>
-                  <span>{ Moment(pipeline.buildtime).fromNow() }</span>
-                </p>
-                <p>
-                  <i className="mdi mdi-worker mdi-24px"></i>
-                  <span>Mats R</span>
-                </p>
+                <div>
+                  <p>
+                    <i className="mdi mdi-clock mdi-24px"></i>
+                    <span>{ Moment(pipeline.buildtime).fromNow() }</span>
+                  </p>
+                  <p>
+                    <i className="mdi mdi-worker mdi-24px"></i>
+                    <span>Mats R</span>
+                  </p>
+                </div>
+                <div>
+                  {progressBtn}
+                </div>
               </div>
             </CardText>
           </Card>
