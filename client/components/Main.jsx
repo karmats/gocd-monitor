@@ -80,6 +80,7 @@ export default class Main extends React.Component {
     // Setup initial state
     this.state = {
       open: false,
+      // In adminMode new pipelines can be added
       adminMode: window.location.search.indexOf('mode=admin') >= 0
     };
   }

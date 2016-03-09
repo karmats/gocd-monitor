@@ -4,28 +4,24 @@
  * Module dependencies.
  */
 
-let app = require('../server/app');
-let debug = require('debug')('gocd-dashboard:server');
-let http = require('http');
-let conf = require('../app-config').config;
+import app from '../server/app';
+import http from 'http';
+import * as conf from '../app-config';
 
 /**
  * Get port from environment and store in Express.
  */
-
 let port = conf.port;
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
-
 let server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
@@ -33,7 +29,6 @@ server.on('listening', onListening);
 /**
  * Normalize a port into a number, string, or false.
  */
-
 function normalizePort(val) {
   var port = parseInt(val, 10);
 
@@ -53,7 +48,6 @@ function normalizePort(val) {
 /**
  * Event listener for HTTP server "error" event.
  */
-
 function onError(error) {
   if (error.syscall !== 'listen') {
     throw error;
@@ -81,11 +75,10 @@ function onError(error) {
 /**
  * Event listener for HTTP server "listening" event.
  */
-
 function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  console.log('Listening on ' + bind);
 }

@@ -2,9 +2,6 @@
 
 import express from 'express';
 import path from 'path';
-import favicon from 'serve-favicon';
-import cookieParser from 'cookie-parser';
-import bodyParser from 'body-parser';
 
 let routes = require('./routes/index'),
     users = require('./routes/users'),
@@ -13,15 +10,11 @@ let routes = require('./routes/index'),
 let app = express();
 
 let devMode = app.get('env') === 'development';
+console.log(devMode);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
 // Use webpack server to serve static assets in development and express.static 
 // for all other stages
 if (devMode) {

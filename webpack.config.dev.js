@@ -1,6 +1,6 @@
-let path = require('path');
-let webpack = require('webpack');
-let conf = require('./app-config').config;
+var path = require('path');
+var webpack = require('webpack');
+var conf = require('./app-config');
 
 module.exports = {
   devtool: 'eval',

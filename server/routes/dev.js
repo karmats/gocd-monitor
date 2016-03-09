@@ -1,6 +1,6 @@
 let express = require('express');
 let request = require('request');
-let conf = require('../../app-config').config;
+let conf = require('../../app-config');
 let router = express.Router();
 
 var webpackServerUrl = 'http://localhost:' + conf.devPort;

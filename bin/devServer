@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-let webpack = require('webpack');
-let WebpackDevServer = require('webpack-dev-server');
-let config = require('../webpack.config.dev');
-let conf = require('../app-config').config;
+import webpack from 'webpack';
+import WebpackDevServer from 'webpack-dev-server';
+import config from '../webpack.config.dev';
+import * as conf from '../app-config';
 
 new WebpackDevServer(webpack(config), {
   publicPath: config.output.publicPath,

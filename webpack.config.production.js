@@ -1,6 +1,6 @@
-let webpack = require('webpack');
-let path = require('path');
-let conf = require('./app-config').config;
+var webpack = require('webpack');
+var path = require('path');
+var conf = require('./app-config');
 
 module.exports = {
     entry: './client/app.jsx',
