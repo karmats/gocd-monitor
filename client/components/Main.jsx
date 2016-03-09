@@ -4,73 +4,56 @@
  */
 
 import React from 'react';
-import { CircularProgress, Dialog, FlatButton, FloatingActionButton } from 'material-ui/lib';
+
+import { Dialog, FlatButton, FloatingActionButton } from 'material-ui/lib';
 import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
 import { Card, CardHeader, CardText } from 'material-ui/lib/card';
 import Colors from 'material-ui/lib/styles/colors';
-import Moment from 'moment';
 import ContentAdd from 'material-ui/lib/svg-icons/content/add';
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
-import TestComponent from './TestComponent';
+
+import Moment from 'moment';
+
+import Pipeline from './Pipeline';
 
 const pipelines = [
         {
             "id": "scx-back-4.1",
             "status": "passed",
             "buildtime": 1457085089646,
+            "author": "Mats R"
         },
         {
             "id": "scx-gui-4.1",
             "status": "passed",
-            "buildtime": 1457359890796
+            "buildtime": 1457359890796,
+            "author": "Mats R"
         },
         {
             "id": "scx-back-5.0",
             "status": "failed",
-            "buildtime": 1318781876406
+            "buildtime": 1318781876406,
+            "author": "Per A"
         },
         {
             "id": "scx-gui-5.0",
             "status": "building",
-            "buildtime": 1457359890796
+            "buildtime": 1457359890796,
+            "author": "Mats R"
         },
         {
           "id": "scx-back-duplicate-detection",
           "status": "passed",
-          "buildtime": 1457359890796
+          "buildtime": 1457359890796,
+           "author": "Hongchao L"
         }
     ];
-
-const weatherIcons = ['mdi-weather-sunny', 'mdi-weather-cloudy', 'mdi-weather-pouring', 'mdi-weather-lightning', 'mdi-weather-partlycloudy'];
 
 const styles = {
   container: {
     textAlign: 'left',
     padding: 20,
     color: '#fff'
-  },
-  cardSuccess: {
-    color: '#fff',
-    background: Colors.greenA700,
-    marginBottom: '1rem'
-  },
-  cardFailure: {
-    color: '#fff',
-    background: Colors.redA700,
-    marginBottom: '1rem'
-  },
-  cardTitle: {
-    color: '#fff',
-    fontSize: '1.2em'
-  },
-  cardSubTitle: {
-    color: '#fff',
-    fontSize: '1em',
-    fontWeight: 100
-  },
-  progress: {
-    color: '#fff',
-    float: 'right'
   },
   fab: {
     position: 'fixed',
@@ -99,42 +82,11 @@ export default class Main extends React.Component {
     };
   }
 
-  randomWeatherIcon() {
-    let idx = Math.floor(Math.random() * weatherIcons.length);
-    return weatherIcons[idx]; 
-  }
-
-  generateDOM() {
+  generatePipelines() {
     return pipelines.map((pipeline, idx) => {
-      let progressBtn = pipeline.status === 'building' ?  <CircularProgress className="progress" color="#fff" size={0.5} /> : null;
       return (
-        <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-          <Card style={pipeline.status === 'failed' ? styles.cardFailure : styles.cardSuccess}>
-            <CardHeader
-              title={pipeline.id}
-              titleStyle={styles.cardTitle}
-              subtitle={pipeline.status}
-              subtitleStyle={styles.cardSubTitle}>
-              <i className={this.randomWeatherIcon() + ' mdi mdi-48px buildstatus'}></i>
-            </CardHeader>
-            <CardText>
-              <div className="buildinfo">
-                <div>
-                  <p>
-                    <i className="mdi mdi-clock mdi-24px"></i>
-                    <span>{ Moment(pipeline.buildtime).fromNow() }</span>
-                  </p>
-                  <p>
-                    <i className="mdi mdi-worker mdi-24px"></i>
-                    <span>Mats R</span>
-                  </p>
-                </div>
-                <div>
-                  {progressBtn}
-                </div>
-              </div>
-            </CardText>
-          </Card>
+        <div key={pipeline.id} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+          <Pipeline pipeline={pipeline} />
         </div>
         )
     });
@@ -165,7 +117,7 @@ export default class Main extends React.Component {
       <MuiThemeProvider muiTheme={muiTheme}>
         <div style={styles.container}>
           <div className="row">
-            {this.generateDOM()}
+            {this.generatePipelines()}
           </div>
           <Dialog
             open={this.state.open}

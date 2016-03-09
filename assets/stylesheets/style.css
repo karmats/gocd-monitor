@@ -102,6 +102,16 @@ body {
 a {
   color: #00B7FF;
 }
+
+div.buildtitle > div {
+  width: 80%;
+}
+div.buildtitle span {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 i.buildstatus {
   float: right;
   margin-top: -5px;
