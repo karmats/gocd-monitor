@@ -69,6 +69,7 @@ const muiTheme = getMuiTheme({
 });
 
 export default class Main extends React.Component {
+
   constructor(props, context) {
     super(props, context);
 
@@ -78,7 +79,8 @@ export default class Main extends React.Component {
 
     // Setup initial state
     this.state = {
-      open: false
+      open: false,
+      adminMode: window.location.search.indexOf('mode=admin') >= 0
     };
   }
 
@@ -105,7 +107,15 @@ export default class Main extends React.Component {
   }
 
   render() {
-    const standardActions = (
+    let fab = this.state.adminMode ? (
+      <FloatingActionButton style={styles.fab}
+        primary={true}
+        onTouchTap={this.handleTouchTap}>
+        <ContentAdd />
+      </FloatingActionButton>
+    ) : null;
+
+    let standardActions = (
       <FlatButton
         label="Okey"
         secondary={true}
@@ -126,11 +136,7 @@ export default class Main extends React.Component {
             onRequestClose={this.handleRequestClose}>
             1-2-3-4-5
           </Dialog>
-          <FloatingActionButton style={styles.fab}
-            primary={true}
-            onTouchTap={this.handleTouchTap}>
-           <ContentAdd />
-         </FloatingActionButton>
+          {fab}
         </div>
       </MuiThemeProvider>
     );
