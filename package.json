@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "//": "Copy node module css to assets/",
-    "init-project": "npm run add-flexbox && npm run add-roboto-font && npm run add-material-icons",
+    "init-project": "mkdir -p assets/fonts && mkdir -p assets/js && npm run add-flexbox && npm run add-roboto-font && npm run add-material-icons",
     "//": "Lint app server",
     "lint": "node_modules/.bin/eslint server/app.js",
     "//": "Start app server",
