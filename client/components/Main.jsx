@@ -1,6 +1,5 @@
 /**
- * In this file, we create a React component
- * which incorporates components providedby material-ui.
+ * Main jsx-file
  */
 
 import React from 'react';
@@ -12,43 +11,165 @@ import Colors from 'material-ui/lib/styles/colors';
 import ContentAdd from 'material-ui/lib/svg-icons/content/add';
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
 
-import Moment from 'moment';
-
 import Pipeline from './Pipeline';
 
+
+// Mocked pipelines
 const pipelines = [
         {
             "id": "scx-back-4.1",
-            "status": "passed",
-            "buildtime": 1457085089646,
-            "author": "Mats R"
+            "results": [
+              {
+                "status": "passed",
+                "buildtime": 1457085089646,
+                "author": "Mats R"
+              },
+              {
+                "status": "failed",
+                "buildtime": 1457085089646,
+                "author": "Mats R"
+              },
+              {
+                "status": "passed",
+                "buildtime": 1457085089646,
+                "author": "Mats R"
+              },
+              {
+                "status": "failed",
+                "buildtime": 1457085089646,
+                "author": "Mats R"
+              },
+              {
+                "status": "failed",
+                "buildtime": 1457085089646,
+                "author": "Mats R"
+              }
+            ]
         },
         {
             "id": "scx-gui-4.1",
-            "status": "passed",
-            "buildtime": 1457359890796,
-            "author": "Mats R"
+            "results": [
+              {
+                "status": "passed",
+                "buildtime": 1457359890796,
+                "author": "Mats R"
+              },
+              {
+                "status": "passed",
+                "buildtime": 1457359890796,
+                "author": "Mats R"
+              },
+              {
+                "status": "passed",
+                "buildtime": 1457359890796,
+                "author": "Mats R"
+              },
+              {
+                "status": "passed",
+                "buildtime": 1457359890796,
+                "author": "Mats R"
+              },
+              {
+                "status": "passed",
+                "buildtime": 1457359890796,
+                "author": "Mats R"
+              }
+            ]
         },
         {
             "id": "scx-back-5.0",
-            "status": "failed",
-            "buildtime": 1318781876406,
-            "author": "Per A"
+            "results": [
+              {
+                "status": "failed",
+                "buildtime": 1448781876406,
+                "author": "Per A"
+              },
+              {
+                "status": "failed",
+                "buildtime": 1418781876406,
+                "author": "Per A"
+              },
+              {
+                "status": "passed",
+                "buildtime": 1408781876406,
+                "author": "Per A"
+              },
+              {
+                "status": "failed",
+                "buildtime": 1408781876406,
+                "author": "Per A"
+              },
+              {
+                "status": "failed",
+                "buildtime": 1318781876406,
+                "author": "Per A"
+              }
+            ]
         },
         {
             "id": "scx-gui-5.0",
-            "status": "building",
-            "buildtime": 1457359890796,
-            "author": "Mats R"
+            "results": [
+              {
+                "status": "building",
+                "buildtime": 1457359890796,
+                "author": "Mats R"
+              },
+              {
+                "status": "passed",
+                "buildtime": 1457359890796,
+                "author": "Mats R"
+              },
+              {
+                "status": "passed",
+                "buildtime": 1457359890796,
+                "author": "Mats R"
+              },
+              {
+                "status": "passed",
+                "buildtime": 1457359890796,
+                "author": "Mats R"
+              },
+              {
+                "status": "passed",
+                "buildtime": 1457359890796,
+                "author": "Mats R"
+              }
+            ]
+            
         },
         {
           "id": "scx-back-duplicate-detection",
-          "status": "passed",
-          "buildtime": 1457359890796,
-           "author": "Hongchao L"
+          "results": [
+            {
+              "status": "passed",
+              "buildtime": 1457359890796,
+              "author": "Hongchao L"
+            },
+            {
+              "status": "passed",
+              "buildtime": 1457359890796,
+              "author": "Hongchao L"
+            },
+            {
+              "status": "passed",
+              "buildtime": 1457359890796,
+              "author": "Hongchao L"
+            },
+            {
+              "status": "failed",
+              "buildtime": 1457359890796,
+              "author": "Hongchao L"
+            },
+            {
+              "status": "passed",
+              "buildtime": 1457359890796,
+              "author": "Hongchao L"
+            },
+          ]
         }
     ];
 
+// FIXME: Break out to style.css
 const styles = {
   container: {
     textAlign: 'left',

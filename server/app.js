@@ -10,7 +10,6 @@ let routes = require('./routes/index'),
 let app = express();
 
 let devMode = app.get('env') === 'development';
-console.log(devMode);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
