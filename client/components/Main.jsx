@@ -4,6 +4,8 @@
 
 import React from 'react';
 
+import io from 'socket.io-client';
+
 import { Dialog, FlatButton, FloatingActionButton } from 'material-ui/lib';
 import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
 import { Card, CardHeader, CardText } from 'material-ui/lib/card';
@@ -13,6 +15,7 @@ import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
 
 import Pipeline from './Pipeline';
 
+const socket = io('http://localhost:3000');
 
 // Mocked pipelines
 const pipelines = [
@@ -198,6 +201,9 @@ export default class Main extends React.Component {
     this.handleRequestClose = this.handleRequestClose.bind(this);
     this.handleTouchTap = this.handleTouchTap.bind(this);
 
+    socket.on('pipelines:new', (newPipelines) => {
+      console.log(newPipelines);
+    });
     // Setup initial state
     this.state = {
       open: false,

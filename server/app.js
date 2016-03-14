@@ -2,14 +2,13 @@
 
 import express from 'express';
 import path from 'path';
+import socketio from 'socket.io';
 
-let routes = require('./routes/index'),
-    users = require('./routes/users'),
-    dev = require('./routes/dev');
-
-let app = express();
-
-let devMode = app.get('env') === 'development';
+const routes = require('./routes/index'),
+      dev = require('./routes/dev'),
+      app = express(),
+      io = socketio(),
+      devMode = app.get('env') === 'development';
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -21,7 +20,6 @@ if (devMode) {
 }
 app.use('/assets', express.static(path.join(__dirname, '../assets')));
 app.use('/', routes);
-app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
@@ -35,6 +33,19 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.sendFile('error-' + err.status + '.html', { root : 'server/views' });
+});
+
+// socket.io setup
+app.io = io;
+
+io.on('connection', (socket) => {
+  console.log('connection established');
+  socket.on('disconnect', () => {
+    console.log('app disconnected');
+  })
+  setInterval(() => {
+    socket.emit('pipelines:new', {pipelines : 'omfg', date: new Date()})
+  }, 5000);
 });
 
 module.exports = app;
