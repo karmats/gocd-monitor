@@ -5,6 +5,7 @@ import path from 'path';
 import socketio from 'socket.io';
 import { parseString } from 'xml2js';
 
+import * as conf from '../app-config';
 import GoService from './services/GoService';
 
 
@@ -14,6 +15,8 @@ const routes = require('./routes/index'),
       io = socketio(),
       devMode = app.get('env') === 'development',
       goService = new GoService();
+let pollingId,
+    pipelines = [];
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -45,18 +48,35 @@ app.io = io;
 
 io.on('connection', (socket) => {
   console.log('connection established');
+  socket.emit('pipelines:update', pipelines);
+
+  // Function that refreshes all pipelines
+  let refreshPipelines = (pipelineNames) => {
+    let currentPipelines = [];
+    pipelineNames.forEach((name) => {
+      goService.getPipelineHistory(name).then((pipeline) => {
+        currentPipelines.push(pipeline);
+        if (currentPipelines.length === pipelineNames.length) {
+          pipelines = currentPipelines;
+          socket.emit('pipelines:update', pipelines);
+        }
+      });
+    });
+  };
+
+  if (!pollingId || pipelines.length <= 0) {
+    // Fetch the pipelines and start polling pipeline history
+    goService.getAllPipelines().then((pipelineNames) => {
+      refreshPipelines(pipelineNames);
+      pollingId = setInterval(() => {
+        refreshPipelines(pipelineNames);
+      }, conf.goPollingInterval);
+    });
+  }
+
   socket.on('disconnect', () => {
     console.log('app disconnected');
-  })
-  goService.getAllPipelines().then((res) => {
-    console.log(res);
-    goService.getPipelineHistory(res[10]).then((ph) => {
-      console.log(ph);
-    })
   });
-  setInterval(() => {
-    socket.emit('pipelines:new', {pipelines : 'omfg', date: new Date()})
-  }, 5000);
 });
 
 module.exports = app;

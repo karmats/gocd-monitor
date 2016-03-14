@@ -50,8 +50,8 @@ export default class GoService {
             }
         };
         return rp(options)
-            .then(res => this._goPipelinesToPipelineResult(res.pipelines.splice(5)))
-            .catch(err => { throw err });
+            .then(res => this._goPipelinesToPipelineResult(res.pipelines.slice(0, 5)))
+            .catch(err => { console.error(err) });
     }
 
     _goPipelinesToPipelineResult(pipelines) {
@@ -69,9 +69,9 @@ export default class GoService {
             let res = {};
 
             // Status
-            if (p.preparing_to_schedule) {
+            if (p.stages.some(stage => stage.result === 'Unknown')) {
                 res.status = 'building';
-            } else if (!p.can_run) {
+            } else if (p.stages.some(stage => stage.result === 'Cancelled')) {
                 res.status = 'paused';
             } else {
                 res.status = p.stages.every(stage => stage.result === 'Passed') ? 'passed' : 'failed';

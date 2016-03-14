@@ -15,162 +15,9 @@ import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
 
 import Pipeline from './Pipeline';
 
-const socket = io('http://localhost:3000');
+// Setup socket.io
+const socket = io();
 
-// Mocked pipelines
-const pipelines = [
-        {
-            "id": "scx-back-4.1",
-            "results": [
-              {
-                "status": "passed",
-                "buildtime": 1457085089646,
-                "author": "Mats R"
-              },
-              {
-                "status": "failed",
-                "buildtime": 1457085089646,
-                "author": "Mats R"
-              },
-              {
-                "status": "passed",
-                "buildtime": 1457085089646,
-                "author": "Mats R"
-              },
-              {
-                "status": "failed",
-                "buildtime": 1457085089646,
-                "author": "Mats R"
-              },
-              {
-                "status": "failed",
-                "buildtime": 1457085089646,
-                "author": "Mats R"
-              }
-            ]
-        },
-        {
-            "id": "scx-gui-4.1",
-            "results": [
-              {
-                "status": "passed",
-                "buildtime": 1457359890796,
-                "author": "Mats R"
-              },
-              {
-                "status": "passed",
-                "buildtime": 1457359890796,
-                "author": "Mats R"
-              },
-              {
-                "status": "passed",
-                "buildtime": 1457359890796,
-                "author": "Mats R"
-              },
-              {
-                "status": "passed",
-                "buildtime": 1457359890796,
-                "author": "Mats R"
-              },
-              {
-                "status": "passed",
-                "buildtime": 1457359890796,
-                "author": "Mats R"
-              }
-            ]
-        },
-        {
-            "id": "scx-back-5.0",
-            "results": [
-              {
-                "status": "failed",
-                "buildtime": 1448781876406,
-                "author": "Per A"
-              },
-              {
-                "status": "failed",
-                "buildtime": 1418781876406,
-                "author": "Per A"
-              },
-              {
-                "status": "passed",
-                "buildtime": 1408781876406,
-                "author": "Per A"
-              },
-              {
-                "status": "failed",
-                "buildtime": 1408781876406,
-                "author": "Per A"
-              },
-              {
-                "status": "failed",
-                "buildtime": 1318781876406,
-                "author": "Per A"
-              }
-            ]
-        },
-        {
-            "id": "scx-gui-5.0",
-            "results": [
-              {
-                "status": "building",
-                "buildtime": 1457359890796,
-                "author": "Mats R"
-              },
-              {
-                "status": "passed",
-                "buildtime": 1457359890796,
-                "author": "Mats R"
-              },
-              {
-                "status": "passed",
-                "buildtime": 1457359890796,
-                "author": "Mats R"
-              },
-              {
-                "status": "passed",
-                "buildtime": 1457359890796,
-                "author": "Mats R"
-              },
-              {
-                "status": "passed",
-                "buildtime": 1457359890796,
-                "author": "Mats R"
-              }
-            ]
-            
-        },
-        {
-          "id": "scx-back-duplicate-detection",
-          "results": [
-            {
-              "status": "passed",
-              "buildtime": 1457359890796,
-              "author": "Hongchao L"
-            },
-            {
-              "status": "passed",
-              "buildtime": 1457359890796,
-              "author": "Hongchao L"
-            },
-            {
-              "status": "passed",
-              "buildtime": 1457359890796,
-              "author": "Hongchao L"
-            },
-            {
-              "status": "failed",
-              "buildtime": 1457359890796,
-              "author": "Hongchao L"
-            },
-            {
-              "status": "passed",
-              "buildtime": 1457359890796,
-              "author": "Hongchao L"
-            },
-          ]
-        }
-    ];
 
 // FIXME: Break out to style.css
 const styles = {
@@ -188,8 +35,8 @@ const styles = {
 
 const muiTheme = getMuiTheme({
   palette: {
-     accent1Color: Colors.purple700
-   } 
+    accent1Color: Colors.purple700
+  }
 });
 
 export default class Main extends React.Component {
@@ -201,25 +48,22 @@ export default class Main extends React.Component {
     this.handleRequestClose = this.handleRequestClose.bind(this);
     this.handleTouchTap = this.handleTouchTap.bind(this);
 
-    socket.on('pipelines:new', (newPipelines) => {
-      console.log(newPipelines);
+    socket.on('pipelines:update', (newPipelines) => {
+      let sortedPipelines = newPipelines.filter(p => p && p.name).sort((a, b) => {
+        return a.results[0].buildtime > b.results[0].buildtime ? -1 : 1;
+      });
+      this.setState({
+        pipelines : sortedPipelines
+      })
     });
     // Setup initial state
     this.state = {
       open: false,
       // In adminMode new pipelines can be added
-      adminMode: window.location.search.indexOf('mode=admin') >= 0
+      adminMode: window.location.search.indexOf('mode=admin') >= 0,
+      // All pipelines
+      pipelines: []
     };
-  }
-
-  generatePipelines() {
-    return pipelines.map((pipeline, idx) => {
-      return (
-        <div key={pipeline.id} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-          <Pipeline pipeline={pipeline} />
-        </div>
-        )
-    });
   }
 
   handleRequestClose() {
@@ -248,14 +92,24 @@ export default class Main extends React.Component {
         label="Okey"
         secondary={true}
         onTouchTap={this.handleRequestClose}
-      />
+        />
     );
+
+    let pipelineCards = this.state.pipelines.map((pipeline) => {
+      if (pipeline && pipeline.name) {
+        return (
+          <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+            <Pipeline pipeline={pipeline} />
+          </div>
+        )
+      }
+    });
 
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div style={styles.container}>
           <div className="row">
-            {this.generatePipelines()}
+            {pipelineCards}
           </div>
           <Dialog
             open={this.state.open}

@@ -24,6 +24,10 @@ const styles = {
     background: Colors.redA700,
     marginBottom: '1rem'
   },
+  cardInactive: {
+    background: Colors.yellowA700,
+    marginBottom: '1rem'
+  },
   cardTitle: {
     color: '#fff',
     fontSize: '1.2em'
@@ -60,11 +64,23 @@ export default class Pipeline extends React.Component {
     let pipeline = this.props.pipeline;
     let latestResult = pipeline.results[0];
     let progress = latestResult.status === 'building' ?  <CircularProgress className="progress" color="#fff" size={0.5} /> : null;
+    let style;
+    switch (latestResult.status) {
+      case 'failed':
+        style = styles.cardFailure;
+        break;
+      case 'paused':
+        style = styles.cardInactive;
+        break;
+      default:
+        style = styles.cardSuccess;
+        break;
+    }
     return (
-      <Card style={latestResult.status === 'failed' ? styles.cardFailure : styles.cardSuccess}>
+      <Card style={style}>
         <CardHeader
           className="buildtitle"
-          title={pipeline.id}
+          title={pipeline.name}
           titleStyle={styles.cardTitle}
           subtitle={latestResult.status}
           subtitleStyle={styles.cardSubTitle}>

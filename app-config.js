@@ -5,5 +5,7 @@ var config = {
     goServerUrl: 'https://ci.example.com.net',
     goUser: 'xxx',
     goPassword: 'xxx'
+    goPassword: 'xxx',
+    goPollingInterval: 30000
 }
 module.exports = config;
