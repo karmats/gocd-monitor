@@ -23,9 +23,11 @@
     "react-dom": "^0.14.7",
     "react-tap-event-plugin": "^0.2.2",
     "request": "^2.69.0",
+    "request-promise": "^2.0.1",
     "roboto-font": "^0.1.0",
     "socket.io": "^1.4.5",
-    "socket.io-client": "^1.4.5"
+    "socket.io-client": "^1.4.5",
+    "xml2js": "^0.4.16"
   },
   "eslintConfig": {
     "parser": "babel-eslint",
