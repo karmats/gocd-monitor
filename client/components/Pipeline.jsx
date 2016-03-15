@@ -12,7 +12,7 @@ import Colors from 'material-ui/lib/styles/colors';
 import Moment from 'moment';
 
 // Weather icon indicator
-const weatherIcons = ['mdi-weather-sunny', 'mdi-weather-partlycloudy', 'mdi-weather-cloudy', 'mdi-weather-pouring', 'mdi-weather-lightning'];
+const weatherIconStatuses = ['mdi-weather-sunny', 'mdi-weather-partlycloudy', 'mdi-weather-cloudy', 'mdi-weather-cloudy', 'mdi-weather-pouring', 'mdi-weather-lightning'];
 
 // FIXME: Break out to style.css
 const styles = {
@@ -57,13 +57,15 @@ export default class Pipeline extends React.Component {
       }
       return p;
     }, 0);
-    return weatherIcons[idx]; 
+    return weatherIconStatuses[idx];
   }
 
   render() {
     let pipeline = this.props.pipeline;
     let latestResult = pipeline.results[0];
-    let progress = latestResult.status === 'building' ?  <CircularProgress className="progress" color="#fff" size={0.5} /> : null;
+    let progress = latestResult.status === 'building' ?  (
+      <div className='col-xs-6'><CircularProgress className="progress" color="#fff" size={0.5} /></div>)
+      : null;
     let style;
     switch (latestResult.status) {
       case 'failed':
@@ -88,7 +90,7 @@ export default class Pipeline extends React.Component {
         </CardHeader>
         <CardText>
           <div className="buildinfo">
-            <div>
+            <div className={latestResult.status === 'building' ? 'col-xs-6' : 'col-xs-12'}>
               <p>
                 <i className="mdi mdi-clock mdi-24px"></i>
                 <span>{ Moment(latestResult.buildtime).fromNow() }</span>
@@ -98,9 +100,7 @@ export default class Pipeline extends React.Component {
                 <span>{latestResult.author}</span>
               </p>
             </div>
-            <div>
-              {progress}
-            </div>
+            {progress}
           </div>
         </CardText>
       </Card>

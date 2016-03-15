@@ -123,7 +123,8 @@ div.buildinfo {
   display: flex;
 }
 div.buildinfo > div {
-  width: 50%;
+  padding-right: 0;
+  padding-left: 0;
 }
 div.buildinfo .progress {
   float: right;

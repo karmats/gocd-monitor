@@ -16,7 +16,8 @@ const routes = require('./routes/index'),
       devMode = app.get('env') === 'development',
       goService = new GoService();
 let pollingId,
-    pipelines = [];
+    pipelines = [],
+    isPolling = false;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -47,11 +48,14 @@ app.use((err, req, res, next) => {
 app.io = io;
 
 io.on('connection', (socket) => {
-  console.log('connection established');
+  console.log('Client connected');
+
+  // Emit latest pipeline result
   socket.emit('pipelines:update', pipelines);
 
   // Function that refreshes all pipelines
   let refreshPipelines = (pipelineNames) => {
+    console.log(`Refreshing ${pipelineNames.length} pipelines`);
     let currentPipelines = [];
     pipelineNames.forEach((name) => {
       goService.getPipelineHistory(name).then((pipeline) => {
@@ -64,18 +68,22 @@ io.on('connection', (socket) => {
     });
   };
 
-  if (!pollingId || pipelines.length <= 0) {
-    // Fetch the pipelines and start polling pipeline history
-    goService.getAllPipelines().then((pipelineNames) => {
+  // Fetch the pipelines and start polling pipeline history
+  if (!pollingId && !isPolling) {
+    isPolling = true;
+    goService.getAllPipelines()
+    .then((pipelineNames) => {
       refreshPipelines(pipelineNames);
-      pollingId = setInterval(() => {
-        refreshPipelines(pipelineNames);
-      }, conf.goPollingInterval);
+      pollingId = setInterval(refreshPipelines, conf.goPollingInterval, pipelineNames);
+    })
+    .catch((err) => {
+      console.err('Failed to get all pipelines');
+      isPolling = false;
     });
   }
 
   socket.on('disconnect', () => {
-    console.log('app disconnected');
+    console.log('Client disconnected');
   });
 });
 

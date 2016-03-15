@@ -51,7 +51,10 @@ export default class GoService {
         };
         return rp(options)
             .then(res => this._goPipelinesToPipelineResult(res.pipelines.slice(0, 5)))
-            .catch(err => { console.error(err) });
+            .catch((err) => { 
+                console.error(`Failed to get pipeline history for pipeline ${name}, ${err.statusCode}: ${err.message}`);
+                return null; 
+            });
     }
 
     _goPipelinesToPipelineResult(pipelines) {
