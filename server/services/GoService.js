@@ -2,13 +2,15 @@ import rp from 'request-promise';
 import * as conf from '../../app-config';
 import { parseString } from 'xml2js';
 
-export default class GoService {
+import Service from './Service';
+
+export default class GoService extends Service {
 
   constructor() {
+    super();
     this.baseUrl = conf.goServerUrl + '/go/api';
     this.user = conf.goUser;
     this.password = conf.goPassword;
-    this.clients = [];
     this.pipelines = [];
   }
 
@@ -42,26 +44,6 @@ export default class GoService {
       .catch((err) => {
         console.error(err);
       });
-  }
-
-  /**
-   * Register new client listener
-   * 
-   * @param {Socket}  client  Socket client that will receive automatic updates
-   */
-  registerClient(client) {
-    // Emit latest pipeline result
-    client.emit('pipelines:update', this.pipelines);
-    this.clients.push(client);
-  }
-
-  /**
-   * Unregister client listener
-   * 
-   * @param {Socket}  client  Socket client that will no longer receive updates
-   */
-  unregisterClient(client) {
-    this.clients = this.clients.filter((c) => client.id !== c.id);
   }
 
   /**
