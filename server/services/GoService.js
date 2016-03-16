@@ -67,6 +67,9 @@ export default class GoService {
         // Pipeline name
         result.name = pipelines[0].name;
 
+        // Pipeline is paused if can_run property is set to false
+        let paused = !pipelines[0].can_run;
+
         // Result array
         result.results = pipelines.map((p) => {
             let res = {};
@@ -74,7 +77,7 @@ export default class GoService {
             // Status
             if (p.stages.some(stage => stage.result === 'Unknown')) {
                 res.status = 'building';
-            } else if (p.stages.some(stage => stage.result === 'Cancelled')) {
+            } else if (paused) {
                 res.status = 'paused';
             } else {
                 res.status = p.stages.every(stage => stage.result === 'Passed') ? 'passed' : 'failed';

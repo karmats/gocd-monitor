@@ -77,7 +77,7 @@ io.on('connection', (socket) => {
       pollingId = setInterval(refreshPipelines, conf.goPollingInterval, pipelineNames);
     })
     .catch((err) => {
-      console.err('Failed to get all pipelines');
+      console.error(err);
       isPolling = false;
     });
   }
