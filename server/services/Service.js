@@ -2,6 +2,7 @@ export default class Service {
 
   constructor() {
     this.clients = [];
+    this.pipelines = [];
   }
 
   /**
