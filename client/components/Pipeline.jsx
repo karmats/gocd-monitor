@@ -4,7 +4,6 @@
 
 import React from 'react';
 
-import RaisedButton from 'material-ui/lib/raised-button';
 import { CircularProgress } from 'material-ui/lib';
 import { Card, CardHeader, CardText } from 'material-ui/lib/card';
 import Colors from 'material-ui/lib/styles/colors';
