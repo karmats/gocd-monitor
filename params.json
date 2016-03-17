@@ -1,6 +1,6 @@
 {
   "name": "gocd-monitor",
   "tagline": "Build monitor for go.cd build server https://www.go.cd/",
-  "body": "## Introduction\r\nThe gocd-monitor is a build monitor for [go.cd](https://www.go.cd/).\r\n\r\n#### Pipeline status\r\n* Green - Last pipeline build passed\r\n* Red - Last pipeline build failed\r\n* Yellow - Pipeline has been paused\r\n\r\n![Pipelines](/karmats/gocd-monitor/blob/gh-pages/images/pipelines.png?raw=true)\r\n\r\n#### Pipeline attributes\r\n![Pipeline explanation](/karmats/gocd-monitor/blob/gh-pages/images/pipeline-expl.png?raw=true)\r\n\r\n## Authors and Contributors\r\n@karmats",
+  "body": "## Introduction\r\nThe gocd-monitor is a build monitor for [go.cd](https://www.go.cd/).\r\n\r\n#### Pipeline status\r\n* Green - Last pipeline build passed\r\n* Red - Last pipeline build failed\r\n* Yellow - Pipeline has been paused\r\n\r\n![Pipelines](https://github.com/karmats/gocd-monitor/blob/gh-pages/images/pipelines.png?raw=true)\r\n\r\n#### Pipeline attributes\r\n![Pipeline explanation](https://github.com/karmats/gocd-monitor/blob/gh-pages/images/pipeline-expl.png?raw=true)\r\n\r\n## Authors and Contributors\r\n@karmats",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
 }
