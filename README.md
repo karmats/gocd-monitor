@@ -1,6 +1,14 @@
 # go.cd monitor
 Build monitor for gocd build server https://www.go.cd/
+#### Pipeline status
+* Green - Last pipeline build passed
+* Red - Last pipeline build failed
+* Yellow - Pipeline has been paused
 
+![Pipelines](https://github.com/karmats/gocd-monitor/blob/gh-pages/images/pipelines.png?raw=true)
+
+#### Pipeline attributes
+![Pipeline explanation](https://github.com/karmats/gocd-monitor/blob/gh-pages/images/pipeline-expl.png?raw=true)
 
 ## Setup
 Open app-config.js and change the three lines
