@@ -110,7 +110,7 @@ export default class GoService extends Service {
       let res = {};
 
       // Status
-      if (p.stages.some(stage => stage.jobs.some(job => job.state === 'Building' || job.state === 'Scheduled'))) {
+      if (p.stages.some(stage => stage.jobs.some(job => job.state === 'Building' || job.state === 'Scheduled' || job.state === 'Completing'))) {
         res.status = 'building';
       } else if (paused) {
         res.status = 'paused';
