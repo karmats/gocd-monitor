@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "test": "node_modules/.bin/mocha spec/ --compilers js:node_modules/babel-core/register --timeout 15000",
     "prestart": "mkdir -p assets/fonts && mkdir -p assets/js && npm run add-flexbox && npm run add-roboto-font && npm run add-material-icons",
     "start": "node_modules/.bin/webpack --config webpack.config.production.js && NODE_ENV=production npm run start-server",
     "lint": "node_modules/.bin/eslint server/app.js",
@@ -51,6 +52,8 @@
     "babel-preset-stage-0": "^6.5.0",
     "ejs": "^2.4.1",
     "eslint": "^1.10.3",
+    "mocha": "^2.4.5",
+    "mockery": "^1.4.1",
     "react-hot-loader": "^1.3.0",
     "webpack": "^1.12.13",
     "webpack-dev-server": "^1.14.1"

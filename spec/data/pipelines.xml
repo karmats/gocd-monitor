@@ -1,0 +1,5 @@
+<pipelines>
+  <link rel="self" href="https://go.seal-software.net/go/api/pipelines.xml"/>
+  <pipeline href="https://ci.example.com/go/api/pipelines/go-pipeline-1/stages.xml"/>
+  <pipeline href="https://ci.example.com/go/api/pipelines/go-pipeline-2/stages.xml"/>
+</pipelines>

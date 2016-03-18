@@ -1,0 +1,127 @@
+{
+  "pipelines": [
+    {
+      "build_cause": {
+        "approver": "anonymous",
+        "material_revisions": [
+          {
+            "modifications": [
+              {
+                "email_address": null,
+                "id": 1,
+                "modified_time": 1434957613000,
+                "user_name": "Pick E Reader <pick.e.reader@example.com>",
+                "comment": "my hola mundo changes",
+                "revision": "c194b49db102b705ebc13e604e490ae13ac92d96"
+              }
+            ],
+            "material": {
+              "description": "URL: https://github.com/gocd/gocd, Branch: master",
+              "fingerprint": "f6e7a3899c55e1682ffb00383bdf8f882bcee2141e79a8728254190a1fddcf4f",
+              "type": "Git",
+              "id": 1
+            },
+            "changed": false
+          }
+        ],
+        "trigger_forced": true,
+        "trigger_message": "Forced by anonymous"
+      },
+      "name": "pipeline1",
+      "natural_order": 11,
+      "can_run": true,
+      "comment": null,
+      "stages": [
+        {
+          "name": "stage1",
+          "approved_by": "admin",
+          "jobs": [
+            {
+              "name": "job1",
+              "result": "Failed",
+              "state": "Completed",
+              "id": 13,
+              "scheduled_date": 1436172201081
+            }
+          ],
+          "can_run": true,
+          "result": "Failed",
+          "approval_type": "success",
+          "counter": "1",
+          "id": 13,
+          "operate_permission": true,
+          "rerun_of_counter": null,
+          "scheduled": true
+        }
+      ],
+      "counter": 11,
+      "id": 13,
+      "preparing_to_schedule": false,
+      "label": "11"
+    },
+    {
+      "build_cause": {
+        "approver": "anonymous",
+        "material_revisions": [
+          {
+            "modifications": [
+              {
+                "email_address": null,
+                "id": 1,
+                "modified_time": 1434957613000,
+                "user_name": "Pick E Reader <pick.e.reader@example.com>",
+                "comment": "my hola mundo changes",
+                "revision": "c194b49db102b705ebc13e604e490ae13ac92d96"
+              }
+            ],
+            "material": {
+              "description": "URL: https://github.com/gocd/gocd, Branch: master",
+              "fingerprint": "f6e7a3899c55e1682ffb00383bdf8f882bcee2141e79a8728254190a1fddcf4f",
+              "type": "Git",
+              "id": 1
+            },
+            "changed": false
+          }
+        ],
+        "trigger_forced": true,
+        "trigger_message": "Forced by anonymous"
+      },
+      "name": "pipeline1",
+      "natural_order": 10,
+      "can_run": true,
+      "comment": null,
+      "stages": [
+        {
+          "name": "stage1",
+          "approved_by": "admin",
+          "jobs": [
+            {
+              "name": "job1",
+              "result": "Passed",
+              "state": "Completed",
+              "id": 12,
+              "scheduled_date": 1436172122024
+            }
+          ],
+          "can_run": true,
+          "result": "Passed",
+          "approval_type": "success",
+          "counter": "1",
+          "id": 12,
+          "operate_permission": true,
+          "rerun_of_counter": null,
+          "scheduled": true
+        }
+      ],
+      "counter": 10,
+      "id": 12,
+      "preparing_to_schedule": false,
+      "label": "10"
+    }
+  ],
+  "pagination": {
+    "offset": 0,
+    "total": 2,
+    "page_size": 10
+  }
+}
