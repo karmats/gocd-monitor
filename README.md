@@ -1,4 +1,4 @@
-# go.cd monitor
+# Go cd monitor
 Build monitor for gocd build server https://www.go.cd/
 #### Pipeline status
 * Green - Last pipeline build passed
@@ -31,3 +31,4 @@ Enjoy :)
 
 ## Development
 To run the application in development mode, open a terminal and enter `npm run dev-start`. The server and client will be rebuilt when a js or jsx-file changes.
+To run tests, open a terminal and enter `npm test`.
