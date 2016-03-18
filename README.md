@@ -1,3 +1,6 @@
+![Build Status](https://travis-ci.org/karmats/gocd-monitor.svg?branch=master)
+![Dependencies](https://david-dm.org/karmats/gocd-monitor.svg)
+
 # Go cd monitor
 Build monitor for gocd build server https://www.go.cd/
 #### Pipeline status
