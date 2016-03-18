@@ -84,12 +84,23 @@ describe('GoService spec', () => {
       expect(pipelinePromise).to.eventually.have.property('results').and.notify(done);
     });
 
-    it('should return null if promise is rejected', (done) => {
+    it('should return undefined if promise is rejected and pipelines are empty', (done) => {
       mockedRequestPromise = Promise.reject({ message : 'Fake error' });
       let pipelinePromise = new GoService().getPipelineHistory('pipeline1');
 
-      expect(pipelinePromise).to.eventually.be.null.and.notify(done);
+      expect(pipelinePromise).to.eventually.be.undefined.and.notify(done);
     });
+
+    it('should return last known pipeline result if promise is rejected', (done) => {
+      mockedRequestPromise = Promise.reject({ message : 'Fake error' });
+      let goService = new GoService();
+      let lastPipelineResult = { name : 'pipeline1', results : [] };
+      goService.pipelines  = [lastPipelineResult, { name : 'pipeline2', results : [] }];
+      let pipelinePromise = goService.getPipelineHistory(lastPipelineResult.name);
+
+      expect(pipelinePromise).to.eventually.be.equal(lastPipelineResult).and.notify(done);
+    });
+
   });
 
 });

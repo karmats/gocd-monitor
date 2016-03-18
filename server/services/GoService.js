@@ -87,8 +87,8 @@ export default class GoService extends Service {
     return rp(options)
       .then(res => this._goPipelinesToPipelineResult(res.pipelines.slice(0, 5)))
       .catch((err) => {
-        console.error(`Failed to get pipeline history for pipeline ${name}, ${err.statusCode}: ${err.message}`);
-        return null;
+        console.error(`Failed to get pipeline history for pipeline "${name}" returning last result, ${err.statusCode}: ${err.message}`);
+        return this.pipelines.filter((p) => p.name === name)[0];
       });
   }
 
