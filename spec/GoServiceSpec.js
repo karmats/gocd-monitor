@@ -66,7 +66,7 @@ describe('GoService spec', () => {
     });
 
     it('should return throw error if promise is rejected', (done) => {
-      mockedRequestPromise = Promise.reject({ message : 'Fake error' });
+      mockedRequestPromise = Promise.reject({ message: 'Fake error' });
       let pipelinePromise = new GoService().getAllPipelines();
 
       expect(pipelinePromise).to.be.rejected.and.notify(done);
@@ -85,20 +85,70 @@ describe('GoService spec', () => {
     });
 
     it('should return undefined if promise is rejected and pipelines are empty', (done) => {
-      mockedRequestPromise = Promise.reject({ message : 'Fake error' });
+      mockedRequestPromise = Promise.reject({ message: 'Fake error' });
       let pipelinePromise = new GoService().getPipelineHistory('pipeline1');
 
       expect(pipelinePromise).to.eventually.be.undefined.and.notify(done);
     });
 
     it('should return last known pipeline result if promise is rejected', (done) => {
-      mockedRequestPromise = Promise.reject({ message : 'Fake error' });
+      mockedRequestPromise = Promise.reject({ message: 'Fake error' });
       let goService = new GoService();
-      let lastPipelineResult = { name : 'pipeline1', results : [] };
-      goService.pipelines  = [lastPipelineResult, { name : 'pipeline2', results : [] }];
+      let lastPipelineResult = { name: 'pipeline1', results: [] };
+      goService.pipelines = [lastPipelineResult, { name: 'pipeline2', results: [] }];
       let pipelinePromise = goService.getPipelineHistory(lastPipelineResult.name);
 
       expect(pipelinePromise).to.eventually.be.equal(lastPipelineResult).and.notify(done);
+    });
+
+  });
+
+  describe('#(un)registerClient()', () => {
+
+    it('should register a client', (done) => {
+      let goService = new GoService();
+      expect(goService.clients).to.have.lengthOf(0);
+
+      goService.registerClient({ id: 'client1', emit : (event, data) => {} });
+      expect(goService.clients).to.have.lengthOf(1);
+
+      done();
+    });
+
+    it('should not register client if client is already registered', (done) => {
+      let goService = new GoService();
+      let client = { id: 'client1', emit : (event, data) => {} };
+
+      goService.registerClient(client);
+      expect(goService.clients).to.have.lengthOf(1);
+      goService.registerClient(client);
+      expect(goService.clients).to.have.lengthOf(1);
+
+      done();
+    });
+
+    it('should unregister a client', (done) => {
+      let goService = new GoService();
+      let client = { id: 'client1', emit : (event, data) => {} };
+
+      goService.registerClient(client);
+      expect(goService.clients).to.have.lengthOf(1);
+
+      goService.unregisterClient(client);
+      expect(goService.clients).to.have.lengthOf(0);
+
+      done();
+    });
+
+    it('should not affect client list if a client that does not exists is unregistered', (done) => {
+      let goService = new GoService();
+      let client = { id: 'client1', emit : (event, data) => {} };
+
+      expect(goService.clients).to.have.lengthOf(0);
+      goService.unregisterClient(client);
+      expect(goService.clients).to.have.lengthOf(0);
+
+      done();
     });
 
   });
