@@ -11,7 +11,7 @@ import Colors from 'material-ui/lib/styles/colors';
 import Moment from 'moment';
 
 // Weather icon indicator
-const weatherIconStatuses = ['mdi-weather-sunny', 'mdi-weather-partlycloudy', 'mdi-weather-cloudy', 'mdi-weather-cloudy', 'mdi-weather-pouring', 'mdi-weather-lightning'];
+const weatherIconStatuses = ['sunny', 'partlycloudy', 'cloudy', 'cloudy', 'pouring', 'lightning'];
 
 // FIXME: Break out to style.css
 const styles = {
@@ -47,7 +47,8 @@ export default class Pipeline extends React.Component {
   /**
    * Calculates which weather icon to use for a pipeline based on 5 latest build results
    * 
-   * @param pipeline
+   * @param   {Object}  pipeline  The pipeline
+   * @return  {string}  Pre weather icon classname
    */
   weatherIcon(pipeline) {
     let idx = pipeline.results.reduce((p, c) => {
@@ -85,7 +86,7 @@ export default class Pipeline extends React.Component {
           titleStyle={styles.cardTitle}
           subtitle={latestResult.status}
           subtitleStyle={styles.cardSubTitle}>
-          <i className={this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
+          <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
         </CardHeader>
         <CardText>
           <div className="buildinfo">

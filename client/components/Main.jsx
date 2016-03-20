@@ -12,9 +12,6 @@ import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
 
 import Pipeline from './Pipeline';
 
-// Setup socket.io
-const socket = io();
-
 
 // FIXME: Break out to style.css
 const styles = {
@@ -41,19 +38,33 @@ export default class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    socket.on('pipelines:update', (newPipelines) => {
-      let sortedPipelines = newPipelines.filter(p => p && p.name).sort((a, b) => {
-        return a.results[0].buildtime > b.results[0].buildtime ? -1 : 1;
-      });
-      this.setState({
-        pipelines : sortedPipelines
-      })
-    });
     // Setup initial state
     this.state = {
       // All pipelines
       pipelines: []
     };
+  }
+
+  componentDidMount() {
+    const socket = io();
+    // Setup socket.io and listen for updates
+    socket.on('pipelines:update', (newPipelines) => {
+      this.setState({
+        pipelines : this.sortPipelines(newPipelines)
+      })
+    });
+  }
+
+  /**
+   * Sort pipelines by date and filter out pipelines without data
+   * 
+   * @param   {Array} pipelines The pipelines to sort
+   * @return  {Array} Sorted pipelines
+   */
+  sortPipelines(pipelines) {
+    return pipelines.filter(p => p && p.name).sort((a, b) => {
+        return a.results[0].buildtime > b.results[0].buildtime ? -1 : 1;
+      });
   }
 
   render() {

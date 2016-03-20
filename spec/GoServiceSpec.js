@@ -40,7 +40,7 @@ describe('GoService spec', () => {
 
   describe('#constructor()', () => {
 
-    it('should set properties when created', (done) => {
+    it('should set properties when created', () => {
       let goService = new GoService();
 
       expect(goService).to.be.ok;
@@ -49,7 +49,6 @@ describe('GoService spec', () => {
       expect(goService.password).to.be.a('string');
       expect(goService.pipelines).to.be.an('array');
       expect(goService.clients).to.be.an('array');
-      done();
     });
 
   });
@@ -109,7 +108,7 @@ describe('GoService spec', () => {
       let goService = new GoService();
       expect(goService.clients).to.have.lengthOf(0);
 
-      goService.registerClient({ id: 'client1', emit : (event, data) => {} });
+      goService.registerClient({ id: 'client1', emit: (event, data) => { } });
       expect(goService.clients).to.have.lengthOf(1);
 
       done();
@@ -117,7 +116,7 @@ describe('GoService spec', () => {
 
     it('should not register client if client is already registered', (done) => {
       let goService = new GoService();
-      let client = { id: 'client1', emit : (event, data) => {} };
+      let client = { id: 'client1', emit: (event, data) => { } };
 
       goService.registerClient(client);
       expect(goService.clients).to.have.lengthOf(1);
@@ -129,7 +128,7 @@ describe('GoService spec', () => {
 
     it('should unregister a client', (done) => {
       let goService = new GoService();
-      let client = { id: 'client1', emit : (event, data) => {} };
+      let client = { id: 'client1', emit: (event, data) => { } };
 
       goService.registerClient(client);
       expect(goService.clients).to.have.lengthOf(1);
@@ -142,7 +141,7 @@ describe('GoService spec', () => {
 
     it('should not affect client list if a client that does not exists is unregistered', (done) => {
       let goService = new GoService();
-      let client = { id: 'client1', emit : (event, data) => {} };
+      let client = { id: 'client1', emit: (event, data) => { } };
 
       expect(goService.clients).to.have.lengthOf(0);
       goService.unregisterClient(client);
