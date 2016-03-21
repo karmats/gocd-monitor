@@ -47,6 +47,7 @@ describe('GoService spec', () => {
       expect(goService.baseUrl).to.be.a('string');
       expect(goService.user).to.be.a('string');
       expect(goService.password).to.be.a('string');
+      expect(goService.pollingInterval).to.be.a('number');
       expect(goService.pipelines).to.be.an('array');
       expect(goService.clients).to.be.an('array');
     });

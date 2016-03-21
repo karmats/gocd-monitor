@@ -11,7 +11,7 @@ var config = {
     goUser: 'xxx',
     // Password for go user
     goPassword: 'xxx',
-    // How often data from go should be refreshed
-    goPollingInterval: 30000
+    // How often data from go should be refreshed in seconds
+    goPollingInterval: 30
 }
 module.exports = config;

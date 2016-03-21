@@ -13,6 +13,7 @@ export default class GoService extends Service {
     this.baseUrl = conf.goServerUrl + '/go/api';
     this.user = conf.goUser;
     this.password = conf.goPassword;
+    this.pollingInterval = conf.goPollingInterval*1000;
   }
 
   /**
@@ -40,7 +41,7 @@ export default class GoService extends Service {
     this.getAllPipelines()
       .then((pipelineNames) => {
         refreshPipelines(pipelineNames);
-        setInterval(refreshPipelines, conf.goPollingInterval, pipelineNames);
+        setInterval(refreshPipelines, this.pollingInterval, pipelineNames);
       })
       .catch((err) => {
         Logger.error(err);
