@@ -6,6 +6,7 @@
 
 import app from '../server/app';
 import http from 'http';
+import Logger from '../server/utils/Logger';
 import * as conf from '../app-config';
 
 /**
@@ -66,11 +67,11 @@ function onError(error) {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+      Logger.error(bind + ' requires elevated privileges');
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+      Logger.error(bind + ' is already in use');
       process.exit(1);
       break;
     default:
@@ -86,5 +87,5 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  console.log('Listening on ' + bind);
+  Logger.debug('Listening on ' + bind);
 }

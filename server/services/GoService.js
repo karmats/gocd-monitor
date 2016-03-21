@@ -1,8 +1,10 @@
 import rp from 'request-promise';
 import * as conf from '../../app-config';
 import { parseString } from 'xml2js';
+import Logger from '../utils/Logger';
 
 import Service from './Service';
+
 
 export default class GoService extends Service {
 
@@ -25,7 +27,7 @@ export default class GoService extends Service {
           currentPipelines.push(pipeline);
           if (currentPipelines.length === pipelineNames.length) {
             this.pipelines = currentPipelines;
-            console.log(`Emitting ${this.pipelines.length} pipelines to ${this.clients.length} clients`);
+            Logger.debug(`Emitting ${this.pipelines.length} pipelines to ${this.clients.length} clients`);
             this.clients.forEach((client) => {
               client.emit('pipelines:update', this.pipelines);
             })
@@ -41,7 +43,7 @@ export default class GoService extends Service {
         setInterval(refreshPipelines, conf.goPollingInterval, pipelineNames);
       })
       .catch((err) => {
-        console.error(err);
+        Logger.error(err);
       });
   }
 
@@ -87,8 +89,8 @@ export default class GoService extends Service {
     return rp(options)
       .then(res => this._goPipelinesToPipelineResult(res.pipelines.slice(0, 5)))
       .catch((err) => {
-        console.error(`Failed to get pipeline history for pipeline "${name}" returning last result, ${err.statusCode}: ${err.message}`);
-        return this.pipelines.filter((p) => p.name === name)[0];
+        Logger.error(`Failed to get pipeline history for pipeline "${name}" returning last result, ${err.statusCode}: ${err.message}`);
+        return this.pipelines.filter((p) => p && p.name === name)[0];
       });
   }
 

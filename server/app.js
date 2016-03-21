@@ -2,6 +2,7 @@
 
 import express from 'express';
 import path from 'path';
+import Logger from './utils/Logger';
 import socketio from 'socket.io';
 import { parseString } from 'xml2js';
 
@@ -48,11 +49,11 @@ goService.startPolling();
 app.io = io;
 
 io.on('connection', (socket) => {
-  console.log('Client connected');
+  Logger.debug('Client connected');
   goService.registerClient(socket);
 
   socket.on('disconnect', () => {
-    console.log('Client disconnected');
+    Logger.debug('Client disconnected');
     goService.unregisterClient(socket);
   });
 });

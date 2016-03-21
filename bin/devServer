@@ -2,6 +2,7 @@
 
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
+import Logger from '../server/utils/Logger';
 import config from '../webpack.config.dev';
 import * as conf from '../app-config';
 
@@ -11,8 +12,8 @@ new WebpackDevServer(webpack(config), {
   historyApiFallback: true
 }).listen(conf.devPort, 'localhost', function (err, result) {
   if (err) {
-    console.log(err);
+    Logger.debug(err);
   }
 
-  console.log('Listening at localhost:' + conf.devPort);
+  Logger.debug('Listening at localhost:' + conf.devPort);
 });
