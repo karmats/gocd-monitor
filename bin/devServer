@@ -12,7 +12,7 @@ new WebpackDevServer(webpack(config), {
   historyApiFallback: true
 }).listen(conf.devPort, 'localhost', function (err, result) {
   if (err) {
-    Logger.debug(err);
+    Logger.error(err);
   }
 
   Logger.debug('Listening at localhost:' + conf.devPort);
