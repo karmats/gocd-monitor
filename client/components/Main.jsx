@@ -50,7 +50,7 @@ export default class Main extends React.Component {
     // Setup socket.io and listen for updates
     socket.on('pipelines:update', (newPipelines) => {
       this.setState({
-        pipelines : this.sortPipelines(newPipelines)
+        pipelines: this.sortPipelines(newPipelines)
       })
     });
   }
@@ -63,8 +63,8 @@ export default class Main extends React.Component {
    */
   sortPipelines(pipelines) {
     return pipelines.filter(p => p && p.name).sort((a, b) => {
-        return a.results[0].buildtime > b.results[0].buildtime ? -1 : 1;
-      });
+      return a.buildtime > b.buildtime ? -1 : 1;
+    });
   }
 
   render() {

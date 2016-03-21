@@ -45,29 +45,24 @@ const styles = {
 export default class Pipeline extends React.Component {
 
   /**
-   * Calculates which weather icon to use for a pipeline based on 5 latest build results
+   * Calculates which weather icon to use for a pipeline based on pipeline heath.
+   * This function was a bit more advanced back in the days, with api changes it got reduced to this.
+   * Let's keep it for now
    * 
    * @param   {Object}  pipeline  The pipeline
    * @return  {string}  Pre weather icon classname
    */
   weatherIcon(pipeline) {
-    let idx = pipeline.results.reduce((p, c) => {
-      if (c.status === 'failed') {
-        p++;
-      }
-      return p;
-    }, 0);
-    return weatherIconStatuses[idx];
+    return weatherIconStatuses[pipeline.health];
   }
 
   render() {
     let pipeline = this.props.pipeline;
-    let latestResult = pipeline.results[0];
-    let progress = latestResult.status === 'building' ?  (
+    let progress = pipeline.status === 'building' ?  (
       <div className='col-xs-6'><CircularProgress className="progress" color="#fff" size={0.5} /></div>)
       : null;
     let style;
-    switch (latestResult.status) {
+    switch (pipeline.status) {
       case 'failed':
         style = styles.cardFailure;
         break;
@@ -84,20 +79,20 @@ export default class Pipeline extends React.Component {
           className="buildtitle"
           title={pipeline.name}
           titleStyle={styles.cardTitle}
-          subtitle={latestResult.status}
+          subtitle={pipeline.status}
           subtitleStyle={styles.cardSubTitle}>
           <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
         </CardHeader>
         <CardText>
           <div className="buildinfo">
-            <div className={latestResult.status === 'building' ? 'col-xs-6' : 'col-xs-12'}>
+            <div className={pipeline.status === 'building' ? 'col-xs-6' : 'col-xs-12'}>
               <p>
                 <i className="mdi mdi-clock mdi-24px"></i>
-                <span>{ Moment(latestResult.buildtime).fromNow() }</span>
+                <span>{ Moment(pipeline.buildtime).fromNow() }</span>
               </p>
               <p>
                 <i className="mdi mdi-worker mdi-24px"></i>
-                <span>{latestResult.author}</span>
+                <span>{pipeline.author}</span>
               </p>
             </div>
             {progress}

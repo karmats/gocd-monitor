@@ -74,13 +74,16 @@ describe('GoService spec', () => {
 
   describe('#getPipelineHistory()', () => {
 
-    it('should parse go pipeline history', (done) => {
+    it('should parse go pipelines', (done) => {
       mockedRequestPromise = Promise.resolve(JSON.parse(fs.readFileSync(__dirname + '/data/pipeline.json', 'utf-8')));
       let pipelinePromise = new GoService().getPipelineHistory('pipeline1');
 
       expect(pipelinePromise).to.eventually.be.ok;
       expect(pipelinePromise).to.eventually.have.property('name');
-      expect(pipelinePromise).to.eventually.have.property('results').and.notify(done);
+      expect(pipelinePromise).to.eventually.have.property('author');
+      expect(pipelinePromise).to.eventually.have.property('buildtime');
+      expect(pipelinePromise).to.eventually.have.property('counter');
+      expect(pipelinePromise).to.eventually.have.property('health').and.notify(done);
     });
 
     it('should return undefined if promise is rejected and pipelines are empty', (done) => {

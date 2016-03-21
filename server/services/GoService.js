@@ -74,7 +74,7 @@ export default class GoService extends Service {
 
   /**
    * @param   {string}    name       Name of the pipeline
-   * @returns {Object}    Pipeline instance. Example { name : 'id, results: [{'status' : 'passed', 'buildtime' : 1457085089646, author: 'Bobby Malone', counter: 255}] }
+   * @returns {Object}    Pipeline instance. Example { name : 'id, status : 'passed', buildtime : 1457085089646, author: 'Bobby Malone', counter: 255, health: 2] }
    */
   getPipelineHistory(name) {
     let options = {
@@ -104,52 +104,55 @@ export default class GoService extends Service {
     // Pipeline name
     result.name = pipelines[0].name;
 
-    // Pipeline is paused if last build stages can_run property is set to false
-    let paused = !pipelines[0].stages.some(stage => stage.can_run === true);
+    // Latest pipeline result is where we will retrieve most data
+    let latestPipelineResult = pipelines[0];
 
-    // Result array
-    result.results = pipelines.map((p) => {
-      let res = {};
+    // Status
+    if (latestPipelineResult.stages.some(stage => stage.jobs.some(job => job.state === 'Scheduled' || job.state === 'Assigned' || job.state === 'Preparing' || job.state === 'Building' || job.state === 'Completing'))) {
+      result.status = 'building';
+    } else if (!latestPipelineResult.stages.some(stage => stage.can_run === true)) { // Pipeline is paused if last build stages can_run property is set to false
+      result.status = 'paused';
+    } else { // Else consider build as failed if any of the stages has failed
+      result.status = latestPipelineResult.stages.some(stage => stage.result === 'Failed') ? 'failed' : 'passed';
+    }
 
-      // Status
-      if (p.stages.some(stage => stage.jobs.some(job => job.state === 'Building' || job.state === 'Scheduled' || job.state === 'Completing'))) {
-        res.status = 'building';
-      } else if (paused) {
-        res.status = 'paused';
-      } else {
-        res.status = p.stages.every(stage => stage.result === 'Passed') ? 'passed' : 'failed';
+    // Health = number of pipelines failed
+    result.health = pipelines.reduce((p, c) => {
+      if (c.stages.some(stage => stage.result === 'Failed')) {
+        return p + 1;
       }
+      return p;
+    }, 0);
 
-      // Bulid time = last scheduled job
-      res.buildtime = p.stages.reduce((sp, sc) => {
-        let lastScheduledJob = sc.jobs.reduce((jp, jc) => {
-          if (jc.scheduled_date > jp) {
-            jp = jc.scheduled_date;
-          }
-          return jp;
-        }, 0);
-        if (lastScheduledJob > sp) {
-          sp = lastScheduledJob;
+    // Bulid time = last scheduled job
+    result.buildtime = latestPipelineResult.stages.reduce((sp, sc) => {
+      let lastScheduledJob = sc.jobs.reduce((jp, jc) => {
+        if (jc.scheduled_date > jp) {
+          return jc.scheduled_date;
         }
-        return sp;
+        return jp;
       }, 0);
-
-      // Author = first modifcator
-      if (p.build_cause && p.build_cause.material_revisions && p.build_cause.material_revisions[0].modifications) {
-        res.author = p.build_cause.material_revisions[0].modifications[0].user_name;
-      } else {
-        res.author = 'Unknown';
+      if (lastScheduledJob > sp) {
+        sp = lastScheduledJob;
       }
-      // Remove email tag if any
-      let tagIdx = res.author.indexOf('<');
-      if (tagIdx > 0) {
-        res.author = res.author.substring(0, tagIdx).trim();
-      }
+      return sp;
+    }, 0);
 
-      // Counter id
-      res.counter = p.counter;
-      return res;
-    });
+    // Author = first modifcator
+    let author = 'Unknown';
+    if (latestPipelineResult.build_cause && latestPipelineResult.build_cause.material_revisions && latestPipelineResult.build_cause.material_revisions[0].modifications) {
+      author = latestPipelineResult.build_cause.material_revisions[0].modifications[0].user_name;
+    }
+    // Remove email tag if any
+    let tagIdx = author.indexOf('<');
+    if (tagIdx > 0) {
+      author = author.substring(0, tagIdx).trim();
+    }
+    result.author = author;
+
+    // Counter id
+    result.counter = latestPipelineResult.counter;
+
     return result;
   }
 }

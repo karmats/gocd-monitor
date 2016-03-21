@@ -7,21 +7,21 @@ describe('PipelineComponent spec', () => {
 
   describe('#weatherIcon()', () => {
 
-    it('should be sunny when no build has failed', () => {
+    it('should be sunny when health is 0', () => {
       let pipelineComponent = new Pipeline();
       let pipeline = {
         name: 'pipeline1',
-        results: [{ status: 'passed' }, { status: 'passed' }, { status: 'passed' }, { status: 'passed' }, { status: 'passed' }]
+        health: 0
       };
 
       expect(pipelineComponent.weatherIcon(pipeline)).to.be.equal('sunny');
     });
 
-    it('should be lightning when all builds has failed', () => {
+    it('should be lightning when health is 5', () => {
       let pipelineComponent = new Pipeline();
       let pipeline = {
         name: 'pipeline1',
-        results: [{ status: 'failed' }, { status: 'failed' }, { status: 'failed' }, { status: 'failed' }, { status: 'failed' }]
+        health: 5
       };
 
       expect(pipelineComponent.weatherIcon(pipeline)).to.be.equal('lightning');

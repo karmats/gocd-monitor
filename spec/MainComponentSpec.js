@@ -10,24 +10,19 @@ describe('MainComponent spec', () => {
     const generatePipelines = () => {
       return [{
         name: 'pipeline1',
-        results: [
-          { buildtime: 1234 }]
+        buildtime: 1234
       }, {
-          name: 'pipeline2',
-          results: [
-            { buildtime: 2345 }]
-        },
-        {
-          name: 'pipeline3',
-          results: [
-            { buildtime: 1111 }]
-        },
-        {
-          name: 'pipeline4',
-          results: [
-            { buildtime: 2222 }]
-        }
-      ]
+        name: 'pipeline2',
+        buildtime: 2345
+      },
+      {
+        name: 'pipeline3',
+        buildtime: 1111
+      },
+      {
+        name: 'pipeline4',
+        buildtime: 2222
+      }]
     };
 
     it('should filter undefined pipelines', () => {
