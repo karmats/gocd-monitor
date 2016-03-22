@@ -2,7 +2,7 @@
 ![Dependencies](https://david-dm.org/karmats/gocd-monitor.svg)
 
 # Go cd monitor
-Build monitor for gocd build server https://www.go.cd/
+Build monitor for Go cd build server https://www.go.cd/
 #### Pipeline status
 * Green - Last pipeline build passed
 * Red - Last pipeline build failed
