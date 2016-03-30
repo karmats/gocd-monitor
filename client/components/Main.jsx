@@ -6,6 +6,8 @@ import React from 'react';
 
 import io from 'socket.io-client';
 
+import { Dialog, FlatButton, FloatingActionButton } from 'material-ui/lib';
+import Settings from 'material-ui/lib/svg-icons/action/settings';
 import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
 import Colors from 'material-ui/lib/styles/colors';
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
@@ -41,7 +43,11 @@ export default class Main extends React.Component {
     // Setup initial state
     this.state = {
       // All pipelines
-      pipelines: []
+      pipelines: [],
+      // If settings dialog open or not
+      open: false,
+      // In adminMode settings can be configured
+      adminMode: window.location.search.indexOf('mode=admin') >= 0,
     };
   }
 
@@ -54,6 +60,23 @@ export default class Main extends React.Component {
       })
     });
   }
+
+  closeSettings(e) {
+    if (e) {
+      // Save settings
+      console.log('Saving settings..');
+    }
+    this.setState({
+      open: false
+    });
+  }
+
+  openSettings() {	
+    this.setState({
+      open: true
+    });
+  }
+
 
   /**
    * Sort pipelines by date and filter out pipelines without data
@@ -68,6 +91,22 @@ export default class Main extends React.Component {
   }
 
   render() {
+
+    const settingsBtn = this.state.adminMode ? (
+      <FloatingActionButton style={styles.fab}
+        primary={true}
+        onTouchTap={this.openSettings.bind(this)}>
+        <Settings />
+      </FloatingActionButton>
+    ) : null;
+
+    const settingsActions = (
+      <FlatButton
+        label="Okey"
+        primary={true}
+        onTouchTap={this.closeSettings.bind(this)}
+      />
+    );
 
     let pipelineCards = this.state.pipelines.map((pipeline) => {
       if (pipeline && pipeline.name) {
@@ -85,6 +124,14 @@ export default class Main extends React.Component {
           <div className="row">
             {pipelineCards}
           </div>
+          <Dialog
+            open={this.state.open}
+            title="Super Secret Password"
+            actions={settingsActions}
+            onRequestClose={this.closeSettings.bind(this)}>
+            1-2-3-4-5
+          </Dialog>
+          {settingsBtn}
         </div>
       </MuiThemeProvider>
     );

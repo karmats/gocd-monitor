@@ -39,6 +39,9 @@
     "rules": {
       "vars-on-top": 2,
       "no-undef": 2
+    },
+    "globals": {
+      "window": true
     }
   },
   "devDependencies": {
