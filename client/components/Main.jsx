@@ -13,6 +13,7 @@ import Colors from 'material-ui/lib/styles/colors';
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
 
 import Pipeline from './Pipeline';
+import Configuration from './Configuration';
 
 
 // FIXME: Break out to style.css
@@ -47,7 +48,7 @@ export default class Main extends React.Component {
       // If settings dialog open or not
       open: false,
       // In adminMode settings can be configured
-      adminMode: window.location.search.indexOf('mode=admin') >= 0,
+      adminMode: window.location.search.indexOf('admin') >= 0,
     };
   }
 
@@ -77,6 +78,22 @@ export default class Main extends React.Component {
     });
   }
 
+  /**
+   * Show/hide a pipeline. Used in configuration dialog
+   * 
+   * @param pipelineName  Name of the pipeline to toggle
+   * @param active        Weather to show or hide it
+   */
+  togglePipeline(pipelineName, active) {
+    this.setState({
+      pipelines: this.state.pipelines.map((p) => {
+        if (p.name === pipelineName) {
+          p.active = active;
+        }
+        return p;
+      })
+    })
+  }
 
   /**
    * Sort pipelines by date and filter out pipelines without data
@@ -109,7 +126,7 @@ export default class Main extends React.Component {
     );
 
     let pipelineCards = this.state.pipelines.map((pipeline) => {
-      if (pipeline && pipeline.name) {
+      if (pipeline && pipeline.active) {
         return (
           <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
             <Pipeline pipeline={pipeline} />
@@ -126,10 +143,11 @@ export default class Main extends React.Component {
           </div>
           <Dialog
             open={this.state.open}
-            title="Super Secret Password"
+            title="Configuration"
             actions={settingsActions}
+            autoScrollBodyContent={true}
             onRequestClose={this.closeSettings.bind(this)}>
-            1-2-3-4-5
+            <Configuration pipelines={this.state.pipelines} onTogglePipeline={this.togglePipeline.bind(this)} />
           </Dialog>
           {settingsBtn}
         </div>

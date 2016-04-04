@@ -5,7 +5,7 @@ import Main from '../client/components/Main';
 
 describe('MainComponent spec', () => {
 
-  describe('#sortPipelines()', () => {
+  describe.skip('#sortPipelines()', () => {
 
     const generatePipelines = () => {
       return [{

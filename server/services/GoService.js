@@ -154,6 +154,9 @@ export default class GoService extends Service {
     // Counter id
     result.counter = latestPipelineResult.counter;
 
+    // FIXME DB
+    result.active = true;
+
     return result;
   }
 }
