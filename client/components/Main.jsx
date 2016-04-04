@@ -46,9 +46,7 @@ export default class Main extends React.Component {
       // All pipelines
       pipelines: [],
       // If settings dialog open or not
-      open: false,
-      // In adminMode settings can be configured
-      adminMode: window.location.search.indexOf('admin') >= 0,
+      open: false
     };
   }
 
@@ -108,8 +106,10 @@ export default class Main extends React.Component {
   }
 
   render() {
+    // In adminMode settings can be configured
+    const adminMode = window.location.search.indexOf('admin') >= 0;
 
-    const settingsBtn = this.state.adminMode ? (
+    const settingsBtn = adminMode ? (
       <FloatingActionButton style={styles.fab}
         primary={true}
         onTouchTap={this.openSettings.bind(this)}>
