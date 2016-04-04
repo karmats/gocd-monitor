@@ -23,6 +23,10 @@ const styles = {
     background: Colors.redA700,
     marginBottom: '1rem'
   },
+  cardActive: {
+    background: Colors.lightBlueA700,
+    marginBottom: '1rem'
+  },
   cardInactive: {
     background: Colors.yellowA700,
     marginBottom: '1rem'
@@ -61,7 +65,7 @@ export default class Pipeline extends React.Component {
     let progress = pipeline.status === 'building' ?  (
       <div className='col-xs-6'><CircularProgress className="progress" color="#fff" size={0.5} /></div>)
       : null;
-    let style;
+    let style = styles.cardActive;
     switch (pipeline.status) {
       case 'failed':
         style = styles.cardFailure;
@@ -69,7 +73,7 @@ export default class Pipeline extends React.Component {
       case 'paused':
         style = styles.cardInactive;
         break;
-      default:
+      case 'passed':
         style = styles.cardSuccess;
         break;
     }
