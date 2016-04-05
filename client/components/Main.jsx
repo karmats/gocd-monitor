@@ -36,6 +36,16 @@ const muiTheme = getMuiTheme({
   }
 });
 
+// Sort by latest build time or pipeline status. Status is sorted by building, failed, passed and paused
+const sortOrders = [{
+  name : 'buildtime',
+  label: 'Build time'
+}, 
+{
+  name: 'status',
+  label: 'Status (building, failed, passed, paused)'
+}];
+
 export default class Main extends React.Component {
 
   constructor(props, context) {
@@ -45,6 +55,8 @@ export default class Main extends React.Component {
     this.state = {
       // All pipelines
       pipelines: [],
+      // Sort order
+      sortOrder: sortOrders[0],
       // If settings dialog open or not
       open: false
     };
@@ -55,7 +67,7 @@ export default class Main extends React.Component {
     // Setup socket.io and listen for updates
     socket.on('pipelines:update', (newPipelines) => {
       this.setState({
-        pipelines: this.sortPipelines(newPipelines)
+        pipelines: this.sortPipelines(newPipelines, this.state.sortOrder.name)
       })
     });
   }
@@ -79,8 +91,8 @@ export default class Main extends React.Component {
   /**
    * Show/hide a pipeline. Used in configuration dialog
    * 
-   * @param pipelineName  Name of the pipeline to toggle
-   * @param active        Weather to show or hide it
+   * @param {string}  pipelineName  Name of the pipeline to toggle
+   * @param {boolean} active        Weather to show or hide it
    */
   togglePipeline(pipelineName, active) {
     this.setState({
@@ -94,15 +106,37 @@ export default class Main extends React.Component {
   }
 
   /**
+   * Change current pipeline sort order
+   * 
+   * @param {Object}  newSortOrder  The sort order to change to, @see const sortOrders
+   */
+  changeSortOrder(newSortOrder) {
+    this.setState({
+      sortOrder: newSortOrder,
+      pipelines: this.sortPipelines(this.state.pipelines, newSortOrder.name)
+    });
+  }
+
+  /**
    * Sort pipelines by date and filter out pipelines without data
    * 
    * @param   {Array} pipelines The pipelines to sort
    * @return  {Array} Sorted pipelines
    */
-  sortPipelines(pipelines) {
-    return pipelines.filter(p => p && p.name).sort((a, b) => {
+  sortPipelines(pipelines, sortOrder) {
+    const activePipelines = pipelines.filter(p => p && p.active);
+    const sortByBuildTime = (a, b) => {
       return a.buildtime > b.buildtime ? -1 : 1;
-    });
+    };
+    if (sortOrder === 'buildtime') {
+      return activePipelines.sort(sortByBuildTime);
+    } else {
+      const building = activePipelines.filter(p => p.status === 'building').sort(sortByBuildTime);
+      const failed = activePipelines.filter(p => p.status === 'failed').sort(sortByBuildTime);
+      const passed = activePipelines.filter(p => p.status === 'passed').sort(sortByBuildTime);
+      const paused = activePipelines.filter(p => p.status === 'paused').sort(sortByBuildTime);
+      return building.concat(failed, passed, paused);
+    }
   }
 
   render() {
@@ -126,13 +160,11 @@ export default class Main extends React.Component {
     );
 
     let pipelineCards = this.state.pipelines.map((pipeline) => {
-      if (pipeline && pipeline.active) {
-        return (
-          <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-            <Pipeline pipeline={pipeline} />
-          </div>
-        )
-      }
+      return (
+        <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+          <Pipeline pipeline={pipeline} />
+        </div>
+      )
     });
 
     return (
@@ -147,7 +179,7 @@ export default class Main extends React.Component {
             actions={settingsActions}
             autoScrollBodyContent={true}
             onRequestClose={this.closeSettings.bind(this)}>
-            <Configuration pipelines={this.state.pipelines} onTogglePipeline={this.togglePipeline.bind(this)} />
+            <Configuration pipelines={this.state.pipelines} sortOrder={this.state.sortOrder} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} />
           </Dialog>
           {settingsBtn}
         </div>

@@ -24,10 +24,10 @@ describe('ConfigurationComponent spec', () => {
       }
       let configurationComponent = new Configuration(props);
 
-      expect(configurationComponent.pipelines).to.not.be.equal(props.pipelines);
-      expect(configurationComponent.pipelines[0].name).to.be.equal('pipeline1');
-      expect(configurationComponent.pipelines[1].name).to.be.equal('pipeline2');
-      expect(configurationComponent.pipelines[2].name).to.be.equal('pipeline3');
+      expect(configurationComponent.state.pipelines).to.not.be.equal(props.pipelines);
+      expect(configurationComponent.state.pipelines[0].name).to.be.equal('pipeline1');
+      expect(configurationComponent.state.pipelines[1].name).to.be.equal('pipeline2');
+      expect(configurationComponent.state.pipelines[2].name).to.be.equal('pipeline3');
     });
 
   });
