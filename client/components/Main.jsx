@@ -46,6 +46,8 @@ const sortOrders = [{
   label: 'Status (building, failed, passed, paused)'
 }];
 
+const socket = io();
+
 export default class Main extends React.Component {
 
   constructor(props, context) {
@@ -55,36 +57,55 @@ export default class Main extends React.Component {
     this.state = {
       // All pipelines
       pipelines: [],
-      // Sort order
-      sortOrder: sortOrders[0],
+      // Configurable settings
+      settings: {
+        disabledPipelines: [],
+        sortOrder: sortOrders[0]
+      },
       // If settings dialog open or not
-      open: false
+      settingsDialogOpened: false
     };
   }
 
   componentDidMount() {
-    const socket = io();
-    // Setup socket.io and listen for updates
-    socket.on('pipelines:update', (newPipelines) => {
+    // Listen for updates
+    socket.on('pipelines:updated', (newPipelines) => {
       this.setState({
-        pipelines: this.sortPipelines(newPipelines, this.state.sortOrder.name)
+        pipelines: this.sortPipelines(newPipelines, this.state.settings.disabledPipelines, this.state.settings.sortOrder.name)
       })
+    });
+
+    // Settings from server
+    socket.on('settings:updated', (settings) => {
+      if (settings.disabledPipelines && settings.sortOrder) {
+        this.setState({
+          pipelines: this.sortPipelines(this.state.pipelines, settings.disabledPipelines, settings.sortOrder),
+          settings: {
+            sortOrder : sortOrders.filter(s => settings.sortOrder === s.name)[0] || sortOrders[0],
+            disabledPipelines: settings.disabledPipelines
+          }
+        });
+      }
     });
   }
 
-  closeSettings(e) {
-    if (e) {
-      // Save settings
-      console.log('Saving settings..');
-    }
+  saveSettings(settings) {
+    socket.emit('settings:update', {
+      sortOrder: settings.sortOrder.name,
+      disabledPipelines: settings.disabledPipelines
+    });
+    this.closeSettings();
+  }
+
+  closeSettings() {
     this.setState({
-      open: false
+      settingsDialogOpened: false
     });
   }
 
   openSettings() {	
     this.setState({
-      open: true
+      settingsDialogOpened: true
     });
   }
 
@@ -95,14 +116,20 @@ export default class Main extends React.Component {
    * @param {boolean} active        Weather to show or hide it
    */
   togglePipeline(pipelineName, active) {
-    this.setState({
-      pipelines: this.state.pipelines.map((p) => {
-        if (p.name === pipelineName) {
-          p.active = active;
+    let disabledPipelines = this.state.settings.disabledPipelines.slice();
+    if (active) {
+      disabledPipelines = disabledPipelines.filter(pName => pName !== pipelineName);
+    } else {
+      disabledPipelines.push(pipelineName);
+    }
+    this.setState((prevState) => {
+      return {
+        settings : {
+          sortOrder: prevState.settings.sortOrder,
+          disabledPipelines : disabledPipelines
         }
-        return p;
-      })
-    })
+      }
+    });
   }
 
   /**
@@ -111,9 +138,13 @@ export default class Main extends React.Component {
    * @param {Object}  newSortOrder  The sort order to change to, @see const sortOrders
    */
   changeSortOrder(newSortOrder) {
-    this.setState({
-      sortOrder: newSortOrder,
-      pipelines: this.sortPipelines(this.state.pipelines, newSortOrder.name)
+    this.setState((prevState) => {
+      return {
+        settings : {
+          sortOrder: newSortOrder,
+          disabledPipelines : prevState.settings.disabledPipelines
+        }
+      }
     });
   }
 
@@ -123,8 +154,8 @@ export default class Main extends React.Component {
    * @param   {Array} pipelines The pipelines to sort
    * @return  {Array} Sorted pipelines
    */
-  sortPipelines(pipelines, sortOrder) {
-    const activePipelines = pipelines.filter(p => p && p.active);
+  sortPipelines(pipelines, disabledPipelines, sortOrder) {
+    const activePipelines = pipelines.filter(p => p && disabledPipelines.indexOf(p.name) < 0);
     const sortByBuildTime = (a, b) => {
       return a.buildtime > b.buildtime ? -1 : 1;
     };
@@ -151,20 +182,27 @@ export default class Main extends React.Component {
       </FloatingActionButton>
     ) : null;
 
-    const settingsActions = (
+    const settingsActions = [
       <FlatButton
-        label="Okey"
-        primary={true}
+        label="Cancel"
+        primary={false}
         onTouchTap={this.closeSettings.bind(this)}
+      />,
+      <FlatButton
+        label="Save"
+        primary={true}
+        onTouchTap={this.saveSettings.bind(this, this.state.settings)}
       />
-    );
+    ];
 
     let pipelineCards = this.state.pipelines.map((pipeline) => {
-      return (
-        <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-          <Pipeline pipeline={pipeline} />
-        </div>
-      )
+      if (pipeline && pipeline.active) {
+        return (
+          <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+            <Pipeline pipeline={pipeline} />
+          </div>
+        )
+      }
     });
 
     return (
@@ -174,12 +212,12 @@ export default class Main extends React.Component {
             {pipelineCards}
           </div>
           <Dialog
-            open={this.state.open}
+            open={this.state.settingsDialogOpened}
             title="Configuration"
             actions={settingsActions}
             autoScrollBodyContent={true}
             onRequestClose={this.closeSettings.bind(this)}>
-            <Configuration pipelines={this.state.pipelines} sortOrder={this.state.sortOrder} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} />
+            <Configuration pipelines={this.state.pipelines} settings={this.state.settings} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} />
           </Dialog>
           {settingsBtn}
         </div>

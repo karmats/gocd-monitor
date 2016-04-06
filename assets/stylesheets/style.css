@@ -132,6 +132,9 @@ div.buildinfo .progress {
 }
 div.buildinfo > div > p {
   margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 div.buildinfo span {
   padding-left: 10px;

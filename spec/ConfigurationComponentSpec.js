@@ -10,17 +10,21 @@ describe('ConfigurationComponent spec', () => {
     it('should sort pipelines by name', () => {
       const props = {
         pipelines : [{
-          name: 'pipeline3',
-          active: true
+          name: 'pipeline3'
         },
         {
-          name: 'pipeline1',
-          active: true
+          name: 'pipeline1'
         },
         {
-          name: 'pipeline2',
-          active: false
-        }]
+          name: 'pipeline2'
+        }],
+        settings: {
+          disabledPipelines: [],
+          sortOrder: {
+            name: 'buildtime',
+            label: ''
+          }
+        }
       }
       let configurationComponent = new Configuration(props);
 

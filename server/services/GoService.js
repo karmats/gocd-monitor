@@ -1,8 +1,8 @@
 import rp from 'request-promise';
-import * as conf from '../../app-config';
 import { parseString } from 'xml2js';
-import Logger from '../utils/Logger';
 
+import Logger from '../utils/Logger';
+import * as conf from '../../app-config';
 import Service from './Service';
 
 
@@ -30,7 +30,7 @@ export default class GoService extends Service {
             this.pipelines = currentPipelines;
             Logger.debug(`Emitting ${this.pipelines.length} pipelines to ${this.clients.length} clients`);
             this.clients.forEach((client) => {
-              client.emit('pipelines:update', this.pipelines);
+              client.emit('pipelines:updated', this.pipelines);
             })
           }
         });
