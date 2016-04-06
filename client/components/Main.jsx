@@ -151,8 +151,10 @@ export default class Main extends React.Component {
   /**
    * Sort pipelines by date and filter out pipelines without data
    * 
-   * @param   {Array} pipelines The pipelines to sort
-   * @return  {Array} Sorted pipelines
+   * @param   {Array}   pipelines         The pipelines to sort
+   * @param   {Array}   disabledPipelines Pipelines that are disabled
+   * @param   {string}  sortOrder         The sort order, 'buildtime' or 'status'
+   * @return  {Array}   Sorted pipelines  
    */
   sortPipelines(pipelines, disabledPipelines, sortOrder) {
     const activePipelines = pipelines.filter(p => p && disabledPipelines.indexOf(p.name) < 0);

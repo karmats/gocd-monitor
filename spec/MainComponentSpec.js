@@ -33,17 +33,21 @@ describe('MainComponent spec', () => {
     const generatePipelines = () => {
       return [{
         name: 'pipeline1',
+        status: 'paused',
         buildtime: 1234
       }, {
         name: 'pipeline2',
+        status: 'passed',
         buildtime: 2345
       },
       {
         name: 'pipeline3',
+        status: 'building',
         buildtime: 1111
       },
       {
         name: 'pipeline4',
+        status: 'passed',
         buildtime: 2222
       }]
     };
@@ -64,6 +68,15 @@ describe('MainComponent spec', () => {
       let sortedPipelineNames = mainComponent.sortPipelines(pipelines, [], 'buildtime').map(p => p.name);
       expect(sortedPipelineNames).to.eql(['pipeline2', 'pipeline4', 'pipeline1', 'pipeline3']);
     });
+
+    it('should sort pipelines by status', () => {
+      let mainComponent = new Main();
+      let pipelines = generatePipelines();
+
+      let sortedPipelineNames = mainComponent.sortPipelines(pipelines, [], 'status').map(p => p.name);
+      expect(sortedPipelineNames).to.eql(['pipeline3', 'pipeline2', 'pipeline4', 'pipeline1']);
+    });
+
   });
 
 });
