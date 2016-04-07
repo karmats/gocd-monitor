@@ -16,16 +16,19 @@ export default class Configuration extends React.Component {
       pipelines: [],
       // Configurable sort order
       currentSortOrder: props.settings.sortOrder,
-      // Disabled pipelines
-      disabledPipelines: props.settings.disabledPipelines,
       // List of sort order options openened or not
       sortOrderListOpened: false
     }
   }
   
   componentDidMount() {
-    const disabledPipelines = this.state.disabledPipelines || [];
-    const pipelines = this.props.pipelines
+    this.setState({
+      pipelines: this.setupPipelines(this.props.pipelines, this.props.settings.disabledPipelines || [])
+    });
+  }
+
+  setupPipelines(pipelines, disabledPipelines) {
+    const sortedPipelines = this.props.pipelines
     .reduce((p, c) => {
       // Disabled pipelines are added later
       if (c && c.name && disabledPipelines.indexOf(c.name) < 0) {
@@ -36,9 +39,7 @@ export default class Configuration extends React.Component {
     .concat(disabledPipelines.map(dp => {
       return { name : dp, active: false } })
     );
-    this.setState({
-      pipelines: pipelines.sort((a,b) => a.name > b.name ? 1 : -1)
-    });
+    return sortedPipelines.sort((a,b) => a.name > b.name ? 1 : -1);
   }
 
   // Toggles a pipeline on/off

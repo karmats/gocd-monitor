@@ -5,8 +5,8 @@ import Configuration from '../client/components/Configuration';
 
 describe('ConfigurationComponent spec', () => {
 
-  describe('#componentDidMount()', () => {
-  
+  describe('#setupPipelines()', () => {
+
   const props = {
       pipelines : [{
         name: 'pipeline3'
@@ -28,21 +28,21 @@ describe('ConfigurationComponent spec', () => {
 
     it('should sort pipelines by name', () => {
       let configurationComponent = new Configuration(props);
-      configurationComponent.componentDidMount();
+      const pipelines = configurationComponent.setupPipelines(props.pipelines, props.settings.disabledPipelines);
 
-      expect(configurationComponent.state.pipelines).to.not.be.equal(props.pipelines);
-      expect(configurationComponent.state.pipelines[0].name).to.be.equal('pipeline1');
-      expect(configurationComponent.state.pipelines[1].name).to.be.equal('pipeline2');
-      expect(configurationComponent.state.pipelines[2].name).to.be.equal('pipeline3');
-      expect(configurationComponent.state.pipelines[3].name).to.be.equal('pipeline4');
+      expect(pipelines).to.not.be.equal(props.pipelines);
+      expect(pipelines[0].name).to.be.equal('pipeline1');
+      expect(pipelines[1].name).to.be.equal('pipeline2');
+      expect(pipelines[2].name).to.be.equal('pipeline3');
+      expect(pipelines[3].name).to.be.equal('pipeline4');
     });
 
     it('should set disabled pipelines to not active', () => {
       let configurationComponent = new Configuration(props);
-      configurationComponent.componentDidMount();
+      const pipelines = configurationComponent.setupPipelines(props.pipelines, props.settings.disabledPipelines);
 
-      expect(configurationComponent.state.pipelines[0].active).to.be.true;
-      expect(configurationComponent.state.pipelines[3].active).to.be.false;
+      expect(pipelines[0].active).to.be.true;
+      expect(pipelines[3].active).to.be.false;
     });
 
   });
