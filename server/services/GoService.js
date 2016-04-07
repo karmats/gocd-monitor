@@ -23,10 +23,12 @@ export default class GoService extends Service {
     // Function that refreshes all pipelines
     let refreshPipelines = (pipelineNames) => {
       let currentPipelines = [];
-      pipelineNames.forEach((name) => {
+      const pipelinesToIgnore = this.currentSettings.disabledPipelines;
+      const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
+      pipelinesToFetch.forEach((name) => {
         this.getPipelineHistory(name).then((pipeline) => {
           currentPipelines.push(pipeline);
-          if (currentPipelines.length === pipelineNames.length) {
+          if (currentPipelines.length === pipelinesToFetch.length) {
             this.pipelines = currentPipelines;
             Logger.debug(`Emitting ${this.pipelines.length} pipelines to ${this.clients.length} clients`);
             this.clients.forEach((client) => {
@@ -153,9 +155,6 @@ export default class GoService extends Service {
 
     // Counter id
     result.counter = latestPipelineResult.counter;
-
-    // FIXME DB
-    result.active = true;
 
     return result;
   }

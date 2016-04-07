@@ -7,7 +7,13 @@ export default class Service {
   constructor() {
     this.clients = [];
     this.pipelines = [];
+    // Init db and settings
     this.datastore = new Datastore({ filename: 'server/data.db', autoload: true });
+    this.datastore.findOne({}, (err, doc) => {
+      if (doc && doc.settings) {
+        this.currentSettings = doc.settings;
+      }
+    });
   }
 
   /**
@@ -18,11 +24,11 @@ export default class Service {
   registerClient(client) {
     // Add client if not in clients list
     if (!this.clients.some(c => client.id === c.id)) {
+
       // Emit latest pipelines and settings
       client.emit('pipelines:updated', this.pipelines);
-      this.datastore.findOne({}, (err, doc) => {
-        client.emit('settings:updated', doc && doc.settings ? doc.settings : {});
-      });
+      client.emit('settings:updated', this.currentSettings);
+
       // Register for setting updates
       client.on('settings:update', (settings) => {
         this.datastore.findOne({}, (err, doc) => {
@@ -31,13 +37,15 @@ export default class Service {
               Logger.debug('Settings updated');
               // Compact so file so only one settings object is saved
               this.datastore.persistence.compactDatafile();
+              this.currentSettings = settings;
             })
           } else {
             this.datastore.insert({ settings: settings}, (err) => {
               Logger.debug('Settings saved');
             });
           }
-        })
+        });
+
         // Notify other clients about the update
         this.clients.forEach((client) => {
           client.emit('settings:updated', settings);

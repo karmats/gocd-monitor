@@ -5,7 +5,7 @@ import Configuration from '../client/components/Configuration';
 
 describe('ConfigurationComponent spec', () => {
 
-  describe('#constructor()', () => {
+  describe('#componentDidMount()', () => {
   
   const props = {
       pipelines : [{
@@ -28,6 +28,7 @@ describe('ConfigurationComponent spec', () => {
 
     it('should sort pipelines by name', () => {
       let configurationComponent = new Configuration(props);
+      configurationComponent.componentDidMount();
 
       expect(configurationComponent.state.pipelines).to.not.be.equal(props.pipelines);
       expect(configurationComponent.state.pipelines[0].name).to.be.equal('pipeline1');
@@ -38,6 +39,7 @@ describe('ConfigurationComponent spec', () => {
 
     it('should set disabled pipelines to not active', () => {
       let configurationComponent = new Configuration(props);
+      configurationComponent.componentDidMount();
 
       expect(configurationComponent.state.pipelines[0].active).to.be.true;
       expect(configurationComponent.state.pipelines[3].active).to.be.false;

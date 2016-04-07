@@ -6,7 +6,7 @@ import React from 'react';
 
 import io from 'socket.io-client';
 
-import { Dialog, FlatButton, FloatingActionButton } from 'material-ui/lib';
+import { Dialog, FlatButton, FloatingActionButton, Snackbar } from 'material-ui/lib';
 import Settings from 'material-ui/lib/svg-icons/action/settings';
 import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
 import Colors from 'material-ui/lib/styles/colors';
@@ -63,7 +63,10 @@ export default class Main extends React.Component {
         sortOrder: sortOrders[0]
       },
       // If settings dialog open or not
-      settingsDialogOpened: false
+      settingsDialogOpened: false,
+      // Snackbar message
+      showMessage: false,
+      message: ''
     };
   }
 
@@ -94,7 +97,11 @@ export default class Main extends React.Component {
       sortOrder: settings.sortOrder.name,
       disabledPipelines: settings.disabledPipelines
     });
-    this.closeSettings();
+    this.setState({
+      settingsDialogOpened: false,
+      showMessage: true,
+      message: 'Settings saved'
+    });
   }
 
   closeSettings() {
@@ -157,7 +164,7 @@ export default class Main extends React.Component {
    * @return  {Array}   Sorted pipelines  
    */
   sortPipelines(pipelines, disabledPipelines, sortOrder) {
-    const activePipelines = pipelines.filter(p => p && disabledPipelines.indexOf(p.name) < 0);
+    const activePipelines = pipelines.filter(p => p && p.name && disabledPipelines.indexOf(p.name) < 0);
     const sortByBuildTime = (a, b) => {
       return a.buildtime > b.buildtime ? -1 : 1;
     };
@@ -170,6 +177,13 @@ export default class Main extends React.Component {
       const paused = activePipelines.filter(p => p.status === 'paused').sort(sortByBuildTime);
       return building.concat(failed, passed, paused);
     }
+  }
+
+  closeSnackbar() {
+    this.setState({
+      showMessage : false,
+      message: ''
+    });
   }
 
   render() {
@@ -198,7 +212,7 @@ export default class Main extends React.Component {
     ];
 
     let pipelineCards = this.state.pipelines.map((pipeline) => {
-      if (pipeline && pipeline.active) {
+      if (pipeline && this.state.settings.disabledPipelines.indexOf(pipeline.name) < 0) {
         return (
           <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
             <Pipeline pipeline={pipeline} />
@@ -218,9 +232,16 @@ export default class Main extends React.Component {
             title="Configuration"
             actions={settingsActions}
             autoScrollBodyContent={true}
+            autoDetectWindowHeight={true}
             onRequestClose={this.closeSettings.bind(this)}>
             <Configuration pipelines={this.state.pipelines} settings={this.state.settings} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} />
           </Dialog>
+          <Snackbar
+            open={this.state.showMessage}
+            message={this.state.message}
+            autoHideDuration={3000}
+            onRequestClose={this.closeSnackbar.bind(this)}
+          />
           {settingsBtn}
         </div>
       </MuiThemeProvider>
