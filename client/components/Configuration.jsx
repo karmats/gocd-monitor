@@ -13,14 +13,14 @@ export default class Configuration extends React.Component {
 
     this.state = {
       // Sort filterable pipelines by name
-      pipelines: [],
+      pipelines: this.setupPipelines(props.pipelines, props.settings.disabledPipelines),
       // Configurable sort order
       currentSortOrder: props.settings.sortOrder,
       // List of sort order options openened or not
       sortOrderListOpened: false
     }
   }
-  
+
   componentDidMount() {
     this.setState({
       pipelines: this.setupPipelines(this.props.pipelines, this.props.settings.disabledPipelines || [])

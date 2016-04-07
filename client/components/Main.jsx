@@ -100,7 +100,7 @@ export default class Main extends React.Component {
     this.setState({
       settingsDialogOpened: false,
       showMessage: true,
-      message: 'Settings saved'
+      message: 'Settings saved. If you activated pipelines hold your breath for a minute, it will show up :)'
     });
   }
 
@@ -171,11 +171,21 @@ export default class Main extends React.Component {
     if (sortOrder === 'buildtime') {
       return activePipelines.sort(sortByBuildTime);
     } else {
-      const building = activePipelines.filter(p => p.status === 'building').sort(sortByBuildTime);
-      const failed = activePipelines.filter(p => p.status === 'failed').sort(sortByBuildTime);
-      const passed = activePipelines.filter(p => p.status === 'passed').sort(sortByBuildTime);
-      const paused = activePipelines.filter(p => p.status === 'paused').sort(sortByBuildTime);
-      return building.concat(failed, passed, paused);
+      return activePipelines.sort((a, b) => {
+        if (a.status === b.status) {
+          return sortByBuildTime(a, b);
+        }
+        switch(a.status) {
+          case 'building':
+            return -1;
+          case 'failed':
+            return b.status === 'building' ? 1 : -1;
+          case 'passed':
+            return b.status === 'building' || b.status === 'failed' ? 1 : -1;
+          default:
+            return b.status !== 'paused' ? 1 : -1;
+        }
+      });
     }
   }
 
@@ -212,7 +222,7 @@ export default class Main extends React.Component {
     ];
 
     let pipelineCards = this.state.pipelines.map((pipeline) => {
-      if (pipeline && this.state.settings.disabledPipelines.indexOf(pipeline.name) < 0) {
+      if (pipeline) {
         return (
           <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
             <Pipeline pipeline={pipeline} />
@@ -232,14 +242,13 @@ export default class Main extends React.Component {
             title="Configuration"
             actions={settingsActions}
             autoScrollBodyContent={true}
-            autoDetectWindowHeight={true}
             onRequestClose={this.closeSettings.bind(this)}>
             <Configuration pipelines={this.state.pipelines} settings={this.state.settings} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} />
           </Dialog>
           <Snackbar
             open={this.state.showMessage}
             message={this.state.message}
-            autoHideDuration={3000}
+            autoHideDuration={5000}
             onRequestClose={this.closeSnackbar.bind(this)}
           />
           {settingsBtn}
