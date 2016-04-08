@@ -7,6 +7,7 @@ export default class Service {
   constructor() {
     this.clients = [];
     this.pipelines = [];
+    this.pipelineNames = [];
     // Init db and settings
     this.datastore = new Datastore({ filename: 'server/data.db', autoload: true });
     this.datastore.findOne({}, (err, doc) => {
@@ -25,7 +26,8 @@ export default class Service {
     // Add client if not in clients list
     if (!this.clients.some(c => client.id === c.id)) {
 
-      // Emit latest pipelines and settings
+      // Emit latest pipelines, pipeline names and settings
+      client.emit('pipelines:names', this.pipelineNames);
       client.emit('pipelines:updated', this.pipelines);
       client.emit('settings:updated', this.currentSettings);
 
@@ -37,7 +39,6 @@ export default class Service {
               Logger.debug('Settings updated');
               // Compact so file so only one settings object is saved
               this.datastore.persistence.compactDatafile();
-              this.currentSettings = settings;
             })
           } else {
             this.datastore.insert({ settings: settings}, (err) => {
@@ -45,11 +46,10 @@ export default class Service {
             });
           }
         });
+        this.currentSettings = settings;
 
         // Notify other clients about the update
-        this.clients.forEach((client) => {
-          client.emit('settings:updated', settings);
-        });
+        this.notifyAllClients('settings:updated', settings);
       });
 
       this.clients.push(client);
@@ -65,4 +65,15 @@ export default class Service {
     this.clients = this.clients.filter(c => client.id !== c.id);
   }
 
+  /**
+   * Emits an event to all registered clients
+   * 
+   * @param {string}  event   Name of the event
+   * @param {Object}  data    The data to send
+   */
+  notifyAllClients(event, data) {
+    this.clients.forEach((client) => {
+      client.emit(event, data);
+    });
+  }
 }

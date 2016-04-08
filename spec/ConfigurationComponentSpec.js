@@ -8,21 +8,15 @@ describe('ConfigurationComponent spec', () => {
   describe('#constructor()', () => {
 
   const props = {
-      pipelines : [{
-        name: 'pipeline3'
-      },
-      {
-        name: 'pipeline1'
-      },
-      {
-        name: 'pipeline2'
-      }],
-      settings: {
-        disabledPipelines: ['pipeline4'],
-        sortOrder: {
-          name: 'buildtime',
-          label: ''
-        }
+      pipelines : [
+        'pipeline3',
+        'pipeline1',
+        'pipeline4',
+        'pipeline2'],
+      disabledPipelines: ['pipeline4'],
+      sortOrder: {
+        name: 'buildtime',
+        label: ''
       }
     }
 

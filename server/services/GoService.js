@@ -14,6 +14,7 @@ export default class GoService extends Service {
     this.user = conf.goUser;
     this.password = conf.goPassword;
     this.pollingInterval = conf.goPollingInterval*1000;
+    this.checkPipelinesInterval = 24*60*60*1000;
   }
 
   /**
@@ -30,24 +31,38 @@ export default class GoService extends Service {
           currentPipelines.push(pipeline);
           if (currentPipelines.length === pipelinesToFetch.length) {
             this.pipelines = currentPipelines;
-            Logger.debug(`Emitting ${this.pipelines.length} pipelines to ${this.clients.length} clients`);
-            this.clients.forEach((client) => {
-              client.emit('pipelines:updated', this.pipelines);
-            })
+            Logger.debug(`Emitting ${currentPipelines.length} pipelines to ${this.clients.length} clients`);
+            this.notifyAllClients('pipelines:updated', currentPipelines);
           }
         });
       });
     };
 
-    // Fetch the pipelines and start polling pipeline history
-    this.getAllPipelines()
-      .then((pipelineNames) => {
-        refreshPipelines(pipelineNames);
-        setInterval(refreshPipelines, this.pollingInterval, pipelineNames);
-      })
-      .catch((err) => {
-        Logger.error(err);
-      });
+    let pollId;
+    let refreshPipelinesAndPollForUpdates = () => {
+      Logger.info('Retrieving pipeline names');
+      // Cancel current poll and start over
+      if (pollId) {
+        clearInterval(pollId);
+      }
+      // Fetch the pipelines and start polling pipeline history
+      this.getAllPipelines()
+        .then((pipelineNames) => {
+          this.pipelineNames = pipelineNames;
+          this.notifyAllClients('pipelines:names', pipelineNames);
+          refreshPipelines(pipelineNames);
+          pollId = setInterval(refreshPipelines, this.pollingInterval, pipelineNames);
+        })
+        .catch((err) => {
+          Logger.error('Failed to retrieve pipeline names, retrying');
+          Logger.error(err);
+          refreshPipelinesAndPollForUpdates();
+        });
+    };
+    // Refresh pipeline names and poll every day for new
+    refreshPipelinesAndPollForUpdates();
+    setInterval(refreshPipelinesAndPollForUpdates, this.checkPipelinesInterval);
+
   }
 
   /**
