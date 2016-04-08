@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/karmats/gocd-monitor.svg?branch=master)](https://travis-ci.org/karmats/gocd-monitor)
 [![Dependencies](https://david-dm.org/karmats/gocd-monitor.svg)](https://david-dm.org/karmats/gocd-monitor)
+[![Code Climate](https://codeclimate.com/github/karmats/gocd-monitor/badges/gpa.svg)](https://codeclimate.com/github/karmats/gocd-monitor)
 
 # Go cd monitor
 Build monitor for Go cd build server https://www.go.cd/
@@ -33,8 +34,14 @@ Go to `http://localhost:3000`
 
 Enjoy :)
 
+## Configuration
+Go to `http://localhost:3000?admin` and click the settings button in the bottom-right corner to open the configuration dialog.
+* Sort Order - Sort pipelines by status or latest build time
+* Filter Pipelines - Disable/enable pipelines to retrieve from go server
+![Configuration img](https://github.com/karmats/gocd-monitor/blob/gh-pages/images/configuration.png?raw=true)
+
 ## How it works
-The server polls your defined go server every `goPollingInterval` seconds. The results are then reported to the client using [socket.io](http://socket.io/).
+The server polls your defined go server every `goPollingInterval` seconds. The results are then reported to the client using [socket.io](http://socket.io/). The pipelines are refreshed once every day.
 
 ## Development
 To run the application in development mode, open a terminal and enter `npm run dev-start`. The server and client will be rebuilt when a js or jsx-file changes.

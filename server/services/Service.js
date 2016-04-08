@@ -13,6 +13,10 @@ export default class Service {
     this.datastore.findOne({}, (err, doc) => {
       if (doc && doc.settings) {
         this.currentSettings = doc.settings;
+      } else {
+        this.currentSettings = {
+          disabledPipelines: []
+        }
       }
     });
   }

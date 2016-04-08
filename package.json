@@ -8,7 +8,7 @@
     "start": "webpack --config webpack.config.production.js && cross-env NODE_ENV=production npm run start-server",
     "lint": "eslint server/**/*.js client/**/*.jsx",
     "start-server": "babel-node ./bin/appServer",
-    "dev-start": "babel-node ./bin/devServer & nodemon --exec \"npm run lint && npm run start-server\" --ignore assets/js",
+    "dev-start": "babel-node ./bin/devServer & nodemon --exec \"npm run lint && npm run start-server\" --ignore assets/js --ignore server/data.db",
     "add-flexbox": "cp node_modules/flexboxgrid/css/index.min.css assets/stylesheets/flexbox.css",
     "add-roboto-font": "cp node_modules/roboto-font/fonts/Roboto/* assets/fonts",
     "add-material-icons": "cp node_modules/mdi/css/materialdesignicons.min.css assets/stylesheets/materialdesignicons.css && cp node_modules/mdi/fonts/* assets/fonts"

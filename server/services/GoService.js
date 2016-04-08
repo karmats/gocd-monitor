@@ -82,6 +82,10 @@ export default class GoService extends Service {
         let pipelines = [];
         // Parse response xml
         parseString(res, (err, parsed) => {
+          if (err) {
+            Logger.error('Failed to parse pipelines.xml, shutting down');
+            process.exit(1);
+          }
           // pipline xml in format <baseUrl>/pipelines/<name>/stages.xml
           pipelines = parsed.pipelines.pipeline.map(p => p.$.href.match(/go\/api\/pipelines\/(.*)\/stages.xml/)[1]);
         });

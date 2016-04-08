@@ -16,25 +16,19 @@ import Pipeline from './Pipeline';
 import Configuration from './Configuration';
 
 
-// FIXME: Break out to style.css
+const muiTheme = getMuiTheme({
+  palette: {
+    accent1Color: Colors.purple700
+  }
+});
+
 const styles = {
-  container: {
-    textAlign: 'left',
-    padding: 20,
-    color: '#fff'
-  },
   fab: {
     position: 'fixed',
     right: 50,
     bottom: 50
   }
 };
-
-const muiTheme = getMuiTheme({
-  palette: {
-    accent1Color: Colors.purple700
-  }
-});
 
 // Sort by latest build time or pipeline status. Status is sorted by building, failed, passed and paused
 const sortOrders = [{
@@ -204,7 +198,8 @@ export default class Main extends React.Component {
     const adminMode = window.location.search.indexOf('admin') >= 0;
 
     const settingsBtn = adminMode ? (
-      <FloatingActionButton style={styles.fab}
+      <FloatingActionButton
+        style={styles.fab}
         primary={true}
         onTouchTap={this.openSettings.bind(this)}>
         <Settings />
@@ -236,7 +231,7 @@ export default class Main extends React.Component {
 
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
-        <div style={styles.container}>
+        <div className="appcontainer">
           <div className="row">
             {pipelineCards}
           </div>

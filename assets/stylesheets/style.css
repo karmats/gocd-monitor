@@ -103,6 +103,12 @@ a {
   color: #00B7FF;
 }
 
+div.appcontainer {
+  text-align: left;
+  padding: 20px;
+  color: #fff;
+}
+
 div.buildtitle > div {
   width: 80%;
 }
@@ -112,7 +118,8 @@ div.buildtitle span {
   overflow: hidden;
 }
 
-i.buildstatus {
+.buildstatus {
+  color: #fff;
   float: right;
   margin-top: -5px;
   margin-right: -5px;
