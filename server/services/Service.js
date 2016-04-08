@@ -1,8 +1,24 @@
+import Datastore from 'nedb';
+
+import Logger from '../utils/Logger';
+
 export default class Service {
 
   constructor() {
     this.clients = [];
     this.pipelines = [];
+    this.pipelineNames = [];
+    // Init db and settings
+    this.datastore = new Datastore({ filename: 'server/data.db', autoload: true });
+    this.datastore.findOne({}, (err, doc) => {
+      if (doc && doc.settings) {
+        this.currentSettings = doc.settings;
+      } else {
+        this.currentSettings = {
+          disabledPipelines: []
+        }
+      }
+    });
   }
 
   /**
@@ -13,8 +29,33 @@ export default class Service {
   registerClient(client) {
     // Add client if not in clients list
     if (!this.clients.some(c => client.id === c.id)) {
-      // Emit latest pipeline result
-      client.emit('pipelines:update', this.pipelines);
+
+      // Emit latest pipelines, pipeline names and settings
+      client.emit('pipelines:names', this.pipelineNames);
+      client.emit('pipelines:updated', this.pipelines);
+      client.emit('settings:updated', this.currentSettings);
+
+      // Register for setting updates
+      client.on('settings:update', (settings) => {
+        this.datastore.findOne({}, (err, doc) => {
+          if (doc && doc.settings) {
+            this.datastore.update({ _id: doc._id }, { $set : { settings : settings  } }, {}, (err) => {
+              Logger.debug('Settings updated');
+              // Compact so file so only one settings object is saved
+              this.datastore.persistence.compactDatafile();
+            })
+          } else {
+            this.datastore.insert({ settings: settings}, (err) => {
+              Logger.debug('Settings saved');
+            });
+          }
+        });
+        this.currentSettings = settings;
+
+        // Notify other clients about the update
+        this.notifyAllClients('settings:updated', settings);
+      });
+
       this.clients.push(client);
     }
   }
@@ -28,4 +69,15 @@ export default class Service {
     this.clients = this.clients.filter(c => client.id !== c.id);
   }
 
+  /**
+   * Emits an event to all registered clients
+   * 
+   * @param {string}  event   Name of the event
+   * @param {Object}  data    The data to send
+   */
+  notifyAllClients(event, data) {
+    this.clients.forEach((client) => {
+      client.emit(event, data);
+    });
+  }
 }

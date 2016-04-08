@@ -25,6 +25,13 @@ describe('GoService spec', () => {
     mockery.registerMock('request-promise', (options) => {
       return mockedRequestPromise;
     });
+    // DB mock
+    mockery.registerMock('nedb', () => { 
+      return {
+        findOne: () => {
+        }
+      }
+    });
 
     // Init GoService
     GoService = require('../server/services/GoService').default;
@@ -112,7 +119,7 @@ describe('GoService spec', () => {
       let goService = new GoService();
       expect(goService.clients).to.have.lengthOf(0);
 
-      goService.registerClient({ id: 'client1', emit: (event, data) => { } });
+      goService.registerClient({ id: 'client1', on: () => { }, emit: () => { } });
       expect(goService.clients).to.have.lengthOf(1);
 
       done();
@@ -120,7 +127,7 @@ describe('GoService spec', () => {
 
     it('should not register client if client is already registered', (done) => {
       let goService = new GoService();
-      let client = { id: 'client1', emit: (event, data) => { } };
+      let client = { id: 'client1', on: () => { }, emit: () => { } };
 
       goService.registerClient(client);
       expect(goService.clients).to.have.lengthOf(1);
@@ -132,7 +139,7 @@ describe('GoService spec', () => {
 
     it('should unregister a client', (done) => {
       let goService = new GoService();
-      let client = { id: 'client1', emit: (event, data) => { } };
+      let client = { id: 'client1', on: () => { }, emit: () => { } };
 
       goService.registerClient(client);
       expect(goService.clients).to.have.lengthOf(1);
@@ -145,7 +152,7 @@ describe('GoService spec', () => {
 
     it('should not affect client list if a client that does not exists is unregistered', (done) => {
       let goService = new GoService();
-      let client = { id: 'client1', emit: (event, data) => { } };
+      let client = { id: 'client1', on: () => { }, emit: () => { } };
 
       expect(goService.clients).to.have.lengthOf(0);
       goService.unregisterClient(client);

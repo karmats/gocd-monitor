@@ -13,7 +13,6 @@ import Moment from 'moment';
 // Weather icon indicator
 const weatherIconStatuses = ['sunny', 'partlycloudy', 'cloudy', 'cloudy', 'pouring', 'lightning'];
 
-// FIXME: Break out to style.css
 const styles = {
   cardSuccess: {
     background: Colors.greenA700,

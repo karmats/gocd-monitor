@@ -37,3 +37,5 @@ assets/js/*
 assets/fonts
 assets/stylesheets
 !style.css
+.eslintrc
+*.db

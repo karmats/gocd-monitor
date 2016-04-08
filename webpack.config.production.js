@@ -5,7 +5,7 @@ var conf = require('./app-config');
 module.exports = {
     entry: './client/app.jsx',
     output: {
-        path: __dirname + '/assets/js',
+        path: path.join(__dirname, '/assets/js'),
         filename: conf.jsFilename
     },
     module: {
@@ -23,6 +23,6 @@ module.exports = {
     plugins: [
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.optimize.UglifyJsPlugin({ mangle: false, sourcemap: false }),
+        new webpack.optimize.UglifyJsPlugin({ mangle: false, sourcemap: false })
     ]
 }

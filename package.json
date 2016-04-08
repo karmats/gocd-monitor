@@ -6,9 +6,9 @@
     "test": "mocha spec/ --compilers js:node_modules/babel-core/register --timeout 15000",
     "prestart": "mkdirp assets/fonts && mkdirp assets/js && npm run add-flexbox && npm run add-roboto-font && npm run add-material-icons",
     "start": "webpack --config webpack.config.production.js && cross-env NODE_ENV=production npm run start-server",
-    "lint": "eslint server/app.js",
+    "lint": "eslint server/**/*.js client/**/*.jsx",
     "start-server": "babel-node ./bin/appServer",
-    "dev-start": "babel-node ./bin/devServer & nodemon --exec \"npm run lint && npm run start-server\" --ignore assets/js",
+    "dev-start": "babel-node ./bin/devServer & nodemon --exec \"npm run lint && npm run start-server\" --ignore assets/js --ignore server/data.db",
     "add-flexbox": "cp node_modules/flexboxgrid/css/index.min.css assets/stylesheets/flexbox.css",
     "add-roboto-font": "cp node_modules/roboto-font/fonts/Roboto/* assets/fonts",
     "add-material-icons": "cp node_modules/mdi/css/materialdesignicons.min.css assets/stylesheets/materialdesignicons.css && cp node_modules/mdi/fonts/* assets/fonts"
@@ -20,6 +20,7 @@
     "material-ui": "^0.14.4",
     "mdi": "^1.4.57",
     "moment": "^2.11.2",
+    "nedb": "^1.8.0",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
     "react-tap-event-plugin": "^0.2.2",
@@ -39,6 +40,10 @@
     "rules": {
       "vars-on-top": 2,
       "no-undef": 2
+    },
+    "globals": {
+      "window": true,
+      "document": true
     }
   },
   "devDependencies": {
