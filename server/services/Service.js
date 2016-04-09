@@ -11,11 +11,14 @@ export default class Service {
     // Init db and settings
     this.datastore = new Datastore({ filename: 'server/data.db', autoload: true });
     this.datastore.findOne({}, (err, doc) => {
-      if (doc && doc.settings) {
+      if (doc && doc.settings && !err) {
         this.currentSettings = doc.settings;
       } else {
         this.currentSettings = {
           disabledPipelines: []
+        }
+        if (err) {
+          Logger.error('Failed to load datastore');
         }
       }
     });
@@ -39,15 +42,25 @@ export default class Service {
       client.on('settings:update', (settings) => {
         this.datastore.findOne({}, (err, doc) => {
           if (doc && doc.settings) {
-            this.datastore.update({ _id: doc._id }, { $set : { settings : settings  } }, {}, (err) => {
-              Logger.debug('Settings updated');
-              // Compact so file so only one settings object is saved
-              this.datastore.persistence.compactDatafile();
+            this.datastore.update({ _id: doc._id }, { $set : { settings : settings  } }, {}, (updErr) => {
+              if (!updErr) {
+                Logger.debug('Settings updated');
+                // Compact so file so only one settings object is saved
+                this.datastore.persistence.compactDatafile();
+              } else {
+                Logger.error('Failed to update settings');
+              }
             })
-          } else {
-            this.datastore.insert({ settings: settings}, (err) => {
-              Logger.debug('Settings saved');
+          } else if (!err) {
+            this.datastore.insert({ settings: settings}, (insErr) => {
+              if (!insErr) {
+                Logger.debug('Settings saved');
+              } else {
+                Logger.error('Failed to save settings');
+              }
             });
+          } else {
+            Logger.error('Failed to find settings');
           }
         });
         this.currentSettings = settings;

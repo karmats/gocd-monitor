@@ -55,8 +55,8 @@ export default class GoService extends Service {
         })
         .catch((err) => {
           Logger.error('Failed to retrieve pipeline names, retrying');
-          Logger.error(err);
-          refreshPipelinesAndPollForUpdates();
+          // Wait a second before trying again
+          setTimeout(refreshPipelinesAndPollForUpdates, 1000);
         });
     };
     // Refresh pipeline names and poll every day for new
@@ -84,7 +84,7 @@ export default class GoService extends Service {
         parseString(res, (err, parsed) => {
           if (err) {
             Logger.error('Failed to parse pipelines.xml, shutting down');
-            process.exit(1);
+            throw err;
           }
           // pipline xml in format <baseUrl>/pipelines/<name>/stages.xml
           pipelines = parsed.pipelines.pipeline.map(p => p.$.href.match(/go\/api\/pipelines\/(.*)\/stages.xml/)[1]);
