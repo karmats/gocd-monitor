@@ -11,7 +11,7 @@ export default class Service {
     // Init db and settings
     this.datastore = new Datastore({ filename: 'server/data.db', autoload: true });
     this.datastore.findOne({}, (err, doc) => {
-      if (doc && doc.settings && !err) {
+      if (doc && doc.settings && !err) {
         this.currentSettings = doc.settings;
       } else {
         this.currentSettings = {

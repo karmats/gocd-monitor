@@ -55,6 +55,7 @@ export default class GoService extends Service {
         })
         .catch((err) => {
           Logger.error('Failed to retrieve pipeline names, retrying');
+          Logger.error(err);
           // Wait a second before trying again
           setTimeout(refreshPipelinesAndPollForUpdates, 1000);
         });
