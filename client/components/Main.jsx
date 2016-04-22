@@ -165,22 +165,37 @@ export default class Main extends React.Component {
     const sortByBuildTime = (a, b) => {
       return a.buildtime > b.buildtime ? -1 : 1;
     };
+    let pipelineStatus = (pipeline) => {
+      if (pipeline.paused) {
+        return 'paused';
+      } else if (pipeline.stageResults.some(result => result.status === 'building')) {
+        return 'building';
+      } else if (pipeline.stageResults.some(result => result.status === 'failed')) {
+        return 'failed';
+      } else {
+        return 'passed';
+      }
+    }
+
     if (sortOrder === 'buildtime') {
       return activePipelines.sort(sortByBuildTime);
     } else {
       return activePipelines.sort((a, b) => {
-        if (a.status === b.status) {
+        let aStatus = pipelineStatus(a);
+        let bStatus = pipelineStatus(b);
+
+        if (aStatus === bStatus) {
           return sortByBuildTime(a, b);
         }
-        switch(a.status) {
+        switch(aStatus) {
           case 'building':
             return -1;
           case 'failed':
-            return b.status === 'building' ? 1 : -1;
+            return bStatus === 'building' ? 1 : -1;
           case 'passed':
-            return b.status === 'building' || b.status === 'failed' ? 1 : -1;
+            return bStatus === 'building' || bStatus === 'failed' ? 1 : -1;
           default:
-            return b.status !== 'paused' ? 1 : -1;
+            return bStatus !== 'paused' ? 1 : -1;
         }
       });
     }

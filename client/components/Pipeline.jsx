@@ -59,13 +59,28 @@ export default class Pipeline extends React.Component {
     return weatherIconStatuses[pipeline.health];
   }
 
+  status(pipeline) {
+    if (pipeline.paused) {
+      return 'paused';
+    } else if (pipeline.stageResults.some(result => result.status === 'building')) {
+      return 'building';
+    } else if (pipeline.stageResults.some(result => result.status === 'failed')) {
+      return 'failed';
+    } else {
+      return 'passed';
+    }
+  }
+
   render() {
     let pipeline = this.props.pipeline;
-    let progress = pipeline.status === 'building' ?  (
+    let status = this.status(pipeline);
+
+    let progress = status === 'building' ?  (
       <div className='col-xs-6'><CircularProgress className="progress" color="#fff" size={0.5} /></div>)
       : null;
+
     let style = styles.cardActive;
-    switch (pipeline.status) {
+    switch (status) {
       case 'failed':
         style = styles.cardFailure;
         break;
@@ -82,13 +97,13 @@ export default class Pipeline extends React.Component {
           className="buildtitle"
           title={pipeline.name}
           titleStyle={styles.cardTitle}
-          subtitle={pipeline.status}
+          subtitle={status}
           subtitleStyle={styles.cardSubTitle}>
           <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
         </CardHeader>
         <CardText>
           <div className="buildinfo">
-            <div className={pipeline.status === 'building' ? 'col-xs-6' : 'col-xs-12'}>
+            <div className={status === 'building' ? 'col-xs-6' : 'col-xs-12'}>
               <p>
                 <i className="mdi mdi-clock mdi-24px"></i>
                 <span>{ Moment(pipeline.buildtime).fromNow() }</span>
