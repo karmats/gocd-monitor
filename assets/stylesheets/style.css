@@ -138,10 +138,17 @@ div.buildinfo .progress {
   color: #fff;
 }
 div.buildinfo > div > p {
+  min-height: 27px;
   margin: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
+div.buildinfo p.right {
+  text-align: right;
+}
+div.buildinfo p.right > i {
+  vertical-align: middle;
 }
 div.buildinfo span {
   padding-left: 10px;

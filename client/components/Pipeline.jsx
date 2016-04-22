@@ -59,6 +59,32 @@ export default class Pipeline extends React.Component {
     return weatherIconStatuses[pipeline.health];
   }
 
+  /**
+   * Calculates icon for stage visualization.
+   * 
+   * @param   {Object}  stage   Stage with name and status
+   * @return  {string}  Material design icon classname
+   */
+  stageIcon(stage) {
+    switch(stage.status) {
+      case 'building':
+        return 'play-circle';
+      case 'unknown':
+        return 'checkbox-blank-circle-outline';
+      case 'failed':
+      case 'cancelled':
+        return 'close-circle';
+      default:
+        return 'checkbox-blank-circle';
+    }
+  }
+
+  /**
+   * Calculate what status a pipeline has
+   * 
+   * @param   {Object}  pipeline  The pipeline to calculate status for
+   * @return  {string}  Status paused, building, failed or passed
+   */
   status(pipeline) {
     if (pipeline.paused) {
       return 'paused';
@@ -71,13 +97,30 @@ export default class Pipeline extends React.Component {
     }
   }
 
+
   render() {
     let pipeline = this.props.pipeline;
     let status = this.status(pipeline);
 
-    let progress = status === 'building' ?  (
-      <div className='col-xs-6'><CircularProgress className="progress" color="#fff" size={0.5} /></div>)
-      : null;
+    let stages = (
+      <div className='col-xs-6'>
+        <p className="right">
+          <span>{status === 'failed' ? 'Failed: ' + pipeline.stageResults.reduce((p, c) => {
+            if (c.status === 'failed') {
+              return c.name;
+            }
+            return p;
+          }, 'Unknown') : ' '}</span>
+        </p>
+        <p className="right">
+        {
+          pipeline.stageResults.map((stage) => {
+            return <i key={stage.name} className={'mdi mdi-' + this.stageIcon(stage)}></i>
+          })
+        }
+        </p>
+        
+      </div>);
 
     let style = styles.cardActive;
     switch (status) {
@@ -103,7 +146,7 @@ export default class Pipeline extends React.Component {
         </CardHeader>
         <CardText>
           <div className="buildinfo">
-            <div className={status === 'building' ? 'col-xs-6' : 'col-xs-12'}>
+            <div className="col-xs-6">
               <p>
                 <i className="mdi mdi-clock mdi-24px"></i>
                 <span>{ Moment(pipeline.buildtime).fromNow() }</span>
@@ -113,7 +156,7 @@ export default class Pipeline extends React.Component {
                 <span>{pipeline.author}</span>
               </p>
             </div>
-            {progress}
+            {stages}
           </div>
         </CardText>
       </Card>
