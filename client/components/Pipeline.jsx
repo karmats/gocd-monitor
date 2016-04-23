@@ -67,13 +67,12 @@ export default class Pipeline extends React.Component {
    */
   stageIcon(stage) {
     switch(stage.status) {
-      case 'building':
-        return 'play-circle';
       case 'unknown':
         return 'checkbox-blank-circle-outline';
       case 'failed':
-      case 'cancelled':
         return 'close-circle';
+      case 'cancelled':
+        return 'close-circle-outline';
       default:
         return 'checkbox-blank-circle';
     }
@@ -115,7 +114,16 @@ export default class Pipeline extends React.Component {
         <p className="right">
         {
           pipeline.stageResults.map((stage) => {
-            return <i key={stage.name} className={'mdi mdi-' + this.stageIcon(stage)}></i>
+            // Build in progress spinner
+            if (stage.status === 'building') {
+              return (<span key={stage.name} className="loader">
+                       <svg className="circular" viewBox="25 25 50 50">
+                         <circle className="path" cx="50" cy="50" r="20" fill="none" strokeWidth="4" strokeMiterlimit="10" />
+                       </svg>
+                     </span>);
+            } else {
+              return <i key={stage.name} className={'mdi mdi-' + this.stageIcon(stage)}></i>
+            }
           })
         }
         </p>
