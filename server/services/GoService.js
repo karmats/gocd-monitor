@@ -97,7 +97,25 @@ export default class GoService extends Service {
 
   /**
    * @param   {string}    name       Name of the pipeline
-   * @returns {Object}    Pipeline instance. Example { name : 'id, status : 'passed', buildtime : 1457085089646, author: 'Bobby Malone', counter: 255, health: 2] }
+   * @returns {Object}    Pipeline instance. 
+   * Example 
+   * { 
+   *    name : 'id,
+   *    buildtime : 1457085089646,
+   *    author: 'Bobby Malone',
+   *    counter: 255,
+   *    paused: false,
+   *    health: 2,
+   *    stageresults: [
+   *      {
+   *        name: 'Build',
+   *        status: 'passed'
+   *      },
+   *      {
+   *        name: 'Test',
+   *        status: 'building'
+   *      }] 
+   * }
    */
   getPipelineHistory(name) {
     let options = {
@@ -124,20 +142,25 @@ export default class GoService extends Service {
       return {};
     }
 
-    // Pipeline name
-    result.name = pipelines[0].name;
-
     // Latest pipeline result is where we will retrieve most data
     let latestPipelineResult = pipelines[0];
 
-    // Status
-    if (latestPipelineResult.stages.some(stage => stage.jobs.some(job => job.state === 'Scheduled' || job.state === 'Assigned' || job.state === 'Preparing' || job.state === 'Building' || job.state === 'Completing'))) {
-      result.status = 'building';
-    } else if (!latestPipelineResult.stages.some(stage => stage.can_run === true)) { // Pipeline is paused if last build stages can_run property is set to false
-      result.status = 'paused';
-    } else { // Else consider build as failed if any of the stages has failed
-      result.status = latestPipelineResult.stages.some(stage => stage.result === 'Failed') ? 'failed' : 'passed';
-    }
+    // Pipeline name
+    result.name = latestPipelineResult.name;
+
+    // Stage results
+    result.stageresults = latestPipelineResult.stages.map((stage) => {
+      let stageResult = { name: stage.name };
+      if (stage.jobs.some(job => job.state === 'Scheduled' || job.state === 'Assigned' || job.state === 'Preparing' || job.state === 'Building' || job.state === 'Completing')) {
+        stageResult.status = 'building';
+      } else {
+        stageResult.status = stage.result ? stage.result.toLowerCase() : 'unknown';
+      }
+      return stageResult;
+    });
+
+    // Pipeline is paused if none of the stagues can run and the pipeline isn't building
+    result.paused = !result.stageresults.some(stageResult => stageResult.status === 'building') && latestPipelineResult.stages.every((stage) => stage.can_run === false);
 
     // Health = number of pipelines failed
     result.health = pipelines.reduce((p, c) => {

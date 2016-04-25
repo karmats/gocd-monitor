@@ -29,4 +29,41 @@ describe('PipelineComponent spec', () => {
 
   });
 
+  describe('#status()', () => {
+
+    it('should be passed when all stage results has passed', () => {
+      let pipeline = {
+        stageresults: [{status: 'passed'}, {status: 'passed'}] 
+      };
+
+      expect(Pipeline.status(pipeline)).to.be.equal('passed');
+    });
+
+    it('should be paused when all pipeline is paused', () => {
+      let pipeline = {
+        paused: true,
+        stageresults: [{status: 'passed'}, {status: 'passed'}] 
+      };
+
+      expect(Pipeline.status(pipeline)).to.be.equal('paused');
+    });
+
+    it('should be failed when one stage has failed', () => {
+      let pipeline = {
+        stageresults: [{status: 'passed'}, {status: 'passed'}, {status: 'failed'}] 
+      };
+
+      expect(Pipeline.status(pipeline)).to.be.equal('failed');
+    });
+
+    it('should be building when one stage is building', () => {
+      let pipeline = {
+        stageresults: [{status: 'passed'}, {status: 'building'}, {status: 'unknown'}] 
+      };
+
+      expect(Pipeline.status(pipeline)).to.be.equal('building');
+    });
+
+  });
+
 });
