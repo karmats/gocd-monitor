@@ -33,22 +33,22 @@ describe('MainComponent spec', () => {
     const generatePipelines = () => {
       return [{
         name: 'pipeline1',
-        stageResults: [{status: 'passed'}, {status: 'cancelled'}],
+        stageresults: [{status: 'passed'}, {status: 'cancelled'}],
         paused: true,
         buildtime: 1234
       }, {
         name: 'pipeline2',
-        stageResults: [{status: 'passed'}, {status: 'passed'}, {status : 'failed'}],
+        stageresults: [{status: 'passed'}, {status: 'passed'}, {status : 'failed'}],
         buildtime: 2345
       },
       {
         name: 'pipeline3',
-        stageResults: [{status: 'passed'}, {status: 'building'}, {status: 'unknown'}],
+        stageresults: [{status: 'passed'}, {status: 'building'}, {status: 'unknown'}],
         buildtime: 1111
       },
       {
         name: 'pipeline4',
-        stageResults: [{status: 'passed'}, {status: 'passed'}],
+        stageresults: [{status: 'passed'}, {status: 'passed'}],
         buildtime: 2222
       }]
     };

@@ -84,12 +84,12 @@ export default class Pipeline extends React.Component {
    * @param   {Object}  pipeline  The pipeline to calculate status for
    * @return  {string}  Status paused, building, failed or passed
    */
-  status(pipeline) {
+  static status(pipeline) {
     if (pipeline.paused) {
       return 'paused';
-    } else if (pipeline.stageResults.some(result => result.status === 'building')) {
+    } else if (pipeline.stageresults.some(result => result.status === 'building')) {
       return 'building';
-    } else if (pipeline.stageResults.some(result => result.status === 'failed')) {
+    } else if (pipeline.stageresults.some(result => result.status === 'failed')) {
       return 'failed';
     } else {
       return 'passed';
@@ -99,21 +99,21 @@ export default class Pipeline extends React.Component {
 
   render() {
     let pipeline = this.props.pipeline;
-    let status = this.status(pipeline);
+    let status = Pipeline.status(pipeline);
 
     let stages = (
       <div className='col-xs-6'>
         <p className="right">
-          <span>{status === 'failed' ? 'Failed: ' + pipeline.stageResults.reduce((p, c) => {
-            if (c.status === 'failed') {
+          <span>{(status === 'failed' || status === 'building') ? pipeline.stageresults.reduce((p, c) => {
+            if (c.status === 'failed' || c.status === 'building') {
               return c.name;
             }
             return p;
-          }, 'Unknown') : ' '}</span>
+          }, ' ') : ' '}</span>
         </p>
         <p className="right">
         {
-          pipeline.stageResults.map((stage) => {
+          pipeline.stageresults.map((stage) => {
             // Build in progress spinner
             if (stage.status === 'building') {
               return (<span key={stage.name} className="loader">

@@ -165,24 +165,13 @@ export default class Main extends React.Component {
     const sortByBuildTime = (a, b) => {
       return a.buildtime > b.buildtime ? -1 : 1;
     };
-    let pipelineStatus = (pipeline) => {
-      if (pipeline.paused) {
-        return 'paused';
-      } else if (pipeline.stageResults.some(result => result.status === 'building')) {
-        return 'building';
-      } else if (pipeline.stageResults.some(result => result.status === 'failed')) {
-        return 'failed';
-      } else {
-        return 'passed';
-      }
-    }
 
     if (sortOrder === 'buildtime') {
       return activePipelines.sort(sortByBuildTime);
     } else {
       return activePipelines.sort((a, b) => {
-        let aStatus = pipelineStatus(a);
-        let bStatus = pipelineStatus(b);
+        let aStatus = Pipeline.status(a);
+        let bStatus = Pipeline.status(b);
 
         if (aStatus === bStatus) {
           return sortByBuildTime(a, b);

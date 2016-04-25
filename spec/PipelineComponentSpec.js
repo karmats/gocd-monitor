@@ -27,19 +27,41 @@ describe('PipelineComponent spec', () => {
       expect(pipelineComponent.weatherIcon(pipeline)).to.be.equal('lightning');
     });
 
-    it('should calculate status', () => {
-      let pipelineComponent = new Pipeline();
+  });
+
+  describe('#status()', () => {
+
+    it('should be passed when all stage results has passed', () => {
       let pipeline = {
-        stageResults: [{status: 'passed'}] 
+        stageresults: [{status: 'passed'}, {status: 'passed'}] 
       };
 
-      expect(pipelineComponent.status(pipeline)).to.be.equal('passed');
-      pipeline.stageResults.push( {status : 'building'} );
-      expect(pipelineComponent.status(pipeline)).to.be.equal('building');
-      pipeline.stageResults[1] = {status : 'failed'};
-      expect(pipelineComponent.status(pipeline)).to.be.equal('failed');
-      pipeline.paused = true;
-      expect(pipelineComponent.status(pipeline)).to.be.equal('paused');
+      expect(Pipeline.status(pipeline)).to.be.equal('passed');
+    });
+
+    it('should be paused when all pipeline is paused', () => {
+      let pipeline = {
+        paused: true,
+        stageresults: [{status: 'passed'}, {status: 'passed'}] 
+      };
+
+      expect(Pipeline.status(pipeline)).to.be.equal('paused');
+    });
+
+    it('should be failed when one stage has failed', () => {
+      let pipeline = {
+        stageresults: [{status: 'passed'}, {status: 'passed'}, {status: 'failed'}] 
+      };
+
+      expect(Pipeline.status(pipeline)).to.be.equal('failed');
+    });
+
+    it('should be building when one stage is building', () => {
+      let pipeline = {
+        stageresults: [{status: 'passed'}, {status: 'building'}, {status: 'unknown'}] 
+      };
+
+      expect(Pipeline.status(pipeline)).to.be.equal('building');
     });
 
   });

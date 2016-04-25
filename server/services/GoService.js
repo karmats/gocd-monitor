@@ -97,7 +97,25 @@ export default class GoService extends Service {
 
   /**
    * @param   {string}    name       Name of the pipeline
-   * @returns {Object}    Pipeline instance. Example { name : 'id, status : 'passed', buildtime : 1457085089646, author: 'Bobby Malone', counter: 255, health: 2] }
+   * @returns {Object}    Pipeline instance. 
+   * Example 
+   * { 
+   *    name : 'id,
+   *    buildtime : 1457085089646,
+   *    author: 'Bobby Malone',
+   *    counter: 255,
+   *    paused: false,
+   *    health: 2,
+   *    stageresults: [
+   *      {
+   *        name: 'Build',
+   *        status: 'passed'
+   *      },
+   *      {
+   *        name: 'Test',
+   *        status: 'building'
+   *      }] 
+   * }
    */
   getPipelineHistory(name) {
     let options = {
@@ -131,7 +149,7 @@ export default class GoService extends Service {
     result.name = latestPipelineResult.name;
 
     // Stage results
-    result.stageResults = latestPipelineResult.stages.map((stage) => {
+    result.stageresults = latestPipelineResult.stages.map((stage) => {
       let stageResult = { name: stage.name };
       if (stage.jobs.some(job => job.state === 'Scheduled' || job.state === 'Assigned' || job.state === 'Preparing' || job.state === 'Building' || job.state === 'Completing')) {
         stageResult.status = 'building';
@@ -142,7 +160,7 @@ export default class GoService extends Service {
     });
 
     // Pipeline is paused if none of the stagues can run and the pipeline isn't building
-    result.paused = !result.stageResults.some(result => result.status === 'building') && latestPipelineResult.stages.every((stage) => stage.can_run === false);
+    result.paused = !result.stageresults.some(stageResult => stageResult.status === 'building') && latestPipelineResult.stages.every((stage) => stage.can_run === false);
 
     // Health = number of pipelines failed
     result.health = pipelines.reduce((p, c) => {
