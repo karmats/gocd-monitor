@@ -4,9 +4,8 @@
 
 import React from 'react';
 
-import { CircularProgress } from 'material-ui/lib';
-import { Card, CardHeader, CardText } from 'material-ui/lib/card';
-import Colors from 'material-ui/lib/styles/colors';
+import { Card, CardHeader, CardText } from 'material-ui/Card';
+import * as Colors from 'material-ui/styles/colors';
 
 import Moment from 'moment';
 

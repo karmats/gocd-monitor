@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-import {Divider, DropDownMenu, List, ListItem, MenuItem, Popover, SelectField, Toggle} from 'material-ui/lib';
+import { Divider, List, ListItem, Popover, Subheader, Toggle } from 'material-ui';
 
 export default class Configuration extends React.Component {
 
@@ -77,7 +77,8 @@ export default class Configuration extends React.Component {
 
     let pipelines = 
     (
-      <List subheader="Filter Pipelines">
+      <List>
+        <Subheader>Filter Pipelines</Subheader>
         { this.state.pipelines.map((p) => {
             return <ListItem key={p.name} primaryText={p.name} rightToggle={<Toggle defaultToggled={p.active} onToggle={this.togglePipeline.bind(this, p)} />} />
         }) }
@@ -96,7 +97,8 @@ export default class Configuration extends React.Component {
 
     return (
       <div>
-        <List subheader="General">
+        <List>
+          <Subheader>General</Subheader>
           <ListItem primaryText="Sort Order" secondaryText={this.state.currentSortOrder.label} onTouchTap={this.openSortOrderList.bind(this)} />
         <Divider />
         </List>

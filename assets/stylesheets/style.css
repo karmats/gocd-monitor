@@ -110,6 +110,7 @@ a {
 }
 
 div.buildtitle > div {
+  padding: 0 !important;
   width: 80%;
 }
 div.buildtitle span {
@@ -128,6 +129,7 @@ div.buildtitle span {
 div.buildinfo {
   color: #fff;
   display: flex;
+  width: 100%;
 }
 div.buildinfo > div {
   padding-right: 0;
@@ -148,12 +150,11 @@ div.buildinfo p.right {
   text-align: right;
 }
 div.buildinfo p.right > i {
-  vertical-align: middle;
+  vertical-align: text-bottom;
 }
 div.buildinfo p.right > span {
-  margin: 0 1px 1px 1px;
   padding: 0;
-  vertical-align: middle;
+  vertical-align: sub;
 }
 div.buildinfo span {
   padding-left: 10px;
@@ -162,6 +163,8 @@ div.buildinfo span {
 
 /* Progress spinner */
 .loader {
+  vertical-align: middle;
+  margin: 0 1px;
   display: inline-block;
   position: relative;
   width: 13px;

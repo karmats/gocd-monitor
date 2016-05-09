@@ -6,11 +6,10 @@ import React from 'react';
 
 import io from 'socket.io-client';
 
-import { Dialog, FlatButton, FloatingActionButton, Snackbar } from 'material-ui/lib';
-import Settings from 'material-ui/lib/svg-icons/action/settings';
-import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
-import Colors from 'material-ui/lib/styles/colors';
-import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
+import { Dialog, FlatButton, FloatingActionButton, Snackbar } from 'material-ui';
+import Settings from 'material-ui/svg-icons/action/settings';
+import * as Colors from 'material-ui/styles/colors';
+import { MuiThemeProvider, getMuiTheme } from 'material-ui/styles';
 
 import Pipeline from './Pipeline';
 import Configuration from './Configuration';
@@ -18,7 +17,7 @@ import Configuration from './Configuration';
 
 const muiTheme = getMuiTheme({
   palette: {
-    accent1Color: Colors.purple700
+    primary1Color: Colors.purple700,
   }
 });
 
