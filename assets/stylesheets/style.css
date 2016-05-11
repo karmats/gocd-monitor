@@ -109,8 +109,8 @@ a {
   color: #fff;
 }
 
+/* Build title, pipeline name and status */
 div.buildtitle > div {
-  padding: 0 !important;
   width: 80%;
 }
 div.buildtitle span {
@@ -119,13 +119,15 @@ div.buildtitle span {
   overflow: hidden;
 }
 
+/* Weather status indicator */
 .buildstatus {
   color: #fff;
-  float: right;
-  margin-top: -5px;
-  margin-right: -5px;
+  position: absolute;
+  top: 14px;
+  right: 10px;
 }
 
+/* Info text att card bottom, triggered by etc. */
 div.buildinfo {
   color: #fff;
   display: flex;
