@@ -150,12 +150,18 @@ export default class GoService extends Service {
 
     // Stage results
     result.stageresults = latestPipelineResult.stages.map((stage) => {
-      let stageResult = { name: stage.name };
+      let stageResult = { name: stage.name, counter : stage.counter };
       if (stage.jobs.some(job => job.state === 'Scheduled' || job.state === 'Assigned' || job.state === 'Preparing' || job.state === 'Building' || job.state === 'Completing')) {
         stageResult.status = 'building';
       } else {
         stageResult.status = stage.result ? stage.result.toLowerCase() : 'unknown';
       }
+      stageResult.jobresults = stage.jobs.map((job) => {
+        return {
+          name: job.name,
+          result: job.state.toLowerCase()
+        }
+      })
       return stageResult;
     });
 

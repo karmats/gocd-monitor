@@ -7,6 +7,7 @@ export default class Service {
     this.clients = [];
     this.pipelines = [];
     this.pipelineNames = [];
+    this.testResults = {};
 
     // Init db and settings
     this.dbService = new DBService();
@@ -43,6 +44,12 @@ export default class Service {
         }, (error) => {
           Logger.error('Failed to save settings');
         });
+      });
+
+      client.on('test:add', (testPipeline) => {
+        if (this.addPipelineForTest) {
+          this.addPipelineForTest(testPipeline);
+        }
       });
 
       this.clients.push(client);

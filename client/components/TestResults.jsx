@@ -37,7 +37,7 @@ export default class TestResults extends React.Component {
     // Setup initial state
     this.state = {
       // Results
-      testResults: [],
+      testReports: {},
       pipelines: [],
       addTestDialogOpened: false,
     };
@@ -46,10 +46,20 @@ export default class TestResults extends React.Component {
   componentDidMount() {
     // All pipelines
     socket.on('pipelines:updated', (pipelines) => {
-      this.setState({
-        pipelines: pipelines
-      });
+      if (pipelines.length > 0) {
+        this.setState({
+          pipelines: pipelines
+        });
+      }
     });
+
+    // Updated test results
+    socket.on('tests:updated', (testReports) => {
+      console.log(testReports);
+      this.setState({
+        testReports : testReports
+      });
+    })
   }
 
   closeAddTest() {
@@ -71,6 +81,7 @@ export default class TestResults extends React.Component {
    */
   addTest() {
     console.log('Adding pipeline for test report', this.selectedPipeline);
+    socket.emit('test:add', this.selectedPipeline);
     this.closeAddTest();
   }
 
@@ -103,7 +114,7 @@ export default class TestResults extends React.Component {
       <FlatButton
         label="Add"
         primary={true}
-        onTouchTap={this.addTest.bind(this, this.selectedPipeline)}
+        onTouchTap={this.addTest.bind(this)}
       />
     ];
 
