@@ -1,9 +1,17 @@
 import Datastore from 'nedb';
 
+// Singleton class
+let instance;
+
 export default class DBService {
 
   constructor() {
+    if (!instance) {
+      instance = this;
+    }
     this.datastore = new Datastore({ filename: 'server/data.db', autoload: true });
+
+    return instance;
   }
 
   /**
@@ -48,6 +56,21 @@ export default class DBService {
           });
         }
       });
+    });
+  }
+
+  /**
+   * @return {Promise<Object>} A history of test results
+   */
+  getTestResults() {
+    return new Promise((resolve, reject) => {
+      return this.getDocument().then((doc) => {
+        if (doc.tests) {
+          resolve(doc.tests);
+        } else {
+          reject(new Error('Failed to find test results'));
+        }
+      })
     });
   }
 
