@@ -1,5 +1,4 @@
-import Datastore from 'nedb';
-
+import DBService from './DBService';
 import Logger from '../utils/Logger';
 
 export default class Service {
@@ -8,19 +7,16 @@ export default class Service {
     this.clients = [];
     this.pipelines = [];
     this.pipelineNames = [];
+
     // Init db and settings
-    this.datastore = new Datastore({ filename: 'server/data.db', autoload: true });
-    this.datastore.findOne({}, (err, doc) => {
-      if (doc && doc.settings && !err) {
-        this.currentSettings = doc.settings;
-      } else {
-        this.currentSettings = {
-          disabledPipelines: []
-        }
-        if (err) {
-          Logger.error('Failed to load datastore');
-        }
+    this.dbService = new DBService();
+    this.dbService.getSettings().then((settings) => {
+      this.currentSettings = settings;
+    }, (error) => {
+      this.currentSettings = {
+        disabledPipelines : []
       }
+      Logger.error('Failed to load settings');
     });
   }
 
@@ -40,33 +36,13 @@ export default class Service {
 
       // Register for setting updates
       client.on('settings:update', (settings) => {
-        this.datastore.findOne({}, (err, doc) => {
-          if (doc && doc.settings) {
-            this.datastore.update({ _id: doc._id }, { $set : { settings : settings  } }, {}, (updErr) => {
-              if (!updErr) {
-                Logger.debug('Settings updated');
-                // Compact so file so only one settings object is saved
-                this.datastore.persistence.compactDatafile();
-              } else {
-                Logger.error('Failed to update settings');
-              }
-            })
-          } else if (!err) {
-            this.datastore.insert({ settings: settings}, (insErr) => {
-              if (!insErr) {
-                Logger.debug('Settings saved');
-              } else {
-                Logger.error('Failed to save settings');
-              }
-            });
-          } else {
-            Logger.error('Failed to find settings');
-          }
+        this.dbService.saveOrUpdateSettings(settings).then((savedSettings) => {
+          this.currentSettings = savedSettings;
+          // Notify other clients about the update
+          this.notifyAllClients('settings:updated', savedSettings);
+        }, (error) => {
+          Logger.error('Failed to save settings');
         });
-        this.currentSettings = settings;
-
-        // Notify other clients about the update
-        this.notifyAllClients('settings:updated', settings);
       });
 
       this.clients.push(client);
