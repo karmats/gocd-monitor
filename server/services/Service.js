@@ -11,28 +11,26 @@ export default class Service {
 
     // Init db and settings
     this.dbService = new DBService();
-    this.dbService.getSettings().then((settings) => {
-      this.currentSettings = settings;
+    this.dbService.getSettings().then((doc) => {
+      this.currentSettings = doc.settings;
     }, (error) => {
       this.currentSettings = {
         disabledPipelines : []
       }
-      Logger.error('Failed to load settings');
     });
   }
 
   /**
    * Register new client listener
-   * 
+   *
    * @param {Socket}  client  Socket client that will receive automatic updates
    */
   registerClient(client) {
     // Add client if not in clients list
     if (!this.clients.some(c => client.id === c.id)) {
 
-      // Emit latest pipelines, pipeline names and settings
+      // Emit latest pipeline names and settings
       client.emit('pipelines:names', this.pipelineNames);
-      client.emit('pipelines:updated', this.pipelines);
       client.emit('settings:updated', this.currentSettings);
 
       // Register for setting updates
@@ -46,10 +44,18 @@ export default class Service {
         });
       });
 
-      client.on('test:add', (testPipeline) => {
+      client.on('tests:add', (testPipeline) => {
         if (this.addPipelineForTest) {
           this.addPipelineForTest(testPipeline);
         }
+      });
+
+      // Return pipelines and tests if client asks for it
+      client.on('pipelines:get', () => {
+        client.emit('pipelines:updated', this.pipelines);
+      });
+      client.on('tests:get', () => {
+        client.emit('tests:updated', this.testResults);
       });
 
       this.clients.push(client);
@@ -58,7 +64,7 @@ export default class Service {
 
   /**
    * Unregister client listener
-   * 
+   *
    * @param {Socket}  client  Socket client that will no longer receive updates
    */
   unregisterClient(client) {
@@ -67,7 +73,7 @@ export default class Service {
 
   /**
    * Emits an event to all registered clients
-   * 
+   *
    * @param {string}  event   Name of the event
    * @param {Object}  data    The data to send
    */

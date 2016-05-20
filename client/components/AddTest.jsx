@@ -19,7 +19,8 @@ export default class Configuration extends React.Component {
 
   componentDidMount() {
     this.setState({
-      pipelines: this.props.pipelines.sort((a,b) => a.name > b.name ? 1 : -1)
+      // Sort pipelines by name
+      pipelines: this.props.pipelines.sort((a,b) => (a && b && a.name > b.name) ? 1 : -1)
     });
   }
   
@@ -40,7 +41,7 @@ export default class Configuration extends React.Component {
         onChange={this.handleChange.bind(this)}
         floatingLabelText="Select pipeline">
         { this.state.pipelines.map((p, idx) => {
-            return <MenuItem key={idx} primaryText={p.name} value={p} />
+            return p ? <MenuItem key={idx} primaryText={p.name} value={p} /> : null
         }) }
       </SelectField>
     );

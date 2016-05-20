@@ -1,17 +1,9 @@
 import Datastore from 'nedb';
 
-// Singleton class
-let instance;
-
 export default class DBService {
 
   constructor() {
-    if (!instance) {
-      this.datastore = new Datastore({ filename: 'server/data.db', autoload: true });
-      instance = this;
-    }
-
-    return instance;
+    this.datastore = new Datastore({ filename: 'server/data.db', autoload: true });
   }
 
   /**
@@ -19,13 +11,17 @@ export default class DBService {
    */
   getSettings() {
     return new Promise((resolve, reject) => {
-      return this._getDocument().then((doc) => {
-        if (doc.settings) {
-          resolve(doc.settings);
+      return this.datastore.findOne({
+        $or: [
+          { 'settings.sortOrder': 'status' },
+          { 'settings.sortOrder': 'buildtime' }]
+      }, (err, doc) => {
+        if (doc && !err) {
+          resolve(doc);
         } else {
-          reject(new Error('Failed to find settings'));
+          reject(err || new Error('Failed to find settings'));
         }
-      })
+      });
     });
   }
 
@@ -35,11 +31,21 @@ export default class DBService {
    */
   saveOrUpdateSettings(settings) {
     return new Promise((resolve, reject) => {
-      return this._getDocument().then((doc) => {
+      const insertSettings = () => {
+        this.datastore.insert({ settings: settings }, (insErr) => {
+          if (!insErr) {
+            this.datastore.persistence.compactDatafile();
+            resolve(settings);
+          } else {
+            reject(insErr);
+          }
+        });
+      }
+      return this.getSettings().then((doc) => {
         if (doc.settings) {
           this.datastore.update({ _id: doc._id }, { $set: { settings: settings } }, {}, (updErr) => {
             if (!updErr) {
-              // Compact so file so only one settings object is saved
+              // Compact file so only one settings object is saved
               this.datastore.persistence.compactDatafile();
               resolve(settings);
             } else {
@@ -47,14 +53,10 @@ export default class DBService {
             }
           })
         } else {
-          this.datastore.insert({ settings: settings }, (insErr) => {
-            if (!insErr) {
-              resolve(settings);
-            } else {
-              reject(insErr);
-            }
-          });
+          insertSettings();
         }
+      }, () => {
+        insertSettings();
       });
     });
   }
@@ -64,13 +66,13 @@ export default class DBService {
    */
   getTestResults() {
     return new Promise((resolve, reject) => {
-      return this._getDocument().then((doc) => {
-        if (doc.tests) {
-          resolve(doc.tests);
+      return this.datastore.find({ type: 'tests' }, (err, doc) => {
+        if (doc && !err) {
+          resolve(doc);
         } else {
-          reject(new Error('Failed to find test results'));
+          reject(err || new Error('Failed to find tests'));
         }
-      })
+      });
     });
   }
 
@@ -78,46 +80,29 @@ export default class DBService {
    * @param {Object}          testResult   The new test results to save or update
    * @return {Promise<Object>}             The updated test results
    */
-  saveOrUpdateTestResult(testResult) {
+  saveOrUpdateTestResult(testName, testResult) {
     return new Promise((resolve, reject) => {
-      return this._getDocument().then((doc) => {
-        if (doc.tests) {
-          this.datastore.update({ _id: doc._id }, { $set: { tests: testResult } }, {}, (updErr) => {
+      return this.datastore.findOne({ _id: testName }, (err, doc) => {
+        if (!err && doc) {
+          this.datastore.update({ _id: testName }, { $push: { results: testResult } }, {}, (updErr, updatedTests) => {
             if (!updErr) {
-              // Compact so file so only one settings object is saved
+              // Compact so file so only one test report object is saved
               this.datastore.persistence.compactDatafile();
               resolve(testResult);
             } else {
               reject(updErr);
             }
-          })
+          });
         } else {
-          this.datastore.insert({ tests: testResult }, (insErr) => {
+          this.datastore.insert({ _id: testName, type: 'tests', results: [testResult] }, (insErr, savedTest) => {
             if (!insErr) {
-              resolve(testResult);
+              resolve(savedTest);
             } else {
               reject(insErr);
             }
           });
         }
-      });
-    });
-  }
-
-  /**
-   * @return {Promise<Object>} The database document
-   */
-  _getDocument() {
-    return new Promise((resolve, reject) => {
-      this.datastore.findOne({}, (err, doc) => {
-        if (doc && !err) {
-          resolve(doc);
-        } else if (err) {
-          reject(err);
-        } else {
-          reject(new Error('Failed to find datastore'));
-        }
-      });
+      })
     });
   }
 }

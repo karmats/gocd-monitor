@@ -65,6 +65,7 @@ export default class Main extends React.Component {
   }
 
   componentDidMount() {
+
     // Listen for updates
     socket.on('pipelines:updated', (newPipelines) => {
       let disabledPipelines = this.state.disabledPipelines.slice();
@@ -92,6 +93,9 @@ export default class Main extends React.Component {
         });
       }
     });
+
+    // Request latest pipelines
+    socket.emit('pipelines:get');
   }
 
   saveSettings(settings) {
