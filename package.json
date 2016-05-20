@@ -14,6 +14,7 @@
     "add-material-icons": "cp node_modules/mdi/css/materialdesignicons.min.css assets/stylesheets/materialdesignicons.css && cp node_modules/mdi/fonts/* assets/fonts"
   },
   "dependencies": {
+    "chart.js": "^1.1.1",
     "debug": "~2.2.0",
     "express": "~4.13.1",
     "flexboxgrid": "^6.3.0",
@@ -22,6 +23,7 @@
     "moment": "^2.11.2",
     "nedb": "^1.8.0",
     "react": "^15.0.2",
+    "react-chartjs": "^0.7.3",
     "react-dom": "^15.0.2",
     "react-tap-event-plugin": "^1.0.0",
     "request": "^2.69.0",

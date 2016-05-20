@@ -8,14 +8,15 @@ import io from 'socket.io-client';
 
 import { Dialog, FlatButton, FloatingActionButton } from 'material-ui';
 import Add from 'material-ui/svg-icons/content/add';
-import * as Colors from 'material-ui/styles/colors';
+import { purple700 } from 'material-ui/styles/colors';
 import { MuiThemeProvider, getMuiTheme } from 'material-ui/styles';
 
+import TestReport from './TestReport';
 import AddTest from './AddTest';
 
 const muiTheme = getMuiTheme({
   palette: {
-    primary1Color: Colors.purple700,
+    primary1Color: purple700,
   }
 });
 
@@ -59,7 +60,11 @@ export default class TestResults extends React.Component {
       this.setState({
         testReports : testReports
       });
-    })
+    });
+
+    // Request latest pipelines and test results
+    socket.emit('pipelines:get');
+    socket.emit('tests:get');
   }
 
   closeAddTest() {
@@ -80,8 +85,7 @@ export default class TestResults extends React.Component {
    * Add test reports for a pipeline
    */
   addTest() {
-    console.log('Adding pipeline for test report', this.selectedPipeline);
-    socket.emit('test:add', this.selectedPipeline);
+    socket.emit('tests:add', this.selectedPipeline);
     this.closeAddTest();
   }
 
@@ -117,11 +121,20 @@ export default class TestResults extends React.Component {
         onTouchTap={this.addTest.bind(this)}
       />
     ];
+    
+    let testReports = [0, 1, 2, 3, 4].map((no) => {
+      return (
+      <div key={no} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+        <TestReport report={'Test-' + no} />
+      </div>)
+    });
 
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div className="appcontainer">
-          <h3>Hello world</h3>
+          <div className="row">
+            {testReports}
+          </div>
           <Dialog
             title="Add Test"
             open={this.state.addTestDialogOpened}
