@@ -43,7 +43,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start polling go server
-goService.startPolling();
+goService.start();
 
 // socket.io setup
 app.io = io;

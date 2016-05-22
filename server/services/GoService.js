@@ -1,33 +1,58 @@
-import rp from 'request-promise';
-import { parseString } from 'xml2js';
-
-import Logger from '../utils/Logger';
 import * as conf from '../../app-config';
-import Service from './Service';
 
+import GoPipelineService from './GoPipelineService';
+import GoTestService from './GoTestService';
+import DBService from './DBService';
+import Logger from '../utils/Logger';
 
-export default class GoService extends Service {
+export default class GoService {
 
   constructor() {
-    super();
-    this.baseUrl = conf.goServerUrl + '/go/api';
-    this.user = conf.goUser;
-    this.password = conf.goPassword;
-    this.pollingInterval = conf.goPollingInterval*1000;
-    this.checkPipelinesInterval = 24*60*60*1000;
+    this.goConfig = new GoConfig(conf.goServerUrl, conf.goUser, conf.goPassword);
+    this.clients = [];
+    this.pipelines = [];
+    this.pipelineNames = [];
+    this.testResults = {};
+    this.currentSettings = {
+      disabledPipelines: []
+    };
+    this.pollingInterval = conf.goPollingInterval * 1000;
+    // Refresh pipelines once every day
+    this.checkPipelinesInterval = 24 * 60 * 60 * 1000;
+    this.pipelineService = new GoPipelineService(this.goConfig);
+    this.testService = new GoTestService(this.goConfig);
+
+    // Init db and settings
+    this.dbService = new DBService();
+
   }
 
   /**
-   * Start polling go server for pipeline results
+   * Starts the service. Polls go server for pipeline and test results
    */
-  startPolling() {
+  start() {
+    // Retrieve current settings
+    this.dbService.getSettings().then((doc) => {
+      this.currentSettings = doc.settings;
+    });
+
+    // Retrieve stored test results
+    this.dbService.getTestResults().then((testResults) => {
+      this.testResults = testResults;
+    });
+
+    // Start polling go server for build and test results
+    this.pollGoServer();
+  }
+
+  pollGoServer() {
     // Function that refreshes all pipelines
     let refreshPipelines = (pipelineNames) => {
       let currentPipelines = [];
       const pipelinesToIgnore = this.currentSettings.disabledPipelines;
       const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
       pipelinesToFetch.forEach((name) => {
-        this.getPipelineHistory(name).then((pipeline) => {
+        this.pipelineService.getPipelineHistory(name).then((pipeline) => {
           currentPipelines.push(pipeline);
           if (currentPipelines.length === pipelinesToFetch.length) {
             this.pipelines = currentPipelines;
@@ -46,7 +71,7 @@ export default class GoService extends Service {
         clearInterval(pollId);
       }
       // Fetch the pipelines and start polling pipeline history
-      this.getAllPipelines()
+      this.pipelineService.getAllPipelines()
         .then((pipelineNames) => {
           this.pipelineNames = pipelineNames;
           this.notifyAllClients('pipelines:names', pipelineNames);
@@ -67,144 +92,77 @@ export default class GoService extends Service {
   }
 
   /**
-   * @returns {Array<string>} All available pipelines from the go.cd server
+   * Register new client listener
+   *
+   * @param {Socket}  client  Socket client that will receive automatic updates
    */
-  getAllPipelines() {
-    let options = {
-      uri: this.baseUrl + '/pipelines.xml',
-      rejectUnauthorized: false,
-      auth: {
-        user: this.user,
-        pass: this.password
-      }
-    };
-    return rp(options)
-      .then((res) => {
-        let pipelines = [];
-        // Parse response xml
-        parseString(res, (err, parsed) => {
-          if (err) {
-            Logger.error('Failed to parse pipelines.xml, shutting down');
-            throw err;
-          }
-          // pipline xml in format <baseUrl>/pipelines/<name>/stages.xml
-          pipelines = parsed.pipelines.pipeline.map(p => p.$.href.match(/go\/api\/pipelines\/(.*)\/stages.xml/)[1]);
+  registerClient(client) {
+    // Add client if not in clients list
+    if (!this.clients.some(c => client.id === c.id)) {
+
+      // Emit latest pipeline names and settings
+      client.emit('pipelines:names', this.pipelineNames);
+      client.emit('settings:updated', this.currentSettings);
+
+      // Register for setting updates
+      client.on('settings:update', (settings) => {
+        this.dbService.saveOrUpdateSettings(settings).then((savedSettings) => {
+          this.currentSettings = savedSettings;
+          // Notify other clients about the update
+          this.notifyAllClients('settings:updated', savedSettings);
+        }, (error) => {
+          Logger.error('Failed to save settings');
         });
-        return pipelines;
-      })
-      .catch(err => { throw err });
+      });
+
+      client.on('tests:add', (testPipeline) => {
+        if (this.addPipelineForTest) {
+          this.addPipelineForTest(testPipeline);
+        }
+      });
+
+      // Return pipelines and tests if client asks for it
+      client.on('pipelines:get', () => {
+        client.emit('pipelines:updated', this.pipelines);
+      });
+      client.on('tests:get', () => {
+        client.emit('tests:updated', this.testResults);
+      });
+
+      this.clients.push(client);
+    }
   }
 
   /**
-   * @param   {string}    name       Name of the pipeline
-   * @returns {Object}    Pipeline instance. 
-   * Example 
-   * { 
-   *    name : 'id,
-   *    buildtime : 1457085089646,
-   *    author: 'Bobby Malone',
-   *    counter: 255,
-   *    paused: false,
-   *    health: 2,
-   *    stageresults: [
-   *      {
-   *        name: 'Build',
-   *        status: 'passed'
-   *      },
-   *      {
-   *        name: 'Test',
-   *        status: 'building'
-   *      }] 
-   * }
+   * Unregister client listener
+   *
+   * @param {Socket}  client  Socket client that will no longer receive updates
    */
-  getPipelineHistory(name) {
-    let options = {
-      uri: this.baseUrl + '/pipelines/' + name + '/history/0',
-      json: true,
-      rejectUnauthorized: false,
-      auth: {
-        user: this.user,
-        pass: this.password
-      }
-    };
-    return rp(options)
-      .then(res => this._goPipelinesToPipelineResult(res.pipelines.slice(0, 5)))
-      .catch((err) => {
-        Logger.error(`Failed to get pipeline history for pipeline "${name}" returning last result, ${err.statusCode}: ${err.message}`);
-        return this.pipelines.filter((p) => p && p.name === name)[0];
-      });
+  unregisterClient(client) {
+    this.clients = this.clients.filter(c => client.id !== c.id);
   }
 
-  _goPipelinesToPipelineResult(pipelines) {
-    let result = {};
-
-    if (pipelines.length <= 0) {
-      return {};
-    }
-
-    // Latest pipeline result is where we will retrieve most data
-    let latestPipelineResult = pipelines[0];
-
-    // Pipeline name
-    result.name = latestPipelineResult.name;
-
-    // Stage results
-    result.stageresults = latestPipelineResult.stages.map((stage) => {
-      let stageResult = { name: stage.name, counter : stage.counter };
-      if (stage.jobs.some(job => job.state === 'Scheduled' || job.state === 'Assigned' || job.state === 'Preparing' || job.state === 'Building' || job.state === 'Completing')) {
-        stageResult.status = 'building';
-      } else {
-        stageResult.status = stage.result ? stage.result.toLowerCase() : 'unknown';
-      }
-      stageResult.jobresults = stage.jobs.map((job) => {
-        return {
-          name: job.name,
-          result: job.state.toLowerCase()
-        }
-      })
-      return stageResult;
+  /**
+   * Emits an event to all registered clients
+   *
+   * @param {string}  event   Name of the event
+   * @param {Object}  data    The data to send
+   */
+  notifyAllClients(event, data) {
+    this.clients.forEach((client) => {
+      client.emit(event, data);
     });
+  }
+}
 
-    // Pipeline is paused if none of the stagues can run and the pipeline isn't building
-    result.paused = !result.stageresults.some(stageResult => stageResult.status === 'building') && latestPipelineResult.stages.every((stage) => stage.can_run === false);
+/**
+ * Class to hold go config
+ */
+export class GoConfig {
 
-    // Health = number of pipelines failed
-    result.health = pipelines.reduce((p, c) => {
-      if (c.stages.some(stage => stage.result === 'Failed')) {
-        return p + 1;
-      }
-      return p;
-    }, 0);
-
-    // Bulid time = last scheduled job
-    result.buildtime = latestPipelineResult.stages.reduce((sp, sc) => {
-      let lastScheduledJob = sc.jobs.reduce((jp, jc) => {
-        if (jc.scheduled_date > jp) {
-          return jc.scheduled_date;
-        }
-        return jp;
-      }, 0);
-      if (lastScheduledJob > sp) {
-        sp = lastScheduledJob;
-      }
-      return sp;
-    }, 0);
-
-    // Author = first modifcator
-    let author = 'Unknown';
-    if (latestPipelineResult.build_cause && latestPipelineResult.build_cause.material_revisions && latestPipelineResult.build_cause.material_revisions[0].modifications) {
-      author = latestPipelineResult.build_cause.material_revisions[0].modifications[0].user_name;
-    }
-    // Remove email tag if any
-    let tagIdx = author.indexOf('<');
-    if (tagIdx > 0) {
-      author = author.substring(0, tagIdx).trim();
-    }
-    result.author = author;
-
-    // Counter id
-    result.counter = latestPipelineResult.counter;
-
-    return result;
+  constructor(serverUrl, user, password) {
+    this.serverUrl = serverUrl;
+    this.user = user;
+    this.password = password;
   }
 }

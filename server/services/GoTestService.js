@@ -2,32 +2,17 @@ import rp from 'request-promise';
 
 import Logger from '../utils/Logger';
 import CucumberJsonParser from '../utils/CucumberJsonParser';
-import * as conf from '../../app-config';
-import Service from './Service';
 
-export default class GoTestService extends Service {
+export default class GoTestService {
 
-  constructor() {
-    super();
-    this.baseUrl = conf.goServerUrl + '/go/files';
-    this.user = conf.goUser;
-    this.password = conf.goPassword;
-  }
-
-  start() {
-    this.dbService.getTestResults().then(
-    (testResults) => {
-      this.testResults = testResults;
-    },
-    (error) => {
-      Logger.error('Failed to get test results');
-    });
+  constructor(goConfig) {
+    this.conf  = goConfig;
   }
 
   addPipelineForTest(testPipeline) {
     Logger.info('Adding ' + testPipeline.name + ' to test stream');
     // Scan all pipeline jobs for cucumber json files, if found add to db
-    let pipelineUri = this.baseUrl + `/${testPipeline.name}/${testPipeline.counter - 1}`;
+    let pipelineUri = this.conf.serverUrl + `/go/files/${testPipeline.name}/${testPipeline.counter}`;
     let options = {
       rejectUnauthorized: false,
       json: true,
@@ -39,34 +24,54 @@ export default class GoTestService extends Service {
     testPipeline.stageresults.forEach((stage) => {
       // Check all files for json files
       stage.jobresults.forEach((job) => {
+        const testName = `${testPipeline.name}-${stage.name}-${job.name}`.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '_');
 
-        //options.uri = `${pipelineUri}/${stage.name}/${stage.counter}/${job.name}.json`;
-        options.uri = 'https://go.seal-software.net/go/files/scx-systemtest-master/88/GUI/2/scd-gui.json';
-        Logger.debug('Retrieving test files from ' + options.uri);
-        rp(options).then((files) => {
-          let urls = this._retrieveJsonFiles({
-            name: 'root',
-            type: 'folder',
-            files: files
-          });
-          Logger.debug(`Found ${urls.length} test files`);
+        // Don't add if test already exists
+        if (!this.testResults[testName]) {
+          options.uri = `${pipelineUri}/${stage.name}/${stage.counter}/${job.name}.json`;
+          Logger.debug(`Retrieving files from ${options.uri}`);
 
-          // Retrieve test files
-          urls.forEach((url) => {
-            options.uri = url;
-            rp(options).then((testReport) => {
-              const testResult = CucumberJsonParser.parse(testReport);
-              this.testResults[`${testPipeline.name}-${stage.name}-${job.name}`] = testResult;
-              this.dbService.saveOrUpdateTestResult(this.testResults);
-              this.notifyAllClients('tests:updated', this.testResults);
-            }).catch((error) => {
-              console.log(error);
-              Logger.error('Failed to get test report');
-            })
+          rp(options).then((files) => {
+            let urls = this._retrieveJsonFiles({
+              name: 'root',
+              type: 'folder',
+              files: files
+            });
+            Logger.debug(`Found ${urls.length} test files`);
+
+            // Retrieve test files
+            urls.forEach((url) => {
+              options.uri = url;
+              rp(options).then((testReport) => {
+                Logger.debug('Goet test report');
+                // Parse file to and retrieve most relevant info
+                let testResult = CucumberJsonParser.parse(testReport);
+                if (testResult) {
+                  testResult.timestamp = Date.now();
+                  // Who to blame if anything went wrong
+                  testResult.blame = testPipeline.author;
+
+                  // Add as new test
+                  this.testResults[testName] = [testResult];
+
+                  // Save to db
+                  this.dbService.saveOrUpdateTestResult(testName, testResult).then((savedTests) => {
+                    Logger.debug('Saved success');
+                    this.notifyAllClients('tests:updated', savedTests);
+                  }, (error) => {
+                    Logger.error('Failed ot save test result');
+                  });
+                }
+
+              }).catch((error) => {
+                Logger.error('Failed to get test report');
+              })
+
+            });
+          }).catch((err) => {
+            Logger.error('Failed to get stage history', err);
           });
-        }).catch((err) => {
-          Logger.error('Failed to get stage history', err);
-        });
+        }
       });
     });
   }
@@ -80,9 +85,10 @@ export default class GoTestService extends Service {
         for (let i = 0; i < file.files.length; i++) {
           traverseFile(file.files[i], jsonFiles);
         }
-      } 
+      }
       return jsonFiles;
     }
     return traverseFile(root, []);
   }
+
 }
