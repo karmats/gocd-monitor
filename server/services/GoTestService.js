@@ -6,76 +6,56 @@ import CucumberJsonParser from '../utils/CucumberJsonParser';
 export default class GoTestService {
 
   constructor(goConfig) {
-    this.conf  = goConfig;
+    this.conf = goConfig;
   }
 
-  addPipelineForTest(testPipeline) {
-    Logger.info('Adding ' + testPipeline.name + ' to test stream');
-    // Scan all pipeline jobs for cucumber json files, if found add to db
-    let pipelineUri = this.conf.serverUrl + `/go/files/${testPipeline.name}/${testPipeline.counter}`;
+  /**
+   * Get test reports from a file uri. The uri points to a pipeline/stage/job artifact exposures.
+   * 
+   * @param  {string}           uri   The uri to get test reports from
+   * @return {Promise<Object>}  Array with test reports, for now only cucumber tests are supported
+   */
+  getTestsFromUri(uri) {
+
     let options = {
+      uri: uri,
       rejectUnauthorized: false,
       json: true,
       auth: {
-        user: this.user,
-        pass: this.password
+        user: this.conf.user,
+        pass: this.conf.password
       }
     };
-    testPipeline.stageresults.forEach((stage) => {
-      // Check all files for json files
-      stage.jobresults.forEach((job) => {
-        const testName = `${testPipeline.name}-${stage.name}-${job.name}`.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '_');
 
-        // Don't add if test already exists
-        if (!this.testResults[testName]) {
-          options.uri = `${pipelineUri}/${stage.name}/${stage.counter}/${job.name}.json`;
-          Logger.debug(`Retrieving files from ${options.uri}`);
-
-          rp(options).then((files) => {
-            let urls = this._retrieveJsonFiles({
-              name: 'root',
-              type: 'folder',
-              files: files
-            });
-            Logger.debug(`Found ${urls.length} test files`);
-
-            // Retrieve test files
-            urls.forEach((url) => {
-              options.uri = url;
-              rp(options).then((testReport) => {
-                Logger.debug('Goet test report');
-                // Parse file to and retrieve most relevant info
-                let testResult = CucumberJsonParser.parse(testReport);
-                if (testResult) {
-                  testResult.timestamp = Date.now();
-                  // Who to blame if anything went wrong
-                  testResult.blame = testPipeline.author;
-
-                  // Add as new test
-                  this.testResults[testName] = [testResult];
-
-                  // Save to db
-                  this.dbService.saveOrUpdateTestResult(testName, testResult).then((savedTests) => {
-                    Logger.debug('Saved success');
-                    this.notifyAllClients('tests:updated', savedTests);
-                  }, (error) => {
-                    Logger.error('Failed ot save test result');
-                  });
-                }
-
-              }).catch((error) => {
-                Logger.error('Failed to get test report');
-              })
-
-            });
-          }).catch((err) => {
-            Logger.error('Failed to get stage history', err);
-          });
-        }
+    return rp(options).then((files) => {
+      let fileUris = this._retrieveJsonFiles({
+        name: 'root',
+        type: 'folder',
+        files: files
       });
+
+      let promises = [];
+      // Retrieve test files
+      fileUris.forEach((fileUri) => {
+        options.uri = fileUri;
+        promises.push(rp(options).then((testReport) => {
+          // Parse file to and retrieve most relevant info
+          let testResult = CucumberJsonParser.parse(testReport);
+          if (testResult) {
+            // Add as new test
+            return testResult;
+          }
+
+        }));
+
+      });
+      return Promise.all(promises);
+    }).catch((err) => {
+      return err;
     });
   }
 
+  // Recursive method that walks through a go file json structure and retrives all json files
   _retrieveJsonFiles(root) {
     const traverseFile = (file, jsonFiles) => {
       if (file.type === 'file' && file.name.indexOf('.json') > 0) {
