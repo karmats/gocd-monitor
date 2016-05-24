@@ -39,10 +39,10 @@ export default class GoTestService {
       fileUris.forEach((fileUri) => {
         options.uri = fileUri;
         promises.push(rp(options).then((testReport) => {
-          // Parse file to and retrieve most relevant info
+          // Parse file and retrieve most relevant info, only cucumber supported atm
           let testResult = CucumberJsonParser.parse(testReport);
           if (testResult) {
-            // Add as new test
+            testResult.type = 'cucumber';
             return testResult;
           }
 

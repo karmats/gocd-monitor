@@ -12,9 +12,7 @@ export default class DBService {
   getSettings() {
     return new Promise((resolve, reject) => {
       return this.datastore.findOne({
-        $or: [
-          { 'settings.sortOrder': 'status' },
-          { 'settings.sortOrder': 'buildtime' }]
+        settings: { $exists: true }
       }, (err, doc) => {
         if (doc && !err) {
           resolve(doc);
@@ -77,32 +75,51 @@ export default class DBService {
   }
 
   /**
-   * @param {Object}          testResult   The new test results to save or update
-   * @return {Promise<Object>}             The updated test results
+   * @param {string}          testName     Name/id of the test
+   * @param {string}          testType     Type of test, i.e. cucumber
+   * @param {Object}          pipelineInfo pipeline/stage/job names
+   * @param {Object}          testResult   The new test result to save
+   * @return {Promise<Object>}             The saved test result
    */
-  saveOrUpdateTestResult(testName, testResult) {
+  saveTestResult(testName, testType, pipelineInfo, testResult) {
     return new Promise((resolve, reject) => {
-      return this.datastore.findOne({ _id: testName }, (err, doc) => {
-        if (!err && doc) {
-          this.datastore.update({ _id: testName }, { $push: { results: testResult } }, {}, (updErr, updatedTests) => {
-            if (!updErr) {
-              // Compact so file so only one test report object is saved
-              this.datastore.persistence.compactDatafile();
-              resolve(testResult);
-            } else {
-              reject(updErr);
-            }
-          });
+      let testToSave = {
+        _id : testName,
+        type: 'test',
+        pipeline: pipelineInfo.pipeline,
+        stage: pipelineInfo.stage,
+        job: pipelineInfo.job
+      };
+      testToSave[testType] = [testResult];
+      this.datastore.insert(testToSave, (insErr, savedTest) => {
+        if (!insErr) {
+          resolve(savedTest);
         } else {
-          this.datastore.insert({ _id: testName, type: 'tests', results: [testResult] }, (insErr, savedTest) => {
-            if (!insErr) {
-              resolve(savedTest);
-            } else {
-              reject(insErr);
-            }
-          });
+          reject(insErr);
         }
-      })
+      });
+    });
+  }
+
+  /**
+   * @param {string}          testName     Name/id of the test
+   * @param {string}          testType     Type of test, i.e. cucumber
+   * @param {Object}          testResult   The test result to update
+   * @return {Promise<Object>}             The updated test result
+   */
+  updateTestResult(testName, testType, testResult) {
+    return new Promise((resolve, reject) => {
+      let testToSave = {};
+      testToSave[testType] = testResult;
+      this.datastore.update({ _id: testName }, { $push: testToSave }, {}, (updErr) => {
+        if (!updErr) {
+          // Compact file so only one test report object is saved
+          this.datastore.persistence.compactDatafile();
+          resolve(testResult);
+        } else {
+          reject(updErr);
+        }
+      });
     });
   }
 }

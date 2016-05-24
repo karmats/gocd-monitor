@@ -12,7 +12,7 @@ export default class GoService {
     this.clients = [];
     this.pipelines = [];
     this.pipelineNames = [];
-    this.testResults = {};
+    this.testResults = [];
     this.currentSettings = {
       disabledPipelines: []
     };
@@ -104,19 +104,25 @@ export default class GoService {
       stage.jobresults.forEach((job) => {
         const testName = `${pipeline.name}-${stage.name}-${job.name}`.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '_');
         // Don't add if test already exists
-        if (!this.testResults[testName]) {
+        if (!this.testResults.some(testRes => testRes._id === testName)) {
           let uri = `${this.goConfig.serverUrl}/go/files/${pipeline.name}/${pipeline.counter}/${stage.name}/${stage.counter}/${job.name}.json`;
-          Logger.debug(`Retrieving files from ${uri}`);
           this.testService.getTestsFromUri(uri).then((testResults) => {
             // Save to db
             if (testResults && testResults.length > 0) {
-              testResults[0].blame = pipeline.author
-              testResults[0].timestamp = Date.now();
-              testResults[0].type = 'cucumber';
+              // Add pipeline, stage, job, timestamp, who to blame if test has failed, only one cucumber report per job
+              const cucumberTest = testResults.map((testRes) => {
+                testRes.blame = pipeline.author;
+                testRes.timestamp = Date.now();
+                return testRes;
+              }).filter(test => test.type === 'cucumber')[0];
               Logger.debug(`Got test reports from ${pipeline.name} -> ${stage.name} -> ${job.name}`);
-              this.dbService.saveOrUpdateTestResult(testName, testResults[0]).then((savedTests) => {
+              this.dbService.saveTestResult(testName, 'cucumber', {
+                pipeline : pipeline.name,
+                stage : stage.name,
+                job : job.name
+              }, cucumberTest).then((savedTests) => {
                 this.notifyAllClients('tests:updated', savedTests);
-                this.testResults[testName] = testResults[0];
+                this.testResults.push(savedTests);
               }, (error) => {
                 Logger.error('Failed ot save test result');
               });
