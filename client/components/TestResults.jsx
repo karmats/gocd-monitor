@@ -124,7 +124,7 @@ export default class TestResults extends React.Component {
     
     let testReports = [0, 1, 2, 3, 4].map((no) => {
       return (
-      <div key={no} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+      <div key={no} className="col-lg-4 col-md-6 col-sm-6 col-xs-12">
         <TestReport report={'Test-' + no} />
       </div>)
     });

@@ -5,19 +5,31 @@
 import React from 'react';
 
 import { Card, CardHeader, CardMedia, CardText } from 'material-ui';
-import { grey100, green100, red100, green500, red500 } from 'material-ui/styles/colors';
+import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
+import { grey100, teal100, pink100, teal500, pink500 } from 'material-ui/styles/colors';
 import { Line as LineChart } from 'react-chartjs';
 
 
 const styles = {
-  card : {
+  cardSuccess: {
+    backgroundColor: teal500,
+    marginBottom: '1rem' 
+  },
+  cardFailure: {
+    backgroundColor: pink500,
     marginBottom: '1rem'
+  },
+  cardHeader: {
+    color: '#fff'
   },
   cardMedia: {
     margin: '0 16px'
   },
+  cardText: {
+    backgroundColor: '#fff'
+  },
   ok: {
-    color: green500
+    color: teal500
   }
 }
 
@@ -26,22 +38,22 @@ const chartData = {
     datasets: [
         {
             label: "Passed",
-            fillColor: green100,
-            strokeColor: green500,
-            pointColor: green500,
-            pointStrokeColor: green500,
-            pointHighlightFill: green500,
-            pointHighlightStroke: green500,
+            fillColor: 'rgba(255, 255, 255, 0.5)',
+            strokeColor: '#fff',
+            pointColor: '#fff',
+            pointStrokeColor: '#fff',
+            pointHighlightFill: '#fff',
+            pointHighlightStroke: '#fff',
             data: [65, 64, 67, 67, 70, 70, 71]
         },
         {
             label: "Failed",
-            fillColor: red100,
-            strokeColor: red500,
-            pointColor: red500,
-            pointStrokeColor: red500,
-            pointHighlightFill: red500,
-            pointHighlightStroke: red500,
+            fillColor: '#fff',
+            strokeColor: '#fff',
+            pointColor: '#fff',
+            pointStrokeColor: '#fff',
+            pointHighlightFill: '#fff',
+            pointHighlightStroke: '#fff',
             data: [0, 1, 10, 0, 0, 2, 3]
         }
     ]
@@ -52,9 +64,12 @@ const chartOptions = {
 
     ///Boolean - Whether grid lines are shown across the chart
     scaleShowGridLines : false,
+    
+    scaleLineColor: '#fff',
+    scaleFontColor: '#fff',
 
     //String - Colour of the grid lines
-    scaleGridLineColor : grey100,
+    scaleGridLineColor : '#fff',
 
     //Number - Width of the grid lines
     scaleGridLineWidth : 1,
@@ -66,13 +81,13 @@ const chartOptions = {
     scaleShowVerticalLines: false,
 
     //Boolean - Whether the line is curved between points
-    bezierCurve : true,
+    bezierCurve : false,
 
     //Number - Tension of the bezier curve between points
     bezierCurveTension : 0.4,
 
     //Boolean - Whether to show a dot for each point
-    pointDot : true,
+    pointDot : false,
 
     //Number - Radius of each point dot in pixels
     pointDotRadius : 1,
@@ -87,7 +102,7 @@ const chartOptions = {
     datasetStroke : true,
 
     //Number - Pixel width of dataset stroke
-    datasetStrokeWidth : 2,
+    datasetStrokeWidth : 1,
 
     //Boolean - Whether to fill the dataset with a colour
     datasetFill : true
@@ -98,17 +113,43 @@ export default class TestReport extends React.Component {
   constructor(props, context) {
     super(props, context);
   }
-  
+
+  generateFailInfo(report) {
+    return (
+      <Table selectable={false}>
+        <TableHeader displaySelectAll={false} adjustForCheckbox={false} enableSelectAll={false}>
+          <TableRow>
+            <TableHeaderColumn>Test</TableHeaderColumn>
+            <TableHeaderColumn>Reason</TableHeaderColumn>
+            <TableHeaderColumn>Blame</TableHeaderColumn>
+          </TableRow>
+        </TableHeader>
+        <TableBody displayRowCheckbox={false}>
+          <TableRow>
+            <TableRowColumn>Button click</TableRowColumn>
+            <TableRowColumn>Expect 1 to be 2</TableRowColumn>
+            <TableRowColumn>Mats Roshauw</TableRowColumn>
+          </TableRow>
+          <TableRow>
+            <TableRowColumn>Fetch all metadata</TableRowColumn>
+            <TableRowColumn>Exception</TableRowColumn>
+            <TableRowColumn>Per Arneng</TableRowColumn>
+          </TableRow>
+        </TableBody>
+      </Table>
+    )
+  }
   render() {
+    const success = Math.random() > 0.5;
 
     return (
-      <Card style={styles.card}>
-        <CardHeader title={this.props.report}  />
+      <Card style={success ?  styles.cardSuccess : styles.cardFailure}>
+        <CardHeader title={this.props.report} titleColor="#fff" />
         <CardMedia style={styles.cardMedia}>
           <LineChart data={chartData} options={chartOptions} />
         </CardMedia>
-        <CardText>
-          All is good
+        <CardText style={styles.cardText}>
+          {success ? 'All is good' : this.generateFailInfo()}
         </CardText>
       </Card>
     );
