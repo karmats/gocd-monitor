@@ -46,7 +46,7 @@ export default class TestResults extends React.Component {
 
   componentDidMount() {
     // All pipelines
-    socket.on('pipelines:updated', (pipelines) => {
+    socket.on('pipelines:names', (pipelines) => {
       if (pipelines.length > 0) {
         this.setState({
           pipelines: pipelines
@@ -62,8 +62,7 @@ export default class TestResults extends React.Component {
       });
     });
 
-    // Request latest pipelines and test results
-    socket.emit('pipelines:get');
+    // Request latest test results
     socket.emit('tests:get');
   }
 

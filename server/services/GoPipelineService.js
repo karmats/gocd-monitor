@@ -11,18 +11,11 @@ export default class GoPipelineService {
   }
 
   /**
-   * Start polling go server for pipeline results
-   */
-  startPolling() {
-
-  }
-
-  /**
    * @returns {Promise<Array<string>>} All available pipelines from the go.cd server
    */
   getAllPipelines() {
     let options = {
-      uri: this.conf.serverUrl + '/go/api/pipelines.xml',
+      uri: `${this.conf.serverUrl}/go/api/pipelines.xml`,
       rejectUnauthorized: false,
       auth: {
         user: this.conf.user,
@@ -35,11 +28,11 @@ export default class GoPipelineService {
         return GoPipelineParser.parsePipelineNames(res).then((pipelineNames) => {
           return pipelineNames;
         }, (error) => {
-          Logger.error('Failed to parse pipelines.xml, shutting down');
+          Logger.error('Failed to parse pipelines.xml');
           throw error;
         });
       }).catch((err) => {
-        Logger.error('Failed to retrieve pipeline names, shutting down');
+        Logger.error('Failed to retrieve pipeline names');
         throw err
       });
   }
@@ -68,7 +61,7 @@ export default class GoPipelineService {
    */
   getPipelineHistory(name) {
     let options = {
-      uri: this.conf.serverUrl + '/go/api/pipelines/' + name + '/history/0',
+      uri: `${this.conf.serverUrl}/go/api/pipelines/${name}/history/0`,
       json: true,
       rejectUnauthorized: false,
       auth: {

@@ -97,39 +97,11 @@ export default class GoService {
    * @param {Object} pipeline The pipeline to get the test reports from
    */
   addPipelineTests(pipeline) {
-    Logger.info(`Scanning ${pipeline.name} for test files`);
-    // Scan all pipeline jobs for cucumber json files, if found add to db
-    pipeline.stageresults.forEach((stage) => {
-      // Check all files for json files
-      stage.jobresults.forEach((job) => {
-        const testName = `${pipeline.name}-${stage.name}-${job.name}`.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '_');
-        // Don't add if test already exists
-        if (!this.testResults.some(testRes => testRes._id === testName)) {
-          let uri = `${this.goConfig.serverUrl}/go/files/${pipeline.name}/${pipeline.counter}/${stage.name}/${stage.counter}/${job.name}.json`;
-          this.testService.getTestsFromUri(uri).then((testResults) => {
-            // Save to db
-            if (testResults && testResults.length > 0) {
-              // Add pipeline, stage, job, timestamp, who to blame if test has failed, only one cucumber report per job
-              const cucumberTest = testResults.map((testRes) => {
-                testRes.blame = pipeline.author;
-                testRes.timestamp = Date.now();
-                return testRes;
-              }).filter(test => test.type === 'cucumber')[0];
-              Logger.debug(`Got test reports from ${pipeline.name} -> ${stage.name} -> ${job.name}`);
-              this.dbService.saveTestResult(testName, 'cucumber', {
-                pipeline : pipeline.name,
-                stage : stage.name,
-                job : job.name
-              }, cucumberTest).then((savedTests) => {
-                this.notifyAllClients('tests:updated', savedTests);
-                this.testResults.push(savedTests);
-              }, (error) => {
-                Logger.error('Failed ot save test result');
-              });
-            }
-          });
-        }
-      });
+    this.testService.getTestsFromPipeline(pipeline).then((result) => {
+      // Flatten the array
+      let reports = result.reduce((p, c) => {
+        return p.concat(c);
+      }, []);
     })
   }
 
