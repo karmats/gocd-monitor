@@ -1,6 +1,6 @@
 import * as conf from '../../app-config';
 
-import GoPipelineService from './GoPipelineService';
+import GoBuildService from './GoBuildService';
 import GoTestService from './GoTestService';
 import DBService from './DBService';
 import Logger from '../utils/Logger';
@@ -19,7 +19,7 @@ export default class GoService {
     this.pollingInterval = conf.goPollingInterval * 1000;
     // Refresh pipelines once every day
     this.checkPipelinesInterval = 24 * 60 * 60 * 1000;
-    this.pipelineService = new GoPipelineService(this.goConfig);
+    this.buildService = new GoBuildService(this.goConfig);
     this.testService = new GoTestService(this.goConfig);
 
     // Init db and settings
@@ -52,7 +52,7 @@ export default class GoService {
       const pipelinesToIgnore = this.currentSettings.disabledPipelines;
       const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
       pipelinesToFetch.forEach((name) => {
-        this.pipelineService.getPipelineHistory(name).then((pipeline) => {
+        this.buildService.getPipelineHistory(name).then((pipeline) => {
           currentPipelines.push(pipeline);
           if (currentPipelines.length === pipelinesToFetch.length) {
             this.pipelines = currentPipelines;
@@ -71,7 +71,7 @@ export default class GoService {
         clearInterval(pollId);
       }
       // Fetch the pipelines and start polling pipeline history
-      this.pipelineService.getAllPipelines()
+      this.buildService.getAllPipelines()
         .then((pipelineNames) => {
           this.pipelineNames = pipelineNames;
           this.notifyAllClients('pipelines:names', pipelineNames);

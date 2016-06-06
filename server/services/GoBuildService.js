@@ -4,7 +4,7 @@ import Logger from '../utils/Logger';
 import GoPipelineParser from '../utils/GoPipelineParser';
 import { GoConfig } from './GoService';
 
-export default class GoPipelineService {
+export default class GoBuildService {
 
   constructor(goConfig) {
     this.conf = goConfig;
@@ -73,7 +73,7 @@ export default class GoPipelineService {
       .then(res => GoPipelineParser.parsePipelineResult(res.pipelines.slice(0, 5)))
       .catch((err) => {
         Logger.error(`Failed to get pipeline history for pipeline "${name}" returning last result, ${err.statusCode}: ${err.message}`);
-        return this.pipelines.filter((p) => p && p.name === name)[0];
+        return this.pipelines ? this.pipelines.filter((p) => p && p.name === name)[0] : null;
       });
   }
 
