@@ -64,7 +64,7 @@ export default class DBService {
    */
   getTestResults() {
     return new Promise((resolve, reject) => {
-      return this.datastore.find({ type: 'tests' }, (err, doc) => {
+      return this.datastore.find({ type: 'test' }, (err, doc) => {
         if (doc && !err) {
           resolve(doc);
         } else {
@@ -75,23 +75,13 @@ export default class DBService {
   }
 
   /**
-   * @param {string}          testName     Name/id of the test
-   * @param {string}          testType     Type of test, i.e. cucumber
-   * @param {Object}          pipelineInfo pipeline/stage/job names
    * @param {Object}          testResult   The new test result to save
    * @return {Promise<Object>}             The saved test result
    */
-  saveTestResult(testName, testType, pipelineInfo, testResult) {
+  saveTestResult(testResult) {
     return new Promise((resolve, reject) => {
-      let testToSave = {
-        _id : testName,
-        type: 'test',
-        pipeline: pipelineInfo.pipeline,
-        stage: pipelineInfo.stage,
-        job: pipelineInfo.job
-      };
-      testToSave[testType] = [testResult];
-      this.datastore.insert(testToSave, (insErr, savedTest) => {
+      testResult.type = 'test';
+      this.datastore.insert(testResult, (insErr, savedTest) => {
         if (!insErr) {
           resolve(savedTest);
         } else {

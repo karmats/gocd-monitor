@@ -19,7 +19,7 @@ export default class GoTestService {
     Logger.info(`Scanning ${name} for test files`);
 
     // Get test reports from 10 latest pipelines
-    let options = {
+    const options = {
       uri: `${this.conf.serverUrl}/go/api/pipelines/${name}/history/0`,
       rejectUnauthorized: false,
       json: true,
@@ -34,7 +34,43 @@ export default class GoTestService {
       pipelineHistory.pipelines.forEach((pipeline) => {
         pipeline.stages.forEach((stage) => {
           stage.jobs.forEach((job) => {
-            promises = promises.concat(this._getTestsFromUri(`${this.conf.serverUrl}/go/files/${pipeline.name}/${pipeline.counter}/${stage.name}/${stage.counter}/${job.name}.json`));
+            promises = promises.concat(
+              this._getTestsFromUri(`${this.conf.serverUrl}/go/files/${pipeline.name}/${pipeline.counter}/${stage.name}/${stage.counter}/${job.name}.json`)
+              .then((result) => {
+                if (result && result.length > 0) {
+                  const cucumberResult = result.filter(res => res.type === 'cucumber');
+                  if (cucumberResult.length > 0) {
+                    // Concatenate the features from all cucumber tests
+                    const cucumber = cucumberResult.reduce((acc, c) => {
+                      acc.features = acc.features.concat(c.features);
+                      return acc;
+                    }, { features: [] });
+
+                    // Test time 
+                    cucumber.timestamp = job.scheduled_date;
+
+                    // Who to blame if test has failed
+                    let blame = 'Unknown';
+                    if (pipeline.build_cause && pipeline.build_cause.material_revisions && pipeline.build_cause.material_revisions[0].modifications) {
+                      blame = pipeline.build_cause.material_revisions[0].modifications[0].user_name;
+                    }
+                    let tagIdx = blame.indexOf('<');
+                    if (tagIdx > 0) {
+                      blame = blame.substring(0, tagIdx).trim();
+                    }
+                    cucumber.blame = blame;
+
+                    return {
+                      _id: `${pipeline.name}-${stage.name}-${job.name}`.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '_'),
+                      pipeline : pipeline.name,
+                      stage : stage.name,
+                      job : job.name,
+                      cucumber : [cucumber]
+                    }
+
+                  }
+                }
+            }));
           });
         });
       });
@@ -49,7 +85,7 @@ export default class GoTestService {
    */
   _getTestsFromUri(uri) {
 
-    let options = {
+    const options = {
       uri: uri,
       rejectUnauthorized: false,
       json: true,
@@ -60,7 +96,7 @@ export default class GoTestService {
     };
 
     return rp(options).then((files) => {
-      let fileUris = this._retrieveTestReportFiles({
+      const fileUris = this._retrieveTestReportFiles({
         name: 'root',
         type: 'folder',
         files: files

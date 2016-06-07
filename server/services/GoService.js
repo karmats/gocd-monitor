@@ -47,7 +47,7 @@ export default class GoService {
 
   pollGoServer() {
     // Function that refreshes all pipelines
-    let refreshPipelines = (pipelineNames) => {
+    const refreshPipelines = (pipelineNames) => {
       let currentPipelines = [];
       const pipelinesToIgnore = this.currentSettings.disabledPipelines;
       const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
@@ -64,7 +64,7 @@ export default class GoService {
     };
 
     let pollId;
-    let refreshPipelinesAndPollForUpdates = () => {
+    const refreshPipelinesAndPollForUpdates = () => {
       Logger.info('Retrieving pipeline names');
       // Cancel current poll and start over
       if (pollId) {
@@ -98,10 +98,26 @@ export default class GoService {
    */
   addPipelineTests(pipeline) {
     this.testService.getTestsFromPipeline(pipeline).then((result) => {
-      // Flatten the array
-      let reports = result.reduce((p, c) => {
-        return p.concat(c);
+      // Group tests with same id
+      const reports = result.reduce((acc, c) => {
+        if (c && c.cucumber.length > 0) {
+          const existing = acc.filter(ex => ex._id === c._id)[0];
+          if (existing) {
+            existing.cucumber = existing.cucumber.concat(c.cucumber);
+          } else {
+            acc.push(c);
+          }
+        }
+        return acc;
       }, []);
+      // Save to db
+      reports.forEach((report) => {
+        this.dbService.saveTestResult(report).then((savedReports) => {
+          this.notifyAllClients('tests:updated', savedReports);
+        }, (error) => {
+          this.notifyAllClients('tests:error', error);
+        });
+      })
     })
   }
 
