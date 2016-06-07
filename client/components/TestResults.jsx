@@ -38,25 +38,22 @@ export default class TestResults extends React.Component {
     // Setup initial state
     this.state = {
       // Results
-      testReports: {},
+      testReports: [],
       pipelines: [],
       addTestDialogOpened: false,
     };
   }
 
   componentDidMount() {
-    // All pipelines
+    // All pipeline names
     socket.on('pipelines:names', (pipelines) => {
-      if (pipelines.length > 0) {
-        this.setState({
-          pipelines: pipelines
-        });
-      }
+      this.setState({
+        pipelines: pipelines
+      });
     });
 
     // Updated test results
     socket.on('tests:updated', (testReports) => {
-      console.log(testReports);
       this.setState({
         testReports : testReports
       });
@@ -121,10 +118,10 @@ export default class TestResults extends React.Component {
       />
     ];
     
-    let testReports = [0, 1, 2, 3, 4].map((no) => {
+    const reports = this.state.testReports.map((report) => {
       return (
-      <div key={no} className="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-        <TestReport report={'Test-' + no} />
+      <div key={report._id} className="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+        <TestReport report={report} />
       </div>)
     });
 
@@ -132,7 +129,7 @@ export default class TestResults extends React.Component {
       <MuiThemeProvider muiTheme={muiTheme}>
         <div className="appcontainer">
           <div className="row">
-            {testReports}
+            {reports}
           </div>
           <Dialog
             title="Add Test"

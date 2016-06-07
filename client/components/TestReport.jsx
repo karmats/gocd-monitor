@@ -4,10 +4,12 @@
 
 import React from 'react';
 
-import { Card, CardHeader, CardMedia, CardText } from 'material-ui';
+import { Card, CardHeader, CardMedia, CardText, CardTitle } from 'material-ui';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import { grey100, teal100, pink100, teal500, pink500 } from 'material-ui/styles/colors';
 import { Line as LineChart } from 'react-chartjs';
+
+import Moment from 'moment';
 
 
 const styles = {
@@ -33,30 +35,32 @@ const styles = {
   }
 }
 
-const chartData = {
-    labels: ["101", "102", "103", "104", "105", "106", "107"],
+const chartData = (labels, passed, failed) => {
+  return {
+    labels: labels || [],
     datasets: [
-        {
-            label: "Passed",
-            fillColor: 'rgba(255, 255, 255, 0.5)',
-            strokeColor: '#fff',
-            pointColor: '#fff',
-            pointStrokeColor: '#fff',
-            pointHighlightFill: '#fff',
-            pointHighlightStroke: '#fff',
-            data: [65, 64, 67, 67, 70, 70, 71]
-        },
-        {
-            label: "Failed",
-            fillColor: '#fff',
-            strokeColor: '#fff',
-            pointColor: '#fff',
-            pointStrokeColor: '#fff',
-            pointHighlightFill: '#fff',
-            pointHighlightStroke: '#fff',
-            data: [0, 1, 10, 0, 0, 2, 3]
-        }
+      {
+        label: "Passed",
+        fillColor: 'rgba(255, 255, 255, 0.5)',
+        strokeColor: '#fff',
+        pointColor: '#fff',
+        pointStrokeColor: '#fff',
+        pointHighlightFill: '#fff',
+        pointHighlightStroke: '#fff',
+        data: passed || []
+      },
+      {
+        label: "Failed",
+        fillColor: '#fff',
+        strokeColor: '#fff',
+        pointColor: '#fff',
+        pointStrokeColor: '#fff',
+        pointHighlightFill: '#fff',
+        pointHighlightStroke: '#fff',
+        data: failed || []
+      }
     ]
+  }
 };
 
 const chartOptions = {
@@ -112,44 +116,107 @@ export default class TestReport extends React.Component {
   
   constructor(props, context) {
     super(props, context);
+
+    this.state = {
+      report: {},
+      chartData: chartData(),
+      failures: []
+    }
+
   }
 
-  generateFailInfo(report) {
+  componentDidMount() {
+    // Report model
+    const report = this.props.report;
+    const reportView = {
+      title: `${report.pipeline} (${report.stage})`,
+      subtitle: report.job
+    };
+    if (report.cucumber) {
+      const failures = [];
+      // Create chart history data      
+      reportView.history = report.cucumber
+      .reduce((acc, c) => {
+        let passed = 0;
+        let failed = 0;
+        c.features.forEach((feature) => {
+          feature.scenarios.forEach((scenario) => {
+            scenario.steps.forEach((step) => {
+              if (step.result === 'passed') {
+                passed++;
+              } else {
+                failed++;
+                failures.push({
+                  test: scenario.name,
+                  message: step.error,
+                });
+              }
+            })
+          })
+        })
+        acc.push({
+          passed: passed,
+          failed: failed,
+          when: c.timestamp
+        });
+        return acc;
+      }, [])
+      // Sort by time ascending
+      .sort((a, b) => {
+        return a.timestamp > b.timestamp ? -1 : 1;
+      });
+      reportView.failed = reportView.history.some(history => history.failed > 0)
+
+      // Chart data
+      const chartDataView = chartData(
+        reportView.history.map(history => Moment(history.when).fromNow()),
+        reportView.history.map(history => history.passed + history.failed),
+        reportView.history.map(history => history.failed)
+      );
+
+      this.setState({
+        report: reportView,
+        failures: failures,
+        chartData: chartDataView
+      })
+    }
+  }
+
+  generateFailInfo() {
     return (
       <Table selectable={false}>
         <TableHeader displaySelectAll={false} adjustForCheckbox={false} enableSelectAll={false}>
           <TableRow>
             <TableHeaderColumn>Test</TableHeaderColumn>
             <TableHeaderColumn>Reason</TableHeaderColumn>
-            <TableHeaderColumn>Blame</TableHeaderColumn>
           </TableRow>
         </TableHeader>
         <TableBody displayRowCheckbox={false}>
-          <TableRow>
-            <TableRowColumn>Button click</TableRowColumn>
-            <TableRowColumn>Expect 1 to be 2</TableRowColumn>
-            <TableRowColumn>Mats Roshauw</TableRowColumn>
-          </TableRow>
-          <TableRow>
-            <TableRowColumn>Fetch all metadata</TableRowColumn>
-            <TableRowColumn>Exception</TableRowColumn>
-            <TableRowColumn>Per Arneng</TableRowColumn>
-          </TableRow>
+          {this.state.failures.map((failure) => {
+            return (
+              <TableRow>
+                <TableRowColumn title={failure.test}>{failure.test}</TableRowColumn>
+                <TableRowColumn title={failure.message}>{failure.message}</TableRowColumn>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
     )
   }
+
   render() {
-    const success = Math.random() > 0.5;
+    const failed = this.state.report.failed;
 
     return (
-      <Card style={success ?  styles.cardSuccess : styles.cardFailure}>
-        <CardHeader title={this.props.report} titleColor="#fff" />
+      <Card style={failed ? styles.cardFailure : styles.cardSuccess}>
+        <CardTitle title={this.state.report.title} subtitle={this.state.report.subtitle}
+          subtitleColor="rgba(255, 255, 255, 0.7)" titleColor="#fff" />
         <CardMedia style={styles.cardMedia}>
-          <LineChart data={chartData} options={chartOptions} />
+          <LineChart data={this.state.chartData} options={chartOptions} redraw />
         </CardMedia>
         <CardText style={styles.cardText}>
-          {success ? 'All is good' : this.generateFailInfo()}
+          {failed ? this.generateFailInfo() : 'Stable for 3 days'}
         </CardText>
       </Card>
     );
