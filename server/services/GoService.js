@@ -56,6 +56,8 @@ export default class GoService {
           currentPipelines.push(pipeline);
           if (currentPipelines.length === pipelinesToFetch.length) {
             this.pipelines = currentPipelines;
+            // Update tests if needed
+            this.updateTestResults(currentPipelines);
             Logger.debug(`Emitting ${currentPipelines.length} pipelines to ${this.clients.length} clients`);
             this.notifyAllClients('pipelines:updated', currentPipelines);
           }
@@ -94,9 +96,10 @@ export default class GoService {
   /**
    * Adds tests from a pipeline. Retrieves all test report files and saves it to db
    * 
-   * @param {Object} pipeline The pipeline to get the test reports from
+   * @param {string} pipeline The pipeline to get the test reports from
    */
   addPipelineTests(pipeline) {
+    Logger.debug(`Adding test results from '${pipeline}'`);
     this.testService.getTestsFromPipeline(pipeline).then((result) => {
       // Group tests with same id
       const reports = result.reduce((acc, c) => {
@@ -113,11 +116,90 @@ export default class GoService {
       // Save to db
       reports.forEach((report) => {
         this.dbService.saveTestResult(report).then((savedReports) => {
-          this.notifyAllClients('tests:updated', savedReports);
+          this.testResults = this.testResults.concat(savedReports);
+          this.notifyAllClients('tests:updated', this.testResults);
         }, (error) => {
           this.notifyAllClients('tests:error', error);
         });
       })
+    })
+  }
+
+  /**
+   * Update test results if needed
+   * 
+   * @param {Array<Object>}   pipelines   Pipelines to check for new tests
+   */
+  updateTestResults(pipelines) {
+    let testsToUpdate = []
+    this.testResults.forEach((result) => {
+      // Time when last test was runned
+      const latestTestTime = result.cucumber ? result.cucumber.reduce((p, cTest) => {
+        if (cTest.timestamp > p) {
+          return cTest.timestamp;
+        }
+        return p;
+      }, 0) : 0;
+      const testPipeline = pipelines
+        .reduce((p, cPipeline) => {
+          if (cPipeline.name === result.pipeline) {
+            for (let i = 0; i < cPipeline.stageresults.length; i++) {
+              const stage = cPipeline.stageresults[i];
+              // If stage is building, test report isn't ready yet
+              if (stage.name === result.stage && stage.status !== 'building') {
+                for (let j = 0; j < stage.jobresults.length; j++) {
+                  const job = stage.jobresults[j];
+                  // If scheduled job time is after time of latest test 
+                  if (job.name === result.job && job.scheduled > latestTestTime) {
+                    return {
+                      testId: result._id,
+                      pipeline: cPipeline.name,
+                      pipelineCounter: cPipeline.counter,
+                      stage: stage.name,
+                      stageCounter: stage.counter,
+                      job: job.name,
+                      scheduled: job.scheduled
+                    }
+                  }
+                }
+              }
+            }
+          }
+          return p;
+        });
+
+      // Add as test to update
+      if (testPipeline) {
+        testsToUpdate.push(testPipeline);
+      }
+    });
+
+    testsToUpdate.forEach((p) => {
+      this.testService._getTestsFromUri(
+        `${this.goConfig.serverUrl}/go/files/${p.pipeline}/${p.pipelineCounter}/${p.stage}/${p.stageCounter}/${p.job}.json`)
+        .then((res) => {
+          if (res && res.length > 0) {
+            const cucumberResult = res.filter(res => res.type === 'cucumber');
+            if (cucumberResult.length > 0) {
+              // Concatenate the features from all cucumber tests
+              const cucumber = cucumberResult.reduce((acc, c) => {
+                acc.features = acc.features.concat(c.features);
+                return acc;
+              }, { features: [] });
+
+              // Test time 
+              cucumber.timestamp = p.scheduled;
+
+              this.dbService.updateTestResult(p.testId, 'cucumber', cucumber).then((savedTests) => {
+                this.testResults.filter(tr => tr._id === p.testId)[0].push(savedTests);
+              }, (error) => {
+                Logger.error(`Failed to save tests for id ${p.testId}`);
+                this.notifyAllClients('tests:error', error);
+              })
+
+            }
+          }
+        });
     })
   }
 
@@ -151,6 +233,7 @@ export default class GoService {
 
       // Return pipelines and tests if client asks for it
       client.on('pipelines:get', () => {
+        console.log(`Emitting ${this.pipelines.length}`);
         client.emit('pipelines:updated', this.pipelines);
       });
       client.on('tests:get', () => {

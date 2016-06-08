@@ -41,7 +41,7 @@ export default class GoBuildService {
    * @param   {string}          name  Name of the pipeline
    * @returns {Promise<Object>}       Pipeline instance. 
    * Example 
-   * { 
+   * {
    *    name : 'id,
    *    buildtime : 1457085089646,
    *    author: 'Bobby Malone',
@@ -51,11 +51,17 @@ export default class GoBuildService {
    *    stageresults: [
    *      {
    *        name: 'Build',
-   *        status: 'passed'
+   *        status: 'passed',
+   *        jobresults: [{
+   *          name: 'build-job',
+   *          result: 'passed',
+   *          schedueld: 1457085089646
+   *        }]
    *      },
    *      {
    *        name: 'Test',
    *        status: 'building'
+   *        jobresults: []
    *      }] 
    * }
    */

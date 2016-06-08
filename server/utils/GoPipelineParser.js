@@ -36,11 +36,19 @@ export default class GoPipelineParser {
     *    stageresults: [
     *      {
     *        name: 'Build',
-    *        status: 'passed'
+    *        status: 'passed',
+    *        counter: 1,
+    *        jobresults: [{
+    *          name: 'build-job',
+    *          result: 'passed',
+    *          scheduled: 1457085089646
+    *        }]
     *      },
     *      {
     *        name: 'Test',
-    *        status: 'building'
+    *        status: 'building',
+    *        counter: 2,
+    *        jobresults: []
     *      }] 
     * }
     */
@@ -68,7 +76,8 @@ export default class GoPipelineParser {
       stageResult.jobresults = stage.jobs.map((job) => {
         return {
           name: job.name,
-          result: job.state.toLowerCase()
+          result: job.state.toLowerCase(),
+          scheduled: job.scheduled_date
         }
       })
       return stageResult;
