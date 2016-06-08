@@ -33,7 +33,7 @@ export default class GoTestService {
         pipeline.stages.forEach((stage) => {
           stage.jobs.forEach((job) => {
             promises = promises.concat(
-              this._getTestsFromUri(`${this.conf.serverUrl}/go/files/${pipeline.name}/${pipeline.counter}/${stage.name}/${stage.counter}/${job.name}.json`)
+              this.getTestsFromUri(`${this.conf.serverUrl}/go/files/${pipeline.name}/${pipeline.counter}/${stage.name}/${stage.counter}/${job.name}.json`)
                 .then((result) => {
                   if (result && result.length > 0) {
                     const cucumberResult = result.filter(res => res.type === 'cucumber');
@@ -72,7 +72,7 @@ export default class GoTestService {
    * @param  {string}           uri   The uri to get test reports from
    * @return {Promise<Array>}  Array with test reports, for now only cucumber tests are supported
    */
-  _getTestsFromUri(uri) {
+  getTestsFromUri(uri) {
 
     const options = {
       uri: uri,
@@ -108,7 +108,7 @@ export default class GoTestService {
       });
       return Promise.all(promises);
     }).catch((err) => {
-      return err;
+      return Promise.reject(err);
     });
   }
 

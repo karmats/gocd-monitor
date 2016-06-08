@@ -131,7 +131,10 @@ export default class GoService {
    * @param {Array<Object>}   pipelines   Pipelines to check for new tests
    */
   updateTestResults(pipelines) {
-    let testsToUpdate = []
+    let testsToUpdate = [];
+
+    // Check all test results. If timestamp for a job is after latest test report timestamp
+    // the test will be updated
     this.testResults.forEach((result) => {
       // Time when last test was runned
       const latestTestTime = result.cucumber ? result.cucumber.reduce((p, cTest) => {
@@ -174,8 +177,9 @@ export default class GoService {
       }
     });
 
+    // Retrive latest test report files
     testsToUpdate.forEach((p) => {
-      this.testService._getTestsFromUri(
+      this.testService.getTestsFromUri(
         `${this.goConfig.serverUrl}/go/files/${p.pipeline}/${p.pipelineCounter}/${p.stage}/${p.stageCounter}/${p.job}.json`)
         .then((res) => {
           if (res && res.length > 0) {
@@ -186,12 +190,12 @@ export default class GoService {
                 acc.features = acc.features.concat(c.features);
                 return acc;
               }, { features: [] });
-
-              // Test time 
               cucumber.timestamp = p.scheduled;
 
+              // Save to db and notify all clients
               this.dbService.updateTestResult(p.testId, 'cucumber', cucumber).then((savedTests) => {
                 this.testResults.filter(tr => tr._id === p.testId)[0].push(savedTests);
+                this.notifyAllClients('tests:updated', this.testResults);
               }, (error) => {
                 Logger.error(`Failed to save tests for id ${p.testId}`);
                 this.notifyAllClients('tests:error', error);

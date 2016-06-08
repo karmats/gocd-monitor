@@ -1,0 +1,34 @@
+[{
+  "name": "cruise-output",
+  "url": "https://ci.example.com/go/files/PipelineName/541/StageName/1/JobName/cruise-output",
+  "type": "folder",
+  "files": [
+    {
+      "name": "console.log",
+      "url": "https://ci.example.com/go/files/PipelineName/541/StageName/1/JobName/cruise-output/console.log",
+      "type": "file"
+    },
+    {
+      "name": "md5.checksum",
+      "url": "https://ci.example.com/go/files/PipelineName/541/StageName/1/JobName/cruise-output/md5.checksum",
+      "type": "file"
+    }
+  ]
+},
+{
+  "name": "cucumber-reports",
+  "url": "https://ci.example.com/go/files/PipelineName/541/StageName/1/JobName/cucumber-reports",
+  "type": "folder",
+  "files": [
+    {
+      "name": "cucumber-login-and-logout-to-web-client-junit-report.xml",
+      "url": "https://ci.example.com/go/files/PipelineName/541/StageName/1/JobName/cucumber-reports/feature-junit-report.xml",
+      "type": "file"
+    },
+    {
+      "name": "feature-report.json",
+      "url": "https://ci.example.com/go/files/PipelineName/541/StageName/1/JobName/cucumber-reports/feature-report.json",
+      "type": "file"
+    }
+  ]
+}]
