@@ -4,7 +4,7 @@ import fs from 'fs';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 
-describe('GoBuildService spec', () => {
+describe('GoTestService spec', () => {
 
   // Chai setup
   chai.use(chaiAsPromised);
@@ -22,7 +22,7 @@ describe('GoBuildService spec', () => {
   let mockedCucumberPromise;
 
   // Test service
-  let GoTestService = require('../server/services/GoTestService').default;
+  let GoTestService;
 
   before((done) => {
     mockery.enable({
