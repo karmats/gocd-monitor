@@ -54,9 +54,14 @@ export default class TestResults extends React.Component {
 
     // Updated test results
     socket.on('tests:updated', (testReports) => {
+      console.log(testReports);
       this.setState({
         testReports : testReports
       });
+    });
+
+    socket.on('tests:error', (error) => {
+      console.log(error);
     });
 
     // Request latest test results
@@ -120,7 +125,7 @@ export default class TestResults extends React.Component {
     
     const reports = this.state.testReports.map((report) => {
       return (
-      <div key={report._id} className="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+      <div key={report._id} className="item">
         <TestReport report={report} />
       </div>)
     });
@@ -128,7 +133,7 @@ export default class TestResults extends React.Component {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div className="appcontainer">
-          <div className="row">
+          <div className="masonry">
             {reports}
           </div>
           <Dialog

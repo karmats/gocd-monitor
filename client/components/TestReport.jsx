@@ -133,10 +133,10 @@ export default class TestReport extends React.Component {
       subtitle: report.job
     };
     if (report.cucumber) {
-      const failures = [];
       // Create chart history data      
       reportView.history = report.cucumber
       .reduce((acc, c) => {
+        const errors = [];
         let passed = 0;
         let failed = 0;
         c.features.forEach((feature) => {
@@ -146,7 +146,7 @@ export default class TestReport extends React.Component {
                 passed++;
               } else {
                 failed++;
-                failures.push({
+                errors.push({
                   test: scenario.name,
                   message: step.error,
                 });
@@ -157,26 +157,28 @@ export default class TestReport extends React.Component {
         acc.push({
           passed: passed,
           failed: failed,
+          errors: errors,
           when: c.timestamp
         });
         return acc;
       }, [])
       // Sort by time ascending
       .sort((a, b) => {
-        return a.timestamp > b.timestamp ? -1 : 1;
+        return a.when > b.when ? 1 : -1;
       });
-      reportView.failed = reportView.history.some(history => history.failed > 0)
+      reportView.failed = reportView.history[0].failed > 0;
 
       // Chart data
       const chartDataView = chartData(
-        reportView.history.map(history => Moment(history.when).fromNow()),
+        reportView.history.map(history => Moment(history.when).fromNow(true)),
         reportView.history.map(history => history.passed + history.failed),
         reportView.history.map(history => history.failed)
       );
 
+      console.log(reportView);
       this.setState({
         report: reportView,
-        failures: failures,
+        failures: reportView.history[0].errors,
         chartData: chartDataView
       })
     }
@@ -192,9 +194,9 @@ export default class TestReport extends React.Component {
           </TableRow>
         </TableHeader>
         <TableBody displayRowCheckbox={false}>
-          {this.state.failures.map((failure) => {
+          {this.state.failures.map((failure, idx) => {
             return (
-              <TableRow>
+              <TableRow key={idx}>
                 <TableRowColumn title={failure.test}>{failure.test}</TableRowColumn>
                 <TableRowColumn title={failure.message}>{failure.message}</TableRowColumn>
               </TableRow>
