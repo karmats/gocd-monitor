@@ -4,8 +4,6 @@
 
 import React from 'react';
 
-import io from 'socket.io-client';
-
 import { Dialog, FlatButton, FloatingActionButton } from 'material-ui';
 import Add from 'material-ui/svg-icons/content/add';
 import { purple700 } from 'material-ui/styles/colors';
@@ -28,12 +26,12 @@ const styles = {
   }
 };
 
-const socket = io();
-
 export default class TestResults extends React.Component {
 
   constructor(props, context) {
     super(props, context);
+
+    this.socket = props.route.socket;
 
     // Setup initial state
     this.state = {
@@ -46,26 +44,26 @@ export default class TestResults extends React.Component {
 
   componentDidMount() {
     // All pipeline names
-    socket.on('pipelines:names', (pipelines) => {
+    this.socket.on('pipelines:names', (pipelines) => {
       this.setState({
         pipelines: pipelines
       });
     });
 
     // Updated test results
-    socket.on('tests:updated', (testReports) => {
+    this.socket.on('tests:updated', (testReports) => {
       console.log(testReports);
       this.setState({
         testReports : testReports
       });
     });
 
-    socket.on('tests:error', (error) => {
+    this.socket.on('tests:error', (error) => {
       console.log(error);
     });
 
     // Request latest test results
-    socket.emit('tests:get');
+    this.socket.emit('tests:get');
   }
 
   closeAddTest() {
@@ -86,7 +84,7 @@ export default class TestResults extends React.Component {
    * Add test reports for a pipeline
    */
   addTest() {
-    socket.emit('tests:add', this.selectedPipeline);
+    this.socket.emit('tests:add', this.selectedPipeline);
     this.closeAddTest();
   }
 

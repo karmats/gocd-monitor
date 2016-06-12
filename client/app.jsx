@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Link, IndexRoute, browserHistory } from 'react-router'
 import injectTapEventPlugin from 'react-tap-event-plugin';
+
+import io from 'socket.io-client';
+
 import Main from './components/Main';
 import TestResults from './components/TestResults';
 
@@ -10,6 +13,9 @@ import TestResults from './components/TestResults';
 //Check this repo:
 //https://github.com/zilverline/react-tap-event-plugin
 injectTapEventPlugin();
+
+// Setup a socket to pass to components that uses it
+const socket = io();
 
 // Dummy component to use for Route root
 class App extends React.Component {
@@ -29,8 +35,8 @@ class NoRoute extends React.Component {
 ReactDOM.render((
   <Router history={browserHistory}>
     <Route path="/" component={App}>
-      <IndexRoute component={Main}></IndexRoute>
-      <Route path="test-results" component={TestResults}/>
+      <IndexRoute component={Main} socket={socket}></IndexRoute>
+      <Route path="test-results" component={TestResults} socket={socket}/>
       <Route path="*" component={NoRoute}/>
     </Route>
   </Router>

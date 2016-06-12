@@ -4,8 +4,6 @@
 
 import React from 'react';
 
-import io from 'socket.io-client';
-
 import { Dialog, FlatButton, FloatingActionButton, Snackbar } from 'material-ui';
 import Settings from 'material-ui/svg-icons/action/settings';
 import * as Colors from 'material-ui/styles/colors';
@@ -39,12 +37,13 @@ const sortOrders = [{
   label: 'Status (building, failed, passed, paused)'
 }];
 
-const socket = io();
 
 export default class Main extends React.Component {
 
   constructor(props, context) {
     super(props, context);
+
+    this.socket = props.route.socket;
 
     // Setup initial state
     this.state = {
@@ -67,7 +66,7 @@ export default class Main extends React.Component {
   componentDidMount() {
 
     // Listen for updates
-    socket.on('pipelines:updated', (newPipelines) => {
+    this.socket.on('pipelines:updated', (newPipelines) => {
       let disabledPipelines = this.state.disabledPipelines.slice();
       let sortOrderName = this.state.sortOrder.name;
       this.setState({
@@ -76,14 +75,14 @@ export default class Main extends React.Component {
     });
 
     // Names of all pipelines
-    socket.on('pipelines:names', (pipelineNames) => {
+    this.socket.on('pipelines:names', (pipelineNames) => {
       this.setState({
         pipelineNames: pipelineNames
       })
     });
 
     // Settings from server
-    socket.on('settings:updated', (settings) => {
+    this.socket.on('settings:updated', (settings) => {
       let pipelines = this.state.pipelines.slice();
       if (settings.disabledPipelines && settings.sortOrder) {
         this.setState({
@@ -95,11 +94,11 @@ export default class Main extends React.Component {
     });
 
     // Request latest pipelines
-    socket.emit('pipelines:get');
+    this.socket.emit('pipelines:get');
   }
 
   saveSettings(settings) {
-    socket.emit('settings:update', {
+    this.socket.emit('settings:update', {
       sortOrder: settings.sortOrder.name,
       disabledPipelines: settings.disabledPipelines
     });

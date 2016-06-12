@@ -7,6 +7,8 @@ describe('MainComponent spec', () => {
 
   let Main;
 
+  const props = { route: {} };
+
   before((done) => {
     mockery.enable({
       warnOnReplace: false,
@@ -54,7 +56,7 @@ describe('MainComponent spec', () => {
     };
 
     it('should filter undefined pipelines', () => {
-      let mainComponent = new Main();
+      let mainComponent = new Main(props);
       let pipelines = generatePipelines();
 
       expect(pipelines).to.have.lengthOf(4);
@@ -63,7 +65,7 @@ describe('MainComponent spec', () => {
     });
 
     it('should sort pipelines by buildtime', () => {
-      let mainComponent = new Main();
+      let mainComponent = new Main(props);
       let pipelines = generatePipelines();
 
       let sortedPipelineNames = mainComponent.sortPipelines(pipelines, [], 'buildtime').map(p => p.name);
@@ -71,7 +73,7 @@ describe('MainComponent spec', () => {
     });
 
     it('should sort pipelines by status', () => {
-      let mainComponent = new Main();
+      let mainComponent = new Main(props);
       let pipelines = generatePipelines();
 
       let sortedPipelineNames = mainComponent.sortPipelines(pipelines, [], 'status').map(p => p.name);

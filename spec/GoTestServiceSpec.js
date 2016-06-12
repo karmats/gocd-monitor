@@ -76,7 +76,7 @@ describe('GoTestService spec', () => {
       expect(testsPromise).to.eventually.be.rejected.and.notify(done);
     });
 
-    it('should be rejected if cucumber json can\'t be retrieved', (done) => {
+    it('should be undefined if cucumber json can\'t be retrieved', (done) => {
       // Mock promise reject
       mockedFilesPromise = Promise.resolve(JSON.parse(fs.readFileSync(__dirname + '/data/files.json', 'utf-8')));
       mockedCucumberPromise = Promise.reject('Cucumber error');
@@ -86,7 +86,7 @@ describe('GoTestService spec', () => {
 
       let testsPromise = new GoTestService(config).getTestsFromUri(`${config.serverUrl}/go/files/dummy.json`);
 
-      expect(testsPromise).to.eventually.be.rejected.and.notify(done);
+      expect(testsPromise).to.eventually.have.deep.property('[0]', undefined).and.notify(done);
     });
 
   });
