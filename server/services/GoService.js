@@ -37,9 +37,7 @@ export default class GoService {
     });
 
     // Retrieve stored test results
-    this.dbService.getTestResults().then((testResults) => {
-      this.testResults = testResults;
-    });
+    this._refreshAndNotifyTestResults();
 
     // Start polling go server for build and test results
     this.pollGoServer();
@@ -116,8 +114,7 @@ export default class GoService {
       // Save to db
       reports.forEach((report) => {
         this.dbService.saveTestResult(report).then((savedReports) => {
-          this.testResults = this.testResults.concat(savedReports);
-          this.notifyAllClients('tests:updated', this.testResults);
+          this._refreshAndNotifyTestResults();
         }, (error) => {
           this.notifyAllClients('tests:error', error);
         });
@@ -131,7 +128,7 @@ export default class GoService {
    * @param {Array<Object>}   pipelines   Pipelines to check for new tests
    */
   updateTestResults(pipelines) {
-    let testsToUpdate = [];
+    const testsToUpdate = [];
 
     // Check all test results. If timestamp for a job is after latest test report timestamp
     // the test will be updated
@@ -145,7 +142,7 @@ export default class GoService {
       }, 0) : 0;
       const testPipeline = pipelines
         .reduce((p, cPipeline) => {
-          if (cPipeline.name === result.pipeline) {
+          if (cPipeline && cPipeline.name === result.pipeline) {
             for (let i = 0; i < cPipeline.stageresults.length; i++) {
               const stage = cPipeline.stageresults[i];
               // If stage is building, test report isn't ready yet
@@ -169,7 +166,7 @@ export default class GoService {
             }
           }
           return p;
-        });
+        }, null);
 
       // Add as test to update
       if (testPipeline) {
@@ -179,6 +176,7 @@ export default class GoService {
 
     // Retrive latest test report files
     testsToUpdate.forEach((p) => {
+      console.log('Getting test from ', p);
       this.testService.getTestsFromUri(
         `${this.goConfig.serverUrl}/go/files/${p.pipeline}/${p.pipelineCounter}/${p.stage}/${p.stageCounter}/${p.job}.json`)
         .then((res) => {
@@ -194,8 +192,7 @@ export default class GoService {
 
               // Save to db and notify all clients
               this.dbService.updateTestResult(p.testId, 'cucumber', cucumber).then((savedTests) => {
-                this.testResults.filter(tr => tr._id === p.testId)[0].push(savedTests);
-                this.notifyAllClients('tests:updated', this.testResults);
+                this._refreshAndNotifyTestResults();
               }, (error) => {
                 Logger.error(`Failed to save tests for id ${p.testId}`);
                 this.notifyAllClients('tests:error', error);
@@ -237,7 +234,6 @@ export default class GoService {
 
       // Return pipelines and tests if client asks for it
       client.on('pipelines:get', () => {
-        console.log(`Emitting ${this.pipelines.length}`);
         client.emit('pipelines:updated', this.pipelines);
       });
       client.on('tests:get', () => {
@@ -266,6 +262,17 @@ export default class GoService {
   notifyAllClients(event, data) {
     this.clients.forEach((client) => {
       client.emit(event, data);
+    });
+  }
+
+  // Get latest test results from db and notify all clients
+  _refreshAndNotifyTestResults() {
+    this.dbService.getTestResults().then((results) => {
+      this.testResults = results;
+      this.notifyAllClients('tests:updated', this.testResults);
+    }, (error) => {
+      Logger.error('Failed to get test results');
+      this.notifyAllClients('tests:error', error);
     });
   }
 }

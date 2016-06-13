@@ -103,6 +103,10 @@ export default class GoTestService {
             return testResult;
           }
 
+        }, (error) => {
+          Logger.error('Failed to get cucumber test report');
+          // Resolve anyway, just ignore this test
+          return Promise.resolve();
         }));
 
       });

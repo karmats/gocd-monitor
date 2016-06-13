@@ -14,12 +14,10 @@ import Moment from 'moment';
 
 const styles = {
   cardSuccess: {
-    backgroundColor: teal500,
-    marginBottom: '1rem' 
+    backgroundColor: teal500 
   },
   cardFailure: {
-    backgroundColor: pink500,
-    marginBottom: '1rem'
+    backgroundColor: pink500
   },
   cardHeader: {
     color: '#fff'
@@ -166,7 +164,8 @@ export default class TestReport extends React.Component {
       .sort((a, b) => {
         return a.when > b.when ? 1 : -1;
       });
-      reportView.failed = reportView.history[0].failed > 0;
+      const latestTestReport = reportView.history[reportView.history.length - 1];
+      reportView.failed = latestTestReport.failed > 0;
 
       // Chart data
       const chartDataView = chartData(
@@ -178,7 +177,7 @@ export default class TestReport extends React.Component {
       console.log(reportView);
       this.setState({
         report: reportView,
-        failures: reportView.history[0].errors,
+        failures: latestTestReport.errors,
         chartData: chartDataView
       })
     }

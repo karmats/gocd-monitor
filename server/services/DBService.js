@@ -80,13 +80,16 @@ export default class DBService {
    */
   saveTestResult(testResult) {
     return new Promise((resolve, reject) => {
-      testResult.type = 'test';
-      this.datastore.insert(testResult, (insErr, savedTest) => {
-        if (!insErr) {
-          resolve(savedTest);
-        } else {
-          reject(insErr);
-        }
+      // Remove if any
+      this.datastore.remove({ _id: testResult._id }, {}, () => {
+        testResult.type = 'test';
+        this.datastore.insert(testResult, (insErr, savedTest) => {
+          if (!insErr) {
+            resolve(savedTest);
+          } else {
+            reject(insErr);
+          }
+        });
       });
     });
   }
