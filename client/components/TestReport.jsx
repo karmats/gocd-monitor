@@ -7,14 +7,14 @@ import React from 'react';
 import { Card, CardHeader, CardMedia, CardText, CardTitle } from 'material-ui';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import { grey100, teal100, pink100, teal500, pink500 } from 'material-ui/styles/colors';
-import { Line as LineChart } from 'react-chartjs';
+import Chart from 'chart.js'
 
 import Moment from 'moment';
 
 
 const styles = {
   cardSuccess: {
-    backgroundColor: teal500 
+    backgroundColor: teal500
   },
   cardFailure: {
     backgroundColor: pink500
@@ -33,85 +33,77 @@ const styles = {
   }
 }
 
+Chart.defaults.global.defaultFontColor = '#fff';
+Chart.defaults.global.defaultFontFamily = 'Roboto';
+
 const chartData = (labels, passed, failed) => {
   return {
     labels: labels || [],
     datasets: [
       {
-        label: "Passed",
-        fillColor: 'rgba(255, 255, 255, 0.5)',
-        strokeColor: '#fff',
-        pointColor: '#fff',
-        pointStrokeColor: '#fff',
-        pointHighlightFill: '#fff',
-        pointHighlightStroke: '#fff',
-        data: passed || []
+        label: "Failed",
+        fill: true,
+        backgroundColor: '#fff',
+        data: failed || []
       },
       {
-        label: "Failed",
-        fillColor: '#fff',
-        strokeColor: '#fff',
-        pointColor: '#fff',
-        pointStrokeColor: '#fff',
-        pointHighlightFill: '#fff',
-        pointHighlightStroke: '#fff',
-        data: failed || []
-      }
+        label: "Passed",
+        fill: true,
+        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+        data: passed || []
+      },
     ]
   }
 };
 
 const chartOptions = {
-    responsive : true,
+  responsive: true,
+  color: '#fff',
+  fontFamily: 'Roboto',
+  fontColor: '#ffffff',
+  title: {
+    display: false
+  },
+  legend: {
+    display: false
+  },
+  elements: {
+    line: {
+      tension: 0,
+      backgroundColor: '#fff',
+      borderColor: '#fff',
+      borderWidth: 1
+    },
+    point: {
+      radius: 1,
+      backgroundColor: '#fff',
+      borderColor: '#fff'
+    }
+  },
 
-    ///Boolean - Whether grid lines are shown across the chart
-    scaleShowGridLines : false,
-    
-    scaleLineColor: '#fff',
-    scaleFontColor: '#fff',
+  scales: {
+    xAxes: [{
+      gridLines: {
+        color: '#fff',
+        display: false
+      }
+    }],
+    yAxes: [{
+      gridLines: {
+        color: '#fff',
+        display: false
+      },
+      stacked: true,
+      beginAtZero: true
+    }]
+  },
 
-    //String - Colour of the grid lines
-    scaleGridLineColor : '#fff',
-
-    //Number - Width of the grid lines
-    scaleGridLineWidth : 1,
-
-    //Boolean - Whether to show horizontal lines (except X axis)
-    scaleShowHorizontalLines: false,
-
-    //Boolean - Whether to show vertical lines (except Y axis)
-    scaleShowVerticalLines: false,
-
-    //Boolean - Whether the line is curved between points
-    bezierCurve : false,
-
-    //Number - Tension of the bezier curve between points
-    bezierCurveTension : 0.4,
-
-    //Boolean - Whether to show a dot for each point
-    pointDot : false,
-
-    //Number - Radius of each point dot in pixels
-    pointDotRadius : 1,
-
-    //Number - Pixel width of point dot stroke
-    pointDotStrokeWidth : 0,
-
-    //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-    pointHitDetectionRadius : 20,
-
-    //Boolean - Whether to show a stroke for datasets
-    datasetStroke : true,
-
-    //Number - Pixel width of dataset stroke
-    datasetStrokeWidth : 1,
-
-    //Boolean - Whether to fill the dataset with a colour
-    datasetFill : true
+  //Boolean - Whether to fill the dataset with a colour
+  datasetFill: true
 };
 
 export default class TestReport extends React.Component {
-  
+
   constructor(props, context) {
     super(props, context);
 
@@ -123,9 +115,39 @@ export default class TestReport extends React.Component {
 
   }
 
+  componentWillMount() {
+    console.log('will mount');
+    this.setupState(this.props);
+  }
+
   componentDidMount() {
+    const ctx = this.refs.reportChart;
+    console.log('will draw chart', this.state.chartData);
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: this.state.chartData,
+      options: chartOptions
+    });
+  }
+
+  componentWillUpdate() {
+    const ctx = this.refs.reportChart;
+    console.log('will draw chart', this.state.chartData);
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: this.state.chartData,
+      options: chartOptions
+    });
+  }
+
+  componentWillReceiveProps(props) {
+    console.log('did receive props');
+    this.setupState(props);
+  }
+
+  setupState(props) {
     // Report model
-    const report = this.props.report;
+    const report = props.report;
     const reportView = {
       title: `${report.pipeline} (${report.stage})`,
       subtitle: report.job
@@ -133,48 +155,47 @@ export default class TestReport extends React.Component {
     if (report.cucumber) {
       // Create chart history data      
       reportView.history = report.cucumber
-      .reduce((acc, c) => {
-        const errors = [];
-        let passed = 0;
-        let failed = 0;
-        c.features.forEach((feature) => {
-          feature.scenarios.forEach((scenario) => {
-            scenario.steps.forEach((step) => {
-              if (step.result === 'passed') {
-                passed++;
-              } else {
-                failed++;
-                errors.push({
-                  test: scenario.name,
-                  message: step.error,
-                });
-              }
+        .reduce((acc, c) => {
+          const errors = [];
+          let passed = 0;
+          let failed = 0;
+          c.features.forEach((feature) => {
+            feature.scenarios.forEach((scenario) => {
+              scenario.steps.forEach((step) => {
+                if (step.result === 'passed') {
+                  passed++;
+                } else {
+                  failed++;
+                  errors.push({
+                    test: scenario.name,
+                    message: step.error,
+                  });
+                }
+              })
             })
           })
-        })
-        acc.push({
-          passed: passed,
-          failed: failed,
-          errors: errors,
-          when: c.timestamp
+          acc.push({
+            passed: passed,
+            failed: failed,
+            errors: errors,
+            when: c.timestamp
+          });
+          return acc;
+        }, [])
+        // Sort by time ascending
+        .sort((a, b) => {
+          return a.when > b.when ? 1 : -1;
         });
-        return acc;
-      }, [])
-      // Sort by time ascending
-      .sort((a, b) => {
-        return a.when > b.when ? 1 : -1;
-      });
       const latestTestReport = reportView.history[reportView.history.length - 1];
       reportView.failed = latestTestReport.failed > 0;
 
       // Chart data
       const chartDataView = chartData(
         reportView.history.map(history => Moment(history.when).fromNow(true)),
-        reportView.history.map(history => history.passed + history.failed),
+        reportView.history.map(history => history.passed),
         reportView.history.map(history => history.failed)
       );
 
-      console.log(reportView);
       this.setState({
         report: reportView,
         failures: latestTestReport.errors,
@@ -200,7 +221,7 @@ export default class TestReport extends React.Component {
                 <TableRowColumn title={failure.message}>{failure.message}</TableRowColumn>
               </TableRow>
             )
-          })}
+          }) }
         </TableBody>
       </Table>
     )
@@ -214,7 +235,7 @@ export default class TestReport extends React.Component {
         <CardTitle title={this.state.report.title} subtitle={this.state.report.subtitle}
           subtitleColor="rgba(255, 255, 255, 0.7)" titleColor="#fff" />
         <CardMedia style={styles.cardMedia}>
-          <LineChart data={this.state.chartData} options={chartOptions} redraw />
+          <canvas ref="reportChart"></canvas>
         </CardMedia>
         <CardText style={styles.cardText}>
           {failed ? this.generateFailInfo() : 'Stable for 3 days'}

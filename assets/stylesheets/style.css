@@ -208,7 +208,7 @@ div.buildinfo span {
 /* Progress spinner */
 .loader {
   vertical-align: middle;
-  margin: 0 2px;
+  margin: 1px 1px 0;
   display: inline-block;
   position: relative;
   width: 13px;
