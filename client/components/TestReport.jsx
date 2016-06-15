@@ -93,8 +93,7 @@ const chartOptions = {
         color: '#fff',
         display: false
       },
-      stacked: true,
-      beginAtZero: true
+      stacked: true
     }]
   },
 
@@ -107,45 +106,35 @@ export default class TestReport extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    this.state = {
-      report: {},
-      chartData: chartData(),
-      failures: []
-    }
+    this.state = this.propsToState(props);
 
-  }
-
-  componentWillMount() {
-    console.log('will mount');
-    this.setupState(this.props);
   }
 
   componentDidMount() {
+    // Initialize chart object
     const ctx = this.refs.reportChart;
-    console.log('will draw chart', this.state.chartData);
-    const chart = new Chart(ctx, {
+    this.chart = new Chart(ctx, {
       type: 'line',
       data: this.state.chartData,
       options: chartOptions
     });
   }
 
-  componentWillUpdate() {
-    const ctx = this.refs.reportChart;
-    console.log('will draw chart', this.state.chartData);
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: this.state.chartData,
-      options: chartOptions
-    });
+  componentDidUpdate() {
+    this.chart.data.datasets = this.state.chartData.datasets;
+    this.chart.update();
   }
 
   componentWillReceiveProps(props) {
-    console.log('did receive props');
-    this.setupState(props);
+    this.setState(this.propsToState(props));
   }
 
-  setupState(props) {
+  /**
+   * Modifies incomming properties to state object
+   * 
+   * @param   {Array<Object>}   props   The properties to modify
+   */
+  propsToState(props) {
     // Report model
     const report = props.report;
     const reportView = {
@@ -187,7 +176,6 @@ export default class TestReport extends React.Component {
           return a.when > b.when ? 1 : -1;
         });
       const latestTestReport = reportView.history[reportView.history.length - 1];
-      reportView.failed = latestTestReport.failed > 0;
 
       // Chart data
       const chartDataView = chartData(
@@ -196,15 +184,15 @@ export default class TestReport extends React.Component {
         reportView.history.map(history => history.failed)
       );
 
-      this.setState({
+      return {
         report: reportView,
-        failures: latestTestReport.errors,
+        latest: latestTestReport,
         chartData: chartDataView
-      })
+      }
     }
   }
 
-  generateFailInfo() {
+  generateFailInfo(failures) {
     return (
       <Table selectable={false}>
         <TableHeader displaySelectAll={false} adjustForCheckbox={false} enableSelectAll={false}>
@@ -214,7 +202,7 @@ export default class TestReport extends React.Component {
           </TableRow>
         </TableHeader>
         <TableBody displayRowCheckbox={false}>
-          {this.state.failures.map((failure, idx) => {
+          {failures.map((failure, idx) => {
             return (
               <TableRow key={idx}>
                 <TableRowColumn title={failure.test}>{failure.test}</TableRowColumn>
@@ -228,7 +216,8 @@ export default class TestReport extends React.Component {
   }
 
   render() {
-    const failed = this.state.report.failed;
+    const latest = this.state.latest;
+    const failed = latest > 0;
 
     return (
       <Card style={failed ? styles.cardFailure : styles.cardSuccess}>
@@ -238,7 +227,7 @@ export default class TestReport extends React.Component {
           <canvas ref="reportChart"></canvas>
         </CardMedia>
         <CardText style={styles.cardText}>
-          {failed ? this.generateFailInfo() : 'Stable for 3 days'}
+          {failed ? this.generateFailInfo(latest.errors) : 'Stable for 3 days'}
         </CardText>
       </Card>
     );
