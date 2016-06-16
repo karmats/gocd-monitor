@@ -5,6 +5,7 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 
 import io from 'socket.io-client';
 
+import { switchBetweenPagesInterval } from '../app-config';
 import Main from './components/Main';
 import TestResults from './components/TestResults';
 
@@ -29,6 +30,17 @@ class NoRoute extends React.Component {
   render() {
     return <h1>No route found :(</h1>
   }
+}
+
+// Switch between pipeline and test results page
+if (switchBetweenPagesInterval && switchBetweenPagesInterval > 0) {
+  setTimeout(() => {
+    if (window.location.pathname.indexOf('test-results') >= 0) {
+      window.location.replace('/');
+    } else {
+      window.location.replace('/test-results');
+    }
+  }, switchBetweenPagesInterval*1000)
 }
 
 // Render react router routes
