@@ -95,6 +95,21 @@ export default class DBService {
   }
 
   /**
+   * @param {string}  testResultId  Id of the test to remove
+   */
+  removeTestResult(testResultId) {
+    return new Promise((resolve, reject) => {
+      this.datastore.remove({ _id: testResultId }, {}, (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve();
+        }
+      })
+    })
+  }
+
+  /**
    * @param {string}          testName     Name/id of the test
    * @param {string}          testType     Type of test, i.e. cucumber
    * @param {Object}          testResult   The test result to update

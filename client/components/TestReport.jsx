@@ -4,11 +4,12 @@
 
 import React from 'react';
 
-import { Card, CardHeader, CardMedia, CardText, CardTitle } from 'material-ui';
-import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
+import { Card, CardActions, CardMedia, CardText, CardTitle, IconButton } from 'material-ui';
+import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
 import { grey100, teal100, pink100, teal500, pink500 } from 'material-ui/styles/colors';
-import Chart from 'chart.js'
+import Clear from 'material-ui/svg-icons/content/clear';
 
+import Chart from 'chart.js'
 import Moment from 'moment';
 
 
@@ -37,6 +38,10 @@ const styles = {
   tableWrapper: {
     maxHeight: 440,
     overflowY: 'auto'
+  },
+  cardActions: {
+    textAlign: 'right',
+    marginRight: -10
   }
 }
 
@@ -188,8 +193,18 @@ export default class TestReport extends React.Component {
     const latest = this.state.latest;
     const failed = latest.errors.length > 0;
 
+    // Remove test action
+    const actions = this.props.admin ? 
+        (<CardActions style={styles.cardActions}>
+          <IconButton tooltip="Remove test" tooltipPosition="bottom-left"
+            onTouchTap={this.props.onRemoveTest.bind(this, report)}>
+            <Clear color={white} />
+          </IconButton>
+        </CardActions>) : null;
+
     return (
       <Card style={failed ? styles.cardFailure : styles.cardSuccess}>
+        {actions}
         <CardTitle title={report.title} subtitle={report.subtitle}
           subtitleColor={transWhite} titleColor={white} />
         <CardMedia style={styles.cardMedia}>

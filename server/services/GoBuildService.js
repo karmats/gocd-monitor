@@ -2,7 +2,6 @@ import rp from 'request-promise';
 
 import Logger from '../utils/Logger';
 import GoPipelineParser from '../utils/GoPipelineParser';
-import { GoConfig } from './GoService';
 
 export default class GoBuildService {
 

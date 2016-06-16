@@ -115,8 +115,11 @@ export default class GoService {
       reports.forEach((report) => {
         this.dbService.saveTestResult(report).then((savedReports) => {
           this._refreshAndNotifyTestResults();
+          this.notifyAllClients('tests:message', 'Tests added');
         }, (error) => {
-          this.notifyAllClients('tests:error', error);
+          const msg = 'Failed to save test result';
+          Logger.error(msg);
+          this.notifyAllClients('tests:message', msg);
         });
       })
     })
@@ -176,7 +179,6 @@ export default class GoService {
 
     // Retrive latest test report files
     testsToUpdate.forEach((p) => {
-      console.log('Getting test from ', p);
       this.testService.getTestsFromUri(
         `${this.goConfig.serverUrl}/go/files/${p.pipeline}/${p.pipelineCounter}/${p.stage}/${p.stageCounter}/${p.job}.json`)
         .then((res) => {
@@ -194,8 +196,9 @@ export default class GoService {
               this.dbService.updateTestResult(p.testId, 'cucumber', cucumber).then((savedTests) => {
                 this._refreshAndNotifyTestResults();
               }, (error) => {
-                Logger.error(`Failed to save tests for id ${p.testId}`);
-                this.notifyAllClients('tests:error', error);
+                const msg = `Failed to save tests for id ${p.testId}`;
+                Logger.error(msg);
+                this.notifyAllClients('tests:message', msg);
               })
 
             }
@@ -230,6 +233,16 @@ export default class GoService {
 
       client.on('tests:add', (testPipeline) => {
         this.addPipelineTests(testPipeline);
+      });
+      client.on('tests:remove', (testId) => {
+        this.dbService.removeTestResult(testId).then(() => {
+          this._refreshAndNotifyTestResults();
+          this.notifyAllClients('tests:message', 'Test removed');
+        }, (error) => {
+          const msg = 'Failed to remove test result';
+          Logger.error(msg);
+          this.notifyAllClients('tests:message', msg);
+        });
       });
 
       // Return pipelines and tests if client asks for it
@@ -271,8 +284,8 @@ export default class GoService {
       this.testResults = results;
       this.notifyAllClients('tests:updated', this.testResults);
     }, (error) => {
-      Logger.error('Failed to get test results');
-      this.notifyAllClients('tests:error', error);
+      const msg = 'Failed to get test results from db';
+      this.notifyAllClients('tests:message', msg);
     });
   }
 }

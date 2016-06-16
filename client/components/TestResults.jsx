@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-import { Dialog, FlatButton, FloatingActionButton } from 'material-ui';
+import { Dialog, FlatButton, FloatingActionButton, Snackbar } from 'material-ui';
 import Add from 'material-ui/svg-icons/content/add';
 import { purple700 } from 'material-ui/styles/colors';
 import { MuiThemeProvider, getMuiTheme } from 'material-ui/styles';
@@ -40,6 +40,9 @@ export default class TestResults extends React.Component {
       testReports: [],
       pipelines: [],
       addTestDialogOpened: false,
+      // Snackbar message
+      message: '',
+      showMessage: false
     };
   }
 
@@ -58,8 +61,11 @@ export default class TestResults extends React.Component {
       });
     });
 
-    this.socket.on('tests:error', (error) => {
-      console.log(error);
+    this.socket.on('tests:message', (message) => {
+      this.setState({
+        showMessage: true,
+        message: message
+      });
     });
 
     // Request latest test results
@@ -101,6 +107,7 @@ export default class TestResults extends React.Component {
   convertReport(report) {
     // Report model
     const reportView = {
+      id: report._id,
       title: `${report.pipeline} (${report.stage})`,
       subtitle: report.job
     };
@@ -146,12 +153,28 @@ export default class TestResults extends React.Component {
     return reportView;
   }
 
+  closeSnackbar() {
+    this.setState({
+      showMessage : false,
+      message: ''
+    });
+  }
+
   /**
    * Add test reports for a pipeline
    */
   addTest() {
     this.socket.emit('tests:add', this.selectedPipeline);
     this.closeAddTest();
+  }
+
+  /**
+   * Removes a test
+   * 
+   * @param {Object} report The report to remove
+   */
+  removeTest(report) {
+    this.socket.emit('tests:remove', report.id);
   }
 
   /**
@@ -190,7 +213,7 @@ export default class TestResults extends React.Component {
     const reports = this.state.testReports.map((report) => {
       return (
         <div key={report.title} className="item">
-          <TestReport report={report} />
+          <TestReport report={report} admin={adminMode} onRemoveTest={this.removeTest.bind(this)} />
         </div>)
     });
 
@@ -208,6 +231,11 @@ export default class TestResults extends React.Component {
             Select a pipeline to generate test reports for.For now only cucumber json is supported.
             <AddTest pipelines={this.state.pipelines} onPipelineSelect={this.selectTestPipeline.bind(this) } />
           </Dialog>
+          <Snackbar
+            open={this.state.showMessage}
+            message={this.state.message}
+            autoHideDuration={5000}
+            onRequestClose={this.closeSnackbar.bind(this)} />
           {addBtn}
         </div>
       </MuiThemeProvider>
