@@ -12,6 +12,7 @@ import { MuiThemeProvider, getMuiTheme } from 'material-ui/styles';
 import TestReport from './TestReport';
 import AddTest from './AddTest';
 
+
 const muiTheme = getMuiTheme({
   palette: {
     primary1Color: purple700,
@@ -52,9 +53,8 @@ export default class TestResults extends React.Component {
 
     // Updated test results
     this.socket.on('tests:updated', (testReports) => {
-      console.log(testReports);
       this.setState({
-        testReports : testReports
+        testReports: testReports.map(this.convertReport).sort(this.sortReports)
       });
     });
 
@@ -81,6 +81,72 @@ export default class TestResults extends React.Component {
   }
 
   /**
+   * Sort reports. Failed first, then time for latest report
+   */
+  sortReports(r1, r2) {
+    const latest1 = r1.history[r1.history.length - 1];
+    const latest2 = r2.history[r2.history.length - 1];
+    if (latest2.failed > 0 && latest1.failed <= 0) {
+      return 1;
+    }
+    if (latest2.when > latest1.when) {
+      return 1;
+    }
+    return 0;
+  }
+
+  /**
+   * Converts report data to report object
+   */
+  convertReport(report) {
+    // Report model
+    const reportView = {
+      title: `${report.pipeline} (${report.stage})`,
+      subtitle: report.job
+    };
+    if (report.cucumber) {
+      // Create chart history data      
+      reportView.history = report.cucumber
+        .reduce((acc, c) => {
+          const errors = [];
+          let passed = 0;
+          let failed = 0;
+          c.features.forEach((feature) => {
+            feature.scenarios.forEach((scenario) => {
+              scenario.steps.forEach((step) => {
+                if (step.result === 'passed') {
+                  passed++;
+                } else {
+                  failed++;
+                  errors.push({
+                    test: scenario.name,
+                    message: step.error,
+                  });
+                }
+              })
+            })
+          })
+          acc.push({
+            passed: passed,
+            failed: failed,
+            errors: errors,
+            when: c.timestamp
+          });
+          return acc;
+        }, [])
+        // Sort by time ascending
+        .sort((a, b) => {
+          return a.when > b.when ? -1 : 1;
+        })
+        // 10 latest
+        .slice(0, 10)
+        .reverse();
+
+    }
+    return reportView;
+  }
+
+  /**
    * Add test reports for a pipeline
    */
   addTest() {
@@ -103,7 +169,7 @@ export default class TestResults extends React.Component {
       <FloatingActionButton
         style={styles.fab}
         primary={true}
-        onTouchTap={this.openAddTest.bind(this)}>
+        onTouchTap={this.openAddTest.bind(this) }>
         <Add />
       </FloatingActionButton>
     ) : null;
@@ -112,20 +178,20 @@ export default class TestResults extends React.Component {
       <FlatButton
         label="Cancel"
         primary={false}
-        onTouchTap={this.closeAddTest.bind(this)}
-      />,
+        onTouchTap={this.closeAddTest.bind(this) }
+        />,
       <FlatButton
         label="Add"
         primary={true}
-        onTouchTap={this.addTest.bind(this)}
-      />
+        onTouchTap={this.addTest.bind(this) }
+        />
     ];
-    
+
     const reports = this.state.testReports.map((report) => {
       return (
-      <div key={report._id} className="item">
-        <TestReport report={report} />
-      </div>)
+        <div key={report.title} className="item">
+          <TestReport report={report} />
+        </div>)
     });
 
     return (
@@ -138,9 +204,9 @@ export default class TestResults extends React.Component {
             title="Add Test"
             open={this.state.addTestDialogOpened}
             actions={addTestActions}
-            onRequestClose={this.closeAddTest.bind(this)}>
-            Select a pipeline to generate test reports for. For now only cucumber json is supported.
-            <AddTest pipelines={this.state.pipelines} onPipelineSelect={this.selectTestPipeline.bind(this)} />
+            onRequestClose={this.closeAddTest.bind(this) }>
+            Select a pipeline to generate test reports for.For now only cucumber json is supported.
+            <AddTest pipelines={this.state.pipelines} onPipelineSelect={this.selectTestPipeline.bind(this) } />
           </Dialog>
           {addBtn}
         </div>

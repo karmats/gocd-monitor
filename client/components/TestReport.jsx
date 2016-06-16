@@ -12,6 +12,9 @@ import Chart from 'chart.js'
 import Moment from 'moment';
 
 
+const white = 'rgb(255, 255, 255)';
+const transWhite = 'rgba(255, 255, 255, 0.5)';
+
 const styles = {
   cardSuccess: {
     backgroundColor: teal500
@@ -20,20 +23,24 @@ const styles = {
     backgroundColor: pink500
   },
   cardHeader: {
-    color: '#fff'
+    color: white
   },
   cardMedia: {
-    margin: '0 16px'
+    margin: '16px'
   },
   cardText: {
-    backgroundColor: '#fff'
+    backgroundColor: white
   },
   ok: {
     color: teal500
+  },
+  tableWrapper: {
+    maxHeight: 440,
+    overflowY: 'auto'
   }
 }
 
-Chart.defaults.global.defaultFontColor = '#fff';
+Chart.defaults.global.defaultFontColor = white;
 Chart.defaults.global.defaultFontFamily = 'Roboto';
 
 const chartData = (labels, passed, failed) => {
@@ -43,13 +50,13 @@ const chartData = (labels, passed, failed) => {
       {
         label: "Failed",
         fill: true,
-        backgroundColor: '#fff',
+        backgroundColor: white,
         data: failed || []
       },
       {
         label: "Passed",
         fill: true,
-        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+        backgroundColor: transWhite,
         data: passed || []
       },
     ]
@@ -58,9 +65,6 @@ const chartData = (labels, passed, failed) => {
 
 const chartOptions = {
   responsive: true,
-  color: '#fff',
-  fontFamily: 'Roboto',
-  fontColor: '#ffffff',
   title: {
     display: false
   },
@@ -70,28 +74,33 @@ const chartOptions = {
   elements: {
     line: {
       tension: 0,
-      backgroundColor: '#fff',
-      borderColor: '#fff',
+      backgroundColor: white,
+      borderColor: white,
       borderWidth: 1
     },
     point: {
       radius: 1,
-      backgroundColor: '#fff',
-      borderColor: '#fff'
-    }
+      backgroundColor: white,
+      borderColor: white
+    },
   },
 
   scales: {
     xAxes: [{
       gridLines: {
-        color: '#fff',
+        drawBorder: false,
+        color: white,
         display: false
       }
     }],
     yAxes: [{
       gridLines: {
-        color: '#fff',
+        drawBorder: false,
+        color: white,
         display: false
+      },
+      ticks: {
+        maxTicksLimit: 5
       },
       stacked: true
     }]
@@ -135,66 +144,25 @@ export default class TestReport extends React.Component {
    * @param   {Array<Object>}   props   The properties to modify
    */
   propsToState(props) {
-    // Report model
     const report = props.report;
-    const reportView = {
-      title: `${report.pipeline} (${report.stage})`,
-      subtitle: report.job
-    };
-    if (report.cucumber) {
-      // Create chart history data      
-      reportView.history = report.cucumber
-        .reduce((acc, c) => {
-          const errors = [];
-          let passed = 0;
-          let failed = 0;
-          c.features.forEach((feature) => {
-            feature.scenarios.forEach((scenario) => {
-              scenario.steps.forEach((step) => {
-                if (step.result === 'passed') {
-                  passed++;
-                } else {
-                  failed++;
-                  errors.push({
-                    test: scenario.name,
-                    message: step.error,
-                  });
-                }
-              })
-            })
-          })
-          acc.push({
-            passed: passed,
-            failed: failed,
-            errors: errors,
-            when: c.timestamp
-          });
-          return acc;
-        }, [])
-        // Sort by time ascending
-        .sort((a, b) => {
-          return a.when > b.when ? 1 : -1;
-        });
-      const latestTestReport = reportView.history[reportView.history.length - 1];
+    const latestTestReport = report.history[report.history.length - 1];
 
-      // Chart data
-      const chartDataView = chartData(
-        reportView.history.map(history => Moment(history.when).fromNow(true)),
-        reportView.history.map(history => history.passed),
-        reportView.history.map(history => history.failed)
-      );
-
-      return {
-        report: reportView,
-        latest: latestTestReport,
-        chartData: chartDataView
-      }
+    // Chart data
+    const chartDataView = chartData(
+      report.history.map(history => Moment(history.when).fromNow(true)),
+      report.history.map(history => history.passed),
+      report.history.map(history => history.failed)
+    )
+    return {
+      report: report,
+      latest: latestTestReport,
+      chartData: chartDataView
     }
   }
 
   generateFailInfo(failures) {
     return (
-      <Table selectable={false}>
+      <Table selectable={false} wrapperStyle={styles.tableWrapper}>
         <TableHeader displaySelectAll={false} adjustForCheckbox={false} enableSelectAll={false}>
           <TableRow>
             <TableHeaderColumn>Test</TableHeaderColumn>
@@ -216,13 +184,14 @@ export default class TestReport extends React.Component {
   }
 
   render() {
+    const report = this.state.report;
     const latest = this.state.latest;
-    const failed = latest > 0;
+    const failed = latest.errors.length > 0;
 
     return (
       <Card style={failed ? styles.cardFailure : styles.cardSuccess}>
-        <CardTitle title={this.state.report.title} subtitle={this.state.report.subtitle}
-          subtitleColor="rgba(255, 255, 255, 0.7)" titleColor="#fff" />
+        <CardTitle title={report.title} subtitle={report.subtitle}
+          subtitleColor={transWhite} titleColor={white} />
         <CardMedia style={styles.cardMedia}>
           <canvas ref="reportChart"></canvas>
         </CardMedia>
