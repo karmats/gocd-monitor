@@ -12,7 +12,7 @@ var config = {
     // Password for go user
     goPassword: 'xxx',
     // How often data from go should be refreshed in seconds
-    goPollingInterval: 30
+    goPollingInterval: 30,
     // If > 0 switches between pipeline and test results page every n seconds
     switchBetweenPagesInterval: 0
 }
