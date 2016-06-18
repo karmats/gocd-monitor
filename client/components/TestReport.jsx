@@ -10,7 +10,7 @@ import { grey100, teal100, pink100, teal500, pink500 } from 'material-ui/styles/
 import Clear from 'material-ui/svg-icons/content/clear';
 
 import Chart from 'chart.js'
-import Moment from 'moment';
+import moment from 'moment';
 
 
 const white = 'rgb(255, 255, 255)';
@@ -110,8 +110,6 @@ const chartOptions = {
       stacked: true
     }]
   },
-
-  //Boolean - Whether to fill the dataset with a colour
   datasetFill: true
 };
 
@@ -136,6 +134,7 @@ export default class TestReport extends React.Component {
 
   componentDidUpdate() {
     this.chart.data.datasets = this.state.chartData.datasets;
+    this.chart.data.labels = this.state.chartData.labels;
     this.chart.update();
   }
 
@@ -154,7 +153,7 @@ export default class TestReport extends React.Component {
 
     // Chart data
     const chartDataView = chartData(
-      report.history.map(history => Moment(history.when).fromNow(true)),
+      report.history.map(history => moment(history.when).fromNow(true)),
       report.history.map(history => history.passed),
       report.history.map(history => history.failed)
     )
@@ -193,6 +192,20 @@ export default class TestReport extends React.Component {
     const latest = this.state.latest;
     const failed = latest.errors.length > 0;
 
+    // String that tells how long the test has been stable
+    let stableDays = '';
+    if (!failed) {
+      const lastFailed = report.history.reduce((p, c) => {
+        if (c.failed > 0 && p < c.when) {
+          return c.when;
+        }
+        return p;
+      }, -1);
+      stableDays = lastFailed > 0 
+        ? `Stable for ${moment(lastFailed).fromNow(true)}`
+        : 'Super stable!'
+    }
+
     // Remove test action
     const actions = this.props.admin ? 
         (<CardActions style={styles.cardActions}>
@@ -211,7 +224,7 @@ export default class TestReport extends React.Component {
           <canvas ref="reportChart"></canvas>
         </CardMedia>
         <CardText style={styles.cardText}>
-          {failed ? this.generateFailInfo(latest.errors) : 'Stable for 3 days'}
+          {failed ? this.generateFailInfo(latest.errors) : stableDays}
         </CardText>
       </Card>
     );
