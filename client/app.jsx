@@ -32,8 +32,9 @@ class NoRoute extends React.Component {
   }
 }
 
-// Switch between pipeline and test results page
-if (switchBetweenPagesInterval && switchBetweenPagesInterval > 0) {
+// Switch between pipeline and test results page, don't when in admin mode
+const adminMode = window.location.search.indexOf('admin') >= 0;
+if (switchBetweenPagesInterval && switchBetweenPagesInterval > 0 && !adminMode) {
   setTimeout(() => {
     if (window.location.pathname.indexOf('test-results') >= 0) {
       window.location.replace('/');
