@@ -7,7 +7,6 @@ import React from 'react';
 import { Card, CardHeader, CardText } from 'material-ui/Card';
 import * as Colors from 'material-ui/styles/colors';
 
-import Moment from 'moment';
 
 // Weather icon indicator
 const weatherIconStatuses = ['sunny', 'partlycloudy', 'cloudy', 'cloudy', 'pouring', 'lightning'];
@@ -65,7 +64,7 @@ export default class Pipeline extends React.Component {
    * @return  {string}  Material design icon classname
    */
   stageIcon(stage) {
-    switch(stage.status) {
+    switch (stage.status) {
       case 'unknown':
         return 'checkbox-blank-circle-outline';
       case 'failed':
@@ -95,6 +94,22 @@ export default class Pipeline extends React.Component {
     }
   }
 
+  /**
+   * @return {boolean}  true if the moment time ago string or any stage status has changed
+   */
+  shouldComponentUpdate(nextProps) {
+    if (nextProps.pipeline.timeago !== this.props.pipeline.timeago) {
+      return true;
+    }
+    const thisStages = this.props.pipeline.stageresults;
+    const nextStages = nextProps.pipeline.stageresults;
+    for (let i = 0; i < thisStages.length; i++) {
+      if (thisStages[i].status !== nextStages[i].status) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   render() {
     let pipeline = this.props.pipeline;
@@ -111,22 +126,22 @@ export default class Pipeline extends React.Component {
           }, ' ') : ' '}</span>
         </p>
         <p className="right">
-        {
-          pipeline.stageresults.map((stage) => {
-            // Build in progress spinner
-            if (stage.status === 'building') {
-              return (<span key={stage.name} className="loader">
-                       <svg className="circular" viewBox="25 25 50 50">
-                         <circle className="path" cx="50" cy="50" r="20" fill="none" strokeWidth="4" strokeMiterlimit="10" />
-                       </svg>
-                     </span>);
-            } else {
-              return <i key={stage.name} className={'mdi mdi-' + this.stageIcon(stage)}></i>
-            }
-          })
-        }
+          {
+            pipeline.stageresults.map((stage) => {
+              // Build in progress spinner
+              if (stage.status === 'building') {
+                return (<span key={stage.name} className="loader">
+                  <svg className="circular" viewBox="25 25 50 50">
+                    <circle className="path" cx="50" cy="50" r="20" fill="none" strokeWidth="4" strokeMiterlimit="10" />
+                  </svg>
+                </span>);
+              } else {
+                return <i key={stage.name} className={'mdi mdi-' + this.stageIcon(stage) }></i>
+              }
+            })
+          }
         </p>
-        
+
       </div>);
 
     let style = styles.cardActive;
@@ -156,7 +171,7 @@ export default class Pipeline extends React.Component {
             <div className="col-xs-6">
               <p>
                 <i className="mdi mdi-clock mdi-24px"></i>
-                <span>{ Moment(pipeline.buildtime).fromNow() }</span>
+                <span>{ pipeline.timeago }</span>
               </p>
               <p>
                 <i className="mdi mdi-worker mdi-24px"></i>

@@ -9,6 +9,8 @@ import Settings from 'material-ui/svg-icons/action/settings';
 import * as Colors from 'material-ui/styles/colors';
 import { MuiThemeProvider, getMuiTheme } from 'material-ui/styles';
 
+import moment from 'moment';
+
 import Pipeline from './Pipeline';
 import Configuration from './Configuration';
 
@@ -164,6 +166,10 @@ export default class Main extends React.Component {
    */
   sortPipelines(pipelines, disabledPipelines, sortOrder) {
     const activePipelines = pipelines.filter(p => p && p.name && disabledPipelines.indexOf(p.name) < 0);
+    // Add "time ago" moment string
+    activePipelines.forEach((pipeline) => {
+      pipeline.timeago = moment(pipeline.buildtime).fromNow();
+    });
     const sortByBuildTime = (a, b) => {
       return a.buildtime > b.buildtime ? -1 : 1;
     };
