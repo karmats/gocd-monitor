@@ -195,14 +195,15 @@ export default class TestReport extends React.Component {
     // String that tells how long the test has been stable
     let stableDays = '';
     if (!failed) {
-      const lastFailed = report.history.reduce((p, c) => {
-        if (c.failed > 0 && p < c.when) {
-          return c.when;
+      const lastFailedIdx = report.history.reduce((p, c, idx) => {
+        if (c.failed > 0 && p < idx) {
+          return idx;
         }
         return p;
       }, -1);
-      stableDays = lastFailed > 0 
-        ? `Stable for ${moment(lastFailed).fromNow(true)}`
+      const passedAfterFailed = report.history[lastFailedIdx+1];
+      stableDays = lastFailedIdx >= 0 && passedAfterFailed 
+        ? `Stable for ${moment(passedAfterFailed.when).fromNow(true)}`
         : 'Super stable!'
     }
 
