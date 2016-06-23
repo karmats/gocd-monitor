@@ -84,7 +84,7 @@ const chartOptions = {
       borderWidth: 1
     },
     point: {
-      radius: 1,
+      radius: 2,
       backgroundColor: white,
       borderColor: white
     },
@@ -92,10 +92,29 @@ const chartOptions = {
 
   scales: {
     xAxes: [{
+      type: 'time',
+      time: {
+        unit: 'hour',
+        displayFormats: {
+          hour: 'ddd, MMM D'
+        },
+        unitStepSize: 24,
+        tooltipFormat: 'dddd, MMMM Do YYYY, h:mm:ss a'
+      },
       gridLines: {
         drawBorder: false,
         color: white,
         display: false
+      },
+      ticks: {
+        callback: (value, idx, values) => {
+          // To avoid duplicates
+          const stringVals = values.map(val => val.format('ddd, MMM D'));
+          if (stringVals.indexOf(value) !== idx) {
+            return '';
+          }
+          return value;
+        }
       }
     }],
     yAxes: [{
@@ -111,7 +130,7 @@ const chartOptions = {
     }]
   },
   datasetFill: true
-};
+}
 
 export default class TestReport extends React.Component {
 
@@ -125,16 +144,24 @@ export default class TestReport extends React.Component {
   componentDidMount() {
     // Initialize chart object
     const ctx = this.refs.reportChart;
+
+    const chartOpts = chartOptions;
+    chartOpts.scales.xAxes[0].time.min = this.state.first.when;
+    chartOpts.scales.xAxes[0].time.max = this.state.latest.when;
+
     this.chart = new Chart(ctx, {
       type: 'line',
       data: this.state.chartData,
-      options: chartOptions
+      options: chartOpts
     });
   }
 
   componentDidUpdate() {
     this.chart.data.datasets = this.state.chartData.datasets;
     this.chart.data.labels = this.state.chartData.labels;
+
+    this.chart.options.scales.xAxes[0].time.min = this.state.first.when;
+    this.chart.options.scales.xAxes[0].time.max = this.state.latest.when;
     this.chart.update();
   }
 
@@ -150,16 +177,19 @@ export default class TestReport extends React.Component {
   propsToState(props) {
     const report = props.report;
     const latestTestReport = report.history[report.history.length - 1];
+    const firstTestReport = report.history[0];
 
     // Chart data
     const chartDataView = chartData(
-      report.history.map(history => moment(history.when).fromNow(true)),
+      report.history.map(history => history.when),
       report.history.map(history => history.passed),
       report.history.map(history => history.failed)
     )
+
     return {
       report: report,
       latest: latestTestReport,
+      first: firstTestReport,
       chartData: chartDataView
     }
   }
@@ -201,20 +231,20 @@ export default class TestReport extends React.Component {
         }
         return p;
       }, -1);
-      const passedAfterFailed = report.history[lastFailedIdx+1];
-      stableDays = lastFailedIdx >= 0 && passedAfterFailed 
+      const passedAfterFailed = report.history[lastFailedIdx + 1];
+      stableDays = lastFailedIdx >= 0 && passedAfterFailed
         ? `Stable for ${moment(passedAfterFailed.when).fromNow(true)}`
         : 'Super stable!'
     }
 
     // Remove test action
-    const actions = this.props.admin ? 
-        (<CardActions style={styles.cardActions}>
-          <IconButton tooltip="Remove test" tooltipPosition="bottom-left"
-            onTouchTap={this.props.onRemoveTest.bind(this, report)}>
-            <Clear color={white} />
-          </IconButton>
-        </CardActions>) : null;
+    const actions = this.props.admin ?
+      (<CardActions style={styles.cardActions}>
+        <IconButton tooltip="Remove test" tooltipPosition="bottom-left"
+          onTouchTap={this.props.onRemoveTest.bind(this, report) }>
+          <Clear color={white} />
+        </IconButton>
+      </CardActions>) : null;
 
     return (
       <Card style={failed ? styles.cardFailure : styles.cardSuccess}>

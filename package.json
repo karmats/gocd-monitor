@@ -14,7 +14,7 @@
     "add-material-icons": "cp node_modules/mdi/css/materialdesignicons.min.css* assets/stylesheets/ && cp node_modules/mdi/fonts/* assets/fonts"
   },
   "dependencies": {
-    "chart.js": "^2.1.5",
+    "chart.js": "^2.1.6",
     "debug": "~2.2.0",
     "express": "~4.13.1",
     "flexboxgrid": "^6.3.0",
