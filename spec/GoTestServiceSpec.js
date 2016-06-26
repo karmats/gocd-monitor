@@ -86,7 +86,7 @@ describe('GoTestService spec', () => {
 
       let testsPromise = new GoTestService(config).getTestsFromUri(`${config.serverUrl}/go/files/dummy.json`);
 
-      expect(testsPromise).to.eventually.have.deep.property('[0]', undefined).and.notify(done);
+      expect(testsPromise).to.eventually.have.deep.property('[0]', null).and.notify(done);
     });
 
   });

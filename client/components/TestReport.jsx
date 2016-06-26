@@ -13,9 +13,11 @@ import Chart from 'chart.js'
 import moment from 'moment';
 
 
+// White and transparent white colors
 const white = 'rgb(255, 255, 255)';
 const transWhite = 'rgba(255, 255, 255, 0.5)';
 
+// Style css
 const styles = {
   cardSuccess: {
     backgroundColor: teal500
@@ -45,6 +47,7 @@ const styles = {
   }
 }
 
+// Chart.js setup
 Chart.defaults.global.defaultFontColor = white;
 Chart.defaults.global.defaultFontFamily = 'Roboto';
 
@@ -172,7 +175,7 @@ export default class TestReport extends React.Component {
   /**
    * Modifies incomming properties to state object
    * 
-   * @param   {Array<Object>}   props   The properties to modify
+   * @param   {Object}   props   The properties to modify
    */
   propsToState(props) {
     const report = props.report;
@@ -194,6 +197,11 @@ export default class TestReport extends React.Component {
     }
   }
 
+  /**
+   * Tests that has failed in a table 
+   * 
+   * @param {Array<Object>}   failures  Failed object array
+   */
   generateFailInfo(failures) {
     return (
       <Table selectable={false} wrapperStyle={styles.tableWrapper}>

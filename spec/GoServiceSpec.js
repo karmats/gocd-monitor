@@ -1,5 +1,4 @@
 import { describe, before, after, it } from 'mocha';
-import mockery from 'mockery';
 import fs from 'fs';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';

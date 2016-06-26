@@ -97,16 +97,15 @@ export default class GoTestService {
         options.uri = fileUri;
         promises.push(rp(options).then((testReport) => {
           // Parse file and retrieve most relevant info, only cucumber supported atm
-          let testResult = CucumberJsonParser.parse(testReport);
+          const testResult = CucumberJsonParser.parse(testReport);
           if (testResult) {
             testResult.type = 'cucumber';
             return testResult;
           }
 
-        }).catch((error) => {
+        }, () => {
           Logger.error('Failed to get cucumber test report');
-          // Resolve anyway, just ignore this test
-          return Promise.resolve();
+          return null;
         }));
 
       });

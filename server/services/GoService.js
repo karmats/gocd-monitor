@@ -116,7 +116,7 @@ export default class GoService {
         this.dbService.saveTestResult(report).then((savedReports) => {
           this._refreshAndNotifyTestResults();
           this.notifyAllClients('tests:message', 'Tests added');
-        }, (error) => {
+        }, () => {
           const msg = 'Failed to save test result';
           Logger.error(msg);
           this.notifyAllClients('tests:message', msg);
@@ -195,7 +195,7 @@ export default class GoService {
               // Save to db and notify all clients
               this.dbService.updateTestResult(p.testId, 'cucumber', cucumber).then((savedTests) => {
                 this._refreshAndNotifyTestResults();
-              }, (error) => {
+              }, () => {
                 const msg = `Failed to save tests for id ${p.testId}`;
                 Logger.error(msg);
                 this.notifyAllClients('tests:message', msg);
@@ -226,7 +226,7 @@ export default class GoService {
           this.currentSettings = savedSettings;
           // Notify other clients about the update
           this.notifyAllClients('settings:updated', savedSettings);
-        }, (error) => {
+        }, () => {
           Logger.error('Failed to save settings');
         });
       });
@@ -238,7 +238,7 @@ export default class GoService {
         this.dbService.removeTestResult(testId).then(() => {
           this._refreshAndNotifyTestResults();
           this.notifyAllClients('tests:message', 'Test removed');
-        }, (error) => {
+        }, () => {
           const msg = 'Failed to remove test result';
           Logger.error(msg);
           this.notifyAllClients('tests:message', msg);
@@ -283,7 +283,7 @@ export default class GoService {
     this.dbService.getTestResults().then((results) => {
       this.testResults = results;
       this.notifyAllClients('tests:updated', this.testResults);
-    }, (error) => {
+    }, () => {
       const msg = 'Failed to get test results from db';
       this.notifyAllClients('tests:message', msg);
     });

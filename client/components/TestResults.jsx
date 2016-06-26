@@ -95,10 +95,13 @@ export default class TestResults extends React.Component {
     if (latest2.failed > 0 && latest1.failed <= 0) {
       return 1;
     }
+    if (latest1.failed > 0 && latest2.failed <= 0) {
+      return -1;
+    }
     if (latest2.when > latest1.when) {
       return 1;
     }
-    return 0;
+    return -1;
   }
 
   /**
