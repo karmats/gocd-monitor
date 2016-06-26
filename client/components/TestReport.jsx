@@ -25,17 +25,16 @@ const styles = {
   cardFailure: {
     backgroundColor: pink500
   },
-  cardHeader: {
-    color: white
-  },
   cardMedia: {
     margin: '16px'
   },
   cardText: {
     backgroundColor: white
   },
-  ok: {
-    color: teal500
+  cardTitle: {
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden'
   },
   tableWrapper: {
     maxHeight: 440,
@@ -258,7 +257,7 @@ export default class TestReport extends React.Component {
       <Card style={failed ? styles.cardFailure : styles.cardSuccess}>
         {actions}
         <CardTitle title={report.title} subtitle={report.subtitle}
-          subtitleColor={transWhite} titleColor={white} />
+          subtitleColor={transWhite} titleColor={white} titleStyle={styles.cardTitle} />
         <CardMedia style={styles.cardMedia}>
           <canvas ref="reportChart"></canvas>
         </CardMedia>
