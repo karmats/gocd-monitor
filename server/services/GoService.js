@@ -72,12 +72,16 @@ export default class GoService extends Service {
   getAllPipelines() {
     let options = {
       uri: this.baseUrl + '/pipelines.xml',
-      rejectUnauthorized: false,
-      auth: {
+      rejectUnauthorized: false
+    };
+    
+    if (this.user !== undefined && this.user !== null && this.user !== '') {
+      options.auth = {
         user: this.user,
         pass: this.password
       }
-    };
+    }
+    
     return rp(options)
       .then((res) => {
         let pipelines = [];
@@ -121,12 +125,16 @@ export default class GoService extends Service {
     let options = {
       uri: this.baseUrl + '/pipelines/' + name + '/history/0',
       json: true,
-      rejectUnauthorized: false,
-      auth: {
+      rejectUnauthorized: false
+    };
+    
+    if (this.user !== undefined && this.user !== null && this.user !== '') {
+      options.auth = {
         user: this.user,
         pass: this.password
       }
-    };
+    }
+    
     return rp(options)
       .then(res => this._goPipelinesToPipelineResult(res.pipelines.slice(0, 5)))
       .catch((err) => {
