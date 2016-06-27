@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "chart.js": "^2.1.6",
-    "debug": "~2.2.0",
-    "express": "~4.13.1",
+    "debug": "^2.2.0",
+    "express": "^4.14.0",
     "flexboxgrid": "^6.3.0",
     "material-ui": "^0.15.0",
     "mdi": "^1.4.57",
