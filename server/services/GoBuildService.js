@@ -2,6 +2,7 @@ import rp from 'request-promise';
 
 import Logger from '../utils/Logger';
 import GoPipelineParser from '../utils/GoPipelineParser';
+import Util from '../utils/Util';
 
 export default class GoBuildService {
 
@@ -13,14 +14,8 @@ export default class GoBuildService {
    * @returns {Promise<Array<string>>} All available pipelines from the go.cd server
    */
   getAllPipelines() {
-    let options = {
-      uri: `${this.conf.serverUrl}/go/api/pipelines.xml`,
-      rejectUnauthorized: false,
-      auth: {
-        user: this.conf.user,
-        pass: this.conf.password
-      }
-    };
+    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/pipelines.xml`, this.conf);
+
     return rp(options)
       .then((res) => {
         // Parse response xml
@@ -65,15 +60,8 @@ export default class GoBuildService {
    * }
    */
   getPipelineHistory(name) {
-    let options = {
-      uri: `${this.conf.serverUrl}/go/api/pipelines/${name}/history/0`,
-      json: true,
-      rejectUnauthorized: false,
-      auth: {
-        user: this.conf.user,
-        pass: this.conf.password
-      }
-    };
+    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/pipelines/${name}/history/0`, this.conf, true);
+
     return rp(options)
       .then(res => GoPipelineParser.parsePipelineResult(res.pipelines.slice(0, 5)))
       .catch((err) => {

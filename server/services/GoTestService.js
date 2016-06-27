@@ -1,6 +1,7 @@
 import rp from 'request-promise';
 
 import Logger from '../utils/Logger';
+import Util from '../utils/Util';
 import CucumberJsonParser from '../utils/CucumberJsonParser';
 
 export default class GoTestService {
@@ -17,15 +18,7 @@ export default class GoTestService {
    */
   getTestsFromPipeline(name) {
     // Get test reports from 10 latest pipelines
-    const options = {
-      uri: `${this.conf.serverUrl}/go/api/pipelines/${name}/history/0`,
-      rejectUnauthorized: false,
-      json: true,
-      auth: {
-        user: this.conf.user,
-        pass: this.conf.password
-      }
-    };
+    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/pipelines/${name}/history/0`, this.conf, true);
 
     return rp(options).then((pipelineHistory) => {
       let promises = [];
@@ -73,16 +66,7 @@ export default class GoTestService {
    * @return {Promise<Array>}  Array with test reports, for now only cucumber tests are supported
    */
   getTestsFromUri(uri) {
-
-    const options = {
-      uri: uri,
-      rejectUnauthorized: false,
-      json: true,
-      auth: {
-        user: this.conf.user,
-        pass: this.conf.password
-      }
-    };
+    const options = Util.createRequestOptions(uri, this.conf, true);
 
     return rp(options).then((files) => {
       const fileUris = this._retrieveTestReportFiles({
