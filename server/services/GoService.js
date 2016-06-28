@@ -1,36 +1,61 @@
-import rp from 'request-promise';
-import { parseString } from 'xml2js';
-
-import Logger from '../utils/Logger';
 import * as conf from '../../app-config';
-import Service from './Service';
 
+import GoBuildService from './GoBuildService';
+import GoTestService from './GoTestService';
+import DBService from './DBService';
+import Logger from '../utils/Logger';
 
-export default class GoService extends Service {
+export default class GoService {
 
   constructor() {
-    super();
-    this.baseUrl = conf.goServerUrl + '/go/api';
-    this.user = conf.goUser;
-    this.password = conf.goPassword;
-    this.pollingInterval = conf.goPollingInterval*1000;
-    this.checkPipelinesInterval = 24*60*60*1000;
+    this.goConfig = new GoConfig(conf.goServerUrl, conf.goUser, conf.goPassword);
+    this.clients = [];
+    this.pipelines = [];
+    this.pipelineNames = [];
+    this.testResults = [];
+    this.currentSettings = {
+      disabledPipelines: []
+    };
+    this.pollingInterval = conf.goPollingInterval * 1000;
+    // Refresh pipelines once every day
+    this.checkPipelinesInterval = 24 * 60 * 60 * 1000;
+    this.buildService = new GoBuildService(this.goConfig);
+    this.testService = new GoTestService(this.goConfig);
+
+    // Init db and settings
+    this.dbService = new DBService();
+
   }
 
   /**
-   * Start polling go server for pipeline results
+   * Starts the service. Polls go server for pipeline and test results
    */
-  startPolling() {
+  start() {
+    // Retrieve current settings
+    this.dbService.getSettings().then((doc) => {
+      this.currentSettings = doc.settings;
+    });
+
+    // Retrieve stored test results
+    this._refreshAndNotifyTestResults();
+
+    // Start polling go server for build and test results
+    this.pollGoServer();
+  }
+
+  pollGoServer() {
     // Function that refreshes all pipelines
-    let refreshPipelines = (pipelineNames) => {
+    const refreshPipelines = (pipelineNames) => {
       let currentPipelines = [];
       const pipelinesToIgnore = this.currentSettings.disabledPipelines;
       const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
       pipelinesToFetch.forEach((name) => {
-        this.getPipelineHistory(name).then((pipeline) => {
+        this.buildService.getPipelineHistory(name).then((pipeline) => {
           currentPipelines.push(pipeline);
           if (currentPipelines.length === pipelinesToFetch.length) {
             this.pipelines = currentPipelines;
+            // Update tests if needed
+            this.updateTestResults(currentPipelines);
             Logger.debug(`Emitting ${currentPipelines.length} pipelines to ${this.clients.length} clients`);
             this.notifyAllClients('pipelines:updated', currentPipelines);
           }
@@ -39,14 +64,14 @@ export default class GoService extends Service {
     };
 
     let pollId;
-    let refreshPipelinesAndPollForUpdates = () => {
+    const refreshPipelinesAndPollForUpdates = () => {
       Logger.info('Retrieving pipeline names');
       // Cancel current poll and start over
       if (pollId) {
         clearInterval(pollId);
       }
       // Fetch the pipelines and start polling pipeline history
-      this.getAllPipelines()
+      this.buildService.getAllPipelines()
         .then((pipelineNames) => {
           this.pipelineNames = pipelineNames;
           this.notifyAllClients('pipelines:names', pipelineNames);
@@ -67,146 +92,212 @@ export default class GoService extends Service {
   }
 
   /**
-   * @returns {Array<string>} All available pipelines from the go.cd server
+   * Adds tests from a pipeline. Retrieves all test report files and saves it to db
+   * 
+   * @param {string} pipeline The pipeline to get the test reports from
    */
-  getAllPipelines() {
-    let options = {
-      uri: this.baseUrl + '/pipelines.xml',
-      rejectUnauthorized: false
-    };
-    
-    if (this.user !== undefined && this.user !== null && this.user !== '') {
-      options.auth = {
-        user: this.user,
-        pass: this.password
-      }
-    }
-    
-    return rp(options)
-      .then((res) => {
-        let pipelines = [];
-        // Parse response xml
-        parseString(res, (err, parsed) => {
-          if (err) {
-            Logger.error('Failed to parse pipelines.xml, shutting down');
-            throw err;
+  addPipelineTests(pipeline) {
+    Logger.debug(`Adding test results from '${pipeline}'`);
+    this.testService.getTestsFromPipeline(pipeline).then((result) => {
+      // Group tests with same id
+      const reports = result.reduce((acc, c) => {
+        if (c && c.cucumber.length > 0) {
+          const existing = acc.filter(ex => ex._id === c._id)[0];
+          if (existing) {
+            existing.cucumber = existing.cucumber.concat(c.cucumber);
+          } else {
+            acc.push(c);
           }
-          // pipline xml in format <baseUrl>/pipelines/<name>/stages.xml
-          pipelines = parsed.pipelines.pipeline.map(p => p.$.href.match(/go\/api\/pipelines\/(.*)\/stages.xml/)[1]);
+        }
+        return acc;
+      }, []);
+      // Save to db
+      reports.forEach((report) => {
+        this.dbService.saveTestResult(report).then((savedReports) => {
+          this._refreshAndNotifyTestResults();
+          this.notifyAllClients('tests:message', 'Tests added');
+        }, () => {
+          const msg = 'Failed to save test result';
+          Logger.error(msg);
+          this.notifyAllClients('tests:message', msg);
         });
-        return pipelines;
       })
-      .catch(err => { throw err });
+    })
   }
 
   /**
-   * @param   {string}    name       Name of the pipeline
-   * @returns {Object}    Pipeline instance. 
-   * Example 
-   * { 
-   *    name : 'id,
-   *    buildtime : 1457085089646,
-   *    author: 'Bobby Malone',
-   *    counter: 255,
-   *    paused: false,
-   *    health: 2,
-   *    stageresults: [
-   *      {
-   *        name: 'Build',
-   *        status: 'passed'
-   *      },
-   *      {
-   *        name: 'Test',
-   *        status: 'building'
-   *      }] 
-   * }
+   * Update test results if needed
+   * 
+   * @param {Array<Object>}   pipelines   Pipelines to check for new tests
    */
-  getPipelineHistory(name) {
-    let options = {
-      uri: this.baseUrl + '/pipelines/' + name + '/history/0',
-      json: true,
-      rejectUnauthorized: false
-    };
-    
-    if (this.user !== undefined && this.user !== null && this.user !== '') {
-      options.auth = {
-        user: this.user,
-        pass: this.password
+  updateTestResults(pipelines) {
+    const testsToUpdate = [];
+
+    // Check all test results. If timestamp for a job is after latest test report timestamp
+    // the test will be updated
+    this.testResults.forEach((result) => {
+      // Time when last test was runned
+      const latestTestTime = result.cucumber ? result.cucumber.reduce((p, cTest) => {
+        if (cTest.timestamp > p) {
+          return cTest.timestamp;
+        }
+        return p;
+      }, 0) : 0;
+      const testPipeline = pipelines
+        .reduce((p, cPipeline) => {
+          if (cPipeline && cPipeline.name === result.pipeline) {
+            for (let i = 0; i < cPipeline.stageresults.length; i++) {
+              const stage = cPipeline.stageresults[i];
+              // If stage is building, test report isn't ready yet
+              if (stage.name === result.stage && stage.status !== 'building') {
+                for (let j = 0; j < stage.jobresults.length; j++) {
+                  const job = stage.jobresults[j];
+                  // If scheduled job time is after time of latest test 
+                  if (job.name === result.job && job.scheduled > latestTestTime) {
+                    return {
+                      testId: result._id,
+                      pipeline: cPipeline.name,
+                      pipelineCounter: cPipeline.counter,
+                      stage: stage.name,
+                      stageCounter: stage.counter,
+                      job: job.name,
+                      scheduled: job.scheduled
+                    }
+                  }
+                }
+              }
+            }
+          }
+          return p;
+        }, null);
+
+      // Add as test to update
+      if (testPipeline) {
+        testsToUpdate.push(testPipeline);
       }
-    }
-    
-    return rp(options)
-      .then(res => this._goPipelinesToPipelineResult(res.pipelines.slice(0, 5)))
-      .catch((err) => {
-        Logger.error(`Failed to get pipeline history for pipeline "${name}" returning last result, ${err.statusCode}: ${err.message}`);
-        return this.pipelines.filter((p) => p && p.name === name)[0];
-      });
-  }
-
-  _goPipelinesToPipelineResult(pipelines) {
-    let result = {};
-
-    if (pipelines.length <= 0) {
-      return {};
-    }
-
-    // Latest pipeline result is where we will retrieve most data
-    let latestPipelineResult = pipelines[0];
-
-    // Pipeline name
-    result.name = latestPipelineResult.name;
-
-    // Stage results
-    result.stageresults = latestPipelineResult.stages.map((stage) => {
-      let stageResult = { name: stage.name };
-      if (stage.jobs.some(job => job.state === 'Scheduled' || job.state === 'Assigned' || job.state === 'Preparing' || job.state === 'Building' || job.state === 'Completing')) {
-        stageResult.status = 'building';
-      } else {
-        stageResult.status = stage.result ? stage.result.toLowerCase() : 'unknown';
-      }
-      return stageResult;
     });
 
-    // Pipeline is paused if none of the stagues can run and the pipeline isn't building
-    result.paused = !result.stageresults.some(stageResult => stageResult.status === 'building') && latestPipelineResult.stages.every((stage) => stage.can_run === false);
+    // Retrive latest test report files
+    testsToUpdate.forEach((p) => {
+      this.testService.getTestsFromUri(
+        `${this.goConfig.serverUrl}/go/files/${p.pipeline}/${p.pipelineCounter}/${p.stage}/${p.stageCounter}/${p.job}.json`)
+        .then((res) => {
+          if (res && res.length > 0) {
+            const cucumberResult = res.filter(res => res.type === 'cucumber');
+            if (cucumberResult.length > 0) {
+              // Concatenate the features from all cucumber tests
+              const cucumber = cucumberResult.reduce((acc, c) => {
+                acc.features = acc.features.concat(c.features);
+                return acc;
+              }, { features: [] });
+              cucumber.timestamp = p.scheduled;
 
-    // Health = number of pipelines failed
-    result.health = pipelines.reduce((p, c) => {
-      if (c.stages.some(stage => stage.result === 'Failed')) {
-        return p + 1;
-      }
-      return p;
-    }, 0);
+              // Save to db and notify all clients
+              this.dbService.updateTestResult(p.testId, 'cucumber', cucumber).then((savedTests) => {
+                this._refreshAndNotifyTestResults();
+              }, () => {
+                const msg = `Failed to save tests for id ${p.testId}`;
+                Logger.error(msg);
+                this.notifyAllClients('tests:message', msg);
+              })
 
-    // Bulid time = last scheduled job
-    result.buildtime = latestPipelineResult.stages.reduce((sp, sc) => {
-      let lastScheduledJob = sc.jobs.reduce((jp, jc) => {
-        if (jc.scheduled_date > jp) {
-          return jc.scheduled_date;
-        }
-        return jp;
-      }, 0);
-      if (lastScheduledJob > sp) {
-        sp = lastScheduledJob;
-      }
-      return sp;
-    }, 0);
+            }
+          }
+        });
+    })
+  }
 
-    // Author = first modifcator
-    let author = 'Unknown';
-    if (latestPipelineResult.build_cause && latestPipelineResult.build_cause.material_revisions && latestPipelineResult.build_cause.material_revisions[0].modifications) {
-      author = latestPipelineResult.build_cause.material_revisions[0].modifications[0].user_name;
+  /**
+   * Register new client listener
+   *
+   * @param {Socket}  client  Socket client that will receive automatic updates
+   */
+  registerClient(client) {
+    // Add client if not in clients list
+    if (!this.clients.some(c => client.id === c.id)) {
+
+      // Emit latest pipeline names and settings
+      client.emit('pipelines:names', this.pipelineNames);
+      client.emit('settings:updated', this.currentSettings);
+
+      // Register for setting updates
+      client.on('settings:update', (settings) => {
+        this.dbService.saveOrUpdateSettings(settings).then((savedSettings) => {
+          this.currentSettings = savedSettings;
+          // Notify other clients about the update
+          this.notifyAllClients('settings:updated', savedSettings);
+        }, () => {
+          Logger.error('Failed to save settings');
+        });
+      });
+
+      client.on('tests:add', (testPipeline) => {
+        this.addPipelineTests(testPipeline);
+      });
+      client.on('tests:remove', (testId) => {
+        this.dbService.removeTestResult(testId).then(() => {
+          this._refreshAndNotifyTestResults();
+          this.notifyAllClients('tests:message', 'Test removed');
+        }, () => {
+          const msg = 'Failed to remove test result';
+          Logger.error(msg);
+          this.notifyAllClients('tests:message', msg);
+        });
+      });
+
+      // Return pipelines and tests if client asks for it
+      client.on('pipelines:get', () => {
+        client.emit('pipelines:updated', this.pipelines);
+      });
+      client.on('tests:get', () => {
+        client.emit('tests:updated', this.testResults);
+      });
+
+      this.clients.push(client);
     }
-    // Remove email tag if any
-    let tagIdx = author.indexOf('<');
-    if (tagIdx > 0) {
-      author = author.substring(0, tagIdx).trim();
-    }
-    result.author = author;
+  }
 
-    // Counter id
-    result.counter = latestPipelineResult.counter;
+  /**
+   * Unregister client listener
+   *
+   * @param {Socket}  client  Socket client that will no longer receive updates
+   */
+  unregisterClient(client) {
+    this.clients = this.clients.filter(c => client.id !== c.id);
+  }
 
-    return result;
+  /**
+   * Emits an event to all registered clients
+   *
+   * @param {string}  event   Name of the event
+   * @param {Object}  data    The data to send
+   */
+  notifyAllClients(event, data) {
+    this.clients.forEach((client) => {
+      client.emit(event, data);
+    });
+  }
+
+  // Get latest test results from db and notify all clients
+  _refreshAndNotifyTestResults() {
+    this.dbService.getTestResults().then((results) => {
+      this.testResults = results;
+      this.notifyAllClients('tests:updated', this.testResults);
+    }, () => {
+      const msg = 'Failed to get test results from db';
+      this.notifyAllClients('tests:message', msg);
+    });
+  }
+}
+
+/**
+ * Class to hold go config
+ */
+export class GoConfig {
+
+  constructor(serverUrl, user, password) {
+    this.serverUrl = serverUrl;
+    this.user = user;
+    this.password = password;
   }
 }

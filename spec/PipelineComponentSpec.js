@@ -8,8 +8,8 @@ describe('PipelineComponent spec', () => {
   describe('#weatherIcon()', () => {
 
     it('should be sunny when health is 0', () => {
-      let pipelineComponent = new Pipeline();
-      let pipeline = {
+      const pipelineComponent = new Pipeline();
+      const pipeline = {
         name: 'pipeline1',
         health: 0
       };
@@ -18,8 +18,8 @@ describe('PipelineComponent spec', () => {
     });
 
     it('should be lightning when health is 5', () => {
-      let pipelineComponent = new Pipeline();
-      let pipeline = {
+      const pipelineComponent = new Pipeline();
+      const pipeline = {
         name: 'pipeline1',
         health: 5
       };
@@ -32,36 +32,97 @@ describe('PipelineComponent spec', () => {
   describe('#status()', () => {
 
     it('should be passed when all stage results has passed', () => {
-      let pipeline = {
-        stageresults: [{status: 'passed'}, {status: 'passed'}] 
+      const pipeline = {
+        stageresults: [{ status: 'passed' }, { status: 'passed' }]
       };
 
       expect(Pipeline.status(pipeline)).to.be.equal('passed');
     });
 
     it('should be paused when all pipeline is paused', () => {
-      let pipeline = {
+      const pipeline = {
         paused: true,
-        stageresults: [{status: 'passed'}, {status: 'passed'}] 
+        stageresults: [{ status: 'passed' }, { status: 'passed' }]
       };
 
       expect(Pipeline.status(pipeline)).to.be.equal('paused');
     });
 
     it('should be failed when one stage has failed', () => {
-      let pipeline = {
-        stageresults: [{status: 'passed'}, {status: 'passed'}, {status: 'failed'}] 
+      const pipeline = {
+        stageresults: [{ status: 'passed' }, { status: 'passed' }, { status: 'failed' }]
       };
 
       expect(Pipeline.status(pipeline)).to.be.equal('failed');
     });
 
     it('should be building when one stage is building', () => {
-      let pipeline = {
-        stageresults: [{status: 'passed'}, {status: 'building'}, {status: 'unknown'}] 
+      const pipeline = {
+        stageresults: [{ status: 'passed' }, { status: 'building' }, { status: 'unknown' }]
       };
 
       expect(Pipeline.status(pipeline)).to.be.equal('building');
+    });
+
+  });
+
+  describe('#shouldComponentUpdate()', () => {
+
+    it('should update if time ago string has changed', () => {
+      const pipelineComponent = new Pipeline();
+      const currPipeline = {
+        timeago: 'A few seconds ago',
+        stageresults: [{ status: 'passed' }, { status: 'building' }, { status: 'unknown' }]
+      };
+      const nextPipeline = {
+        timeago: '1 minute ago',
+        stageresults: [{ status: 'passed' }, { status: 'building' }, { status: 'unknown' }]
+      };
+
+      pipelineComponent.props = {
+        pipeline: currPipeline
+      }
+
+      expect(pipelineComponent.shouldComponentUpdate({ pipeline: nextPipeline })).to.be.true;
+
+    });
+
+    it('should update if any stage status has changed', () => {
+      const pipelineComponent = new Pipeline();
+      const currPipeline = {
+        timeago: '1 minute ago',
+        stageresults: [{ status: 'passed' }, { status: 'building' }, { status: 'unknown' }]
+      };
+      const nextPipeline = {
+        timeago: '1 minute ago',
+        stageresults: [{ status: 'passed' }, { status: 'passed' }, { status: 'building' }]
+      };
+
+      pipelineComponent.props = {
+        pipeline: currPipeline
+      }
+
+      expect(pipelineComponent.shouldComponentUpdate({ pipeline: nextPipeline })).to.be.true;
+
+    });
+
+    it('should not update if stage status and time ago string is same', () => {
+      const pipelineComponent = new Pipeline();
+      const currPipeline = {
+        timeago: '1 minute ago',
+        stageresults: [{ status: 'passed' }, { status: 'building' }, { status: 'unknown' }]
+      };
+      const nextPipeline = {
+        timeago: '1 minute ago',
+        stageresults: [{ status: 'passed' }, { status: 'building' }, { status: 'unknown' }]
+      };
+
+      pipelineComponent.props = {
+        pipeline: currPipeline
+      }
+
+      expect(pipelineComponent.shouldComponentUpdate({ pipeline: nextPipeline })).to.be.false;
+
     });
 
   });

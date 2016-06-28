@@ -7,6 +7,8 @@ describe('MainComponent spec', () => {
 
   let Main;
 
+  const props = { route: {} };
+
   before((done) => {
     mockery.enable({
       warnOnReplace: false,
@@ -33,29 +35,29 @@ describe('MainComponent spec', () => {
     const generatePipelines = () => {
       return [{
         name: 'pipeline1',
-        stageresults: [{status: 'passed'}, {status: 'cancelled'}],
+        stageresults: [{ status: 'passed' }, { status: 'cancelled' }],
         paused: true,
         buildtime: 1234
       }, {
-        name: 'pipeline2',
-        stageresults: [{status: 'passed'}, {status: 'passed'}, {status : 'failed'}],
-        buildtime: 2345
-      },
-      {
-        name: 'pipeline3',
-        stageresults: [{status: 'passed'}, {status: 'building'}, {status: 'unknown'}],
-        buildtime: 1111
-      },
-      {
-        name: 'pipeline4',
-        stageresults: [{status: 'passed'}, {status: 'passed'}],
-        buildtime: 2222
-      }]
+          name: 'pipeline2',
+          stageresults: [{ status: 'passed' }, { status: 'passed' }, { status: 'failed' }],
+          buildtime: 2345
+        },
+        {
+          name: 'pipeline3',
+          stageresults: [{ status: 'passed' }, { status: 'building' }, { status: 'unknown' }],
+          buildtime: 1111
+        },
+        {
+          name: 'pipeline4',
+          stageresults: [{ status: 'passed' }, { status: 'passed' }],
+          buildtime: 2222
+        }]
     };
 
     it('should filter undefined pipelines', () => {
-      let mainComponent = new Main();
-      let pipelines = generatePipelines();
+      const mainComponent = new Main(props);
+      const pipelines = generatePipelines();
 
       expect(pipelines).to.have.lengthOf(4);
       pipelines[0] = null;
@@ -63,19 +65,31 @@ describe('MainComponent spec', () => {
     });
 
     it('should sort pipelines by buildtime', () => {
-      let mainComponent = new Main();
-      let pipelines = generatePipelines();
+      const mainComponent = new Main(props);
+      const pipelines = generatePipelines();
 
-      let sortedPipelineNames = mainComponent.sortPipelines(pipelines, [], 'buildtime').map(p => p.name);
+      const sortedPipelineNames = mainComponent.sortPipelines(pipelines, [], 'buildtime').map(p => p.name);
       expect(sortedPipelineNames).to.eql(['pipeline2', 'pipeline4', 'pipeline1', 'pipeline3']);
     });
 
     it('should sort pipelines by status', () => {
-      let mainComponent = new Main();
-      let pipelines = generatePipelines();
+      const mainComponent = new Main(props);
+      const pipelines = generatePipelines();
 
-      let sortedPipelineNames = mainComponent.sortPipelines(pipelines, [], 'status').map(p => p.name);
+      const sortedPipelineNames = mainComponent.sortPipelines(pipelines, [], 'status').map(p => p.name);
       expect(sortedPipelineNames).to.eql(['pipeline3', 'pipeline2', 'pipeline4', 'pipeline1']);
+    });
+
+    it('should add time ago string', () => {
+      const mainComponent = new Main(props);
+      const pipelines = generatePipelines();
+
+      const sortedPipelines = mainComponent.sortPipelines(pipelines, [], 'status');
+
+      sortedPipelines.forEach((p) => {
+        expect(p).to.have.property('timeago');
+      });
+
     });
 
   });
