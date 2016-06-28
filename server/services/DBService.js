@@ -10,17 +10,7 @@ export default class DBService {
    * @return {Promise<Object>}  Settings stored in db
    */
   getSettings() {
-    return new Promise((resolve, reject) => {
-      return this.datastore.findOne({
-        settings: { $exists: true }
-      }, (err, doc) => {
-        if (doc && !err) {
-          resolve(doc);
-        } else {
-          reject(err || new Error('Failed to find settings'));
-        }
-      });
-    });
+    return this._executeDbAction('findOne', { settings: { $exists: true } });
   }
 
   /**
@@ -28,34 +18,20 @@ export default class DBService {
    * @return {Promise<Object>}           The updated settings
    */
   saveOrUpdateSettings(settings) {
-    return new Promise((resolve, reject) => {
-      const insertSettings = () => {
-        this.datastore.insert({ settings: settings }, (insErr) => {
-          if (!insErr) {
-            this.datastore.persistence.compactDatafile();
-            resolve(settings);
-          } else {
-            reject(insErr);
-          }
+    const insertSettings = () => {
+      return this._executeDbAction('insert', { settings: settings })
+    }
+    return this.getSettings().then((doc) => {
+      if (doc && doc.settings) {
+        return this._executeDbAction('update', { _id: doc._id }, { $set: { settings: settings } }, {}).then(() => {
+          // Since callback of an update returns number of affected documents, we resolve with settings argument 
+          return settings;
         });
+      } else {
+        return insertSettings();
       }
-      return this.getSettings().then((doc) => {
-        if (doc.settings) {
-          this.datastore.update({ _id: doc._id }, { $set: { settings: settings } }, {}, (updErr) => {
-            if (!updErr) {
-              // Compact file so only one settings object is saved
-              this.datastore.persistence.compactDatafile();
-              resolve(settings);
-            } else {
-              reject(updErr);
-            }
-          })
-        } else {
-          insertSettings();
-        }
-      }, () => {
-        insertSettings();
-      });
+    }, () => {
+      return insertSettings();
     });
   }
 
@@ -63,15 +39,7 @@ export default class DBService {
    * @return {Promise<Object>} A history of test results
    */
   getTestResults() {
-    return new Promise((resolve, reject) => {
-      return this.datastore.find({ type: 'test' }, (err, doc) => {
-        if (doc && !err) {
-          resolve(doc);
-        } else {
-          reject(err || new Error('Failed to find tests'));
-        }
-      });
-    });
+    return this._executeDbAction('find', { type: 'test' });
   }
 
   /**
@@ -79,18 +47,10 @@ export default class DBService {
    * @return {Promise<Object>}             The saved test result
    */
   saveTestResult(testResult) {
-    return new Promise((resolve, reject) => {
-      // Remove if any
-      this.datastore.remove({ _id: testResult._id }, {}, () => {
-        testResult.type = 'test';
-        this.datastore.insert(testResult, (insErr, savedTest) => {
-          if (!insErr) {
-            resolve(savedTest);
-          } else {
-            reject(insErr);
-          }
-        });
-      });
+    // Remove if any
+    return this.removeTestResult(testResult._id).then(() => {
+      testResult.type = 'test';
+      return this._executeDbAction('insert', testResult);
     });
   }
 
@@ -98,15 +58,7 @@ export default class DBService {
    * @param {string}  testResultId  Id of the test to remove
    */
   removeTestResult(testResultId) {
-    return new Promise((resolve, reject) => {
-      this.datastore.remove({ _id: testResultId }, {}, (err) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve();
-        }
-      })
-    })
+    return this._executeDbAction('remove', { _id: testResultId }, {});
   }
 
   /**
@@ -116,18 +68,30 @@ export default class DBService {
    * @return {Promise<Object>}             The updated test result
    */
   updateTestResult(testName, testType, testResult) {
+    const testToSave = {};
+    testToSave[testType] = testResult;
+    return this._executeDbAction('update', { _id: testName }, { $push: testToSave }, {});
+  }
+
+  /**
+   * Executes a database action
+   * 
+   * @param   {string}        action    The action to execute e.g. find, update, remove etc
+   * @parma   {Array<Object>} args      Database arguments
+   */
+  _executeDbAction(action, ...args) {
     return new Promise((resolve, reject) => {
-      let testToSave = {};
-      testToSave[testType] = testResult;
-      this.datastore.update({ _id: testName }, { $push: testToSave }, {}, (updErr) => {
-        if (!updErr) {
-          // Compact file so only one test report object is saved
-          this.datastore.persistence.compactDatafile();
-          resolve(testResult);
+      this.datastore[action](...args, (error, success) => {
+        if (error) {
+          reject(error);
         } else {
-          reject(updErr);
+          // Compress db file when on save actions
+          if (action === 'insert' || action === 'update') {
+            this.datastore.persistence.compactDatafile();
+          }
+          resolve(success);
         }
-      });
-    });
+      })
+    })
   }
 }
