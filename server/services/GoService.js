@@ -4,6 +4,7 @@ import GoBuildService from './GoBuildService';
 import GoTestService from './GoTestService';
 import DBService from './DBService';
 import Logger from '../utils/Logger';
+import CucumberParser from '../utils/CucumberParser';
 
 export default class GoService {
 
@@ -33,7 +34,9 @@ export default class GoService {
   start() {
     // Retrieve current settings
     this.dbService.getSettings().then((doc) => {
-      this.currentSettings = doc.settings;
+      if (doc && doc.settings) {
+        this.currentSettings = doc.settings;
+      }
     });
 
     // Retrieve stored test results
@@ -183,24 +186,16 @@ export default class GoService {
         `${this.goConfig.serverUrl}/go/files/${p.pipeline}/${p.pipelineCounter}/${p.stage}/${p.stageCounter}/${p.job}.json`)
         .then((res) => {
           if (res && res.length > 0) {
-            const cucumberResult = res.filter(res => res.type === 'cucumber');
-            if (cucumberResult.length > 0) {
-              // Concatenate the features from all cucumber tests
-              const cucumber = cucumberResult.reduce((acc, c) => {
-                acc.features = acc.features.concat(c.features);
-                return acc;
-              }, { features: [] });
-              cucumber.timestamp = p.scheduled;
-
+            const cucumber = CucumberParser.cucumberResultToDbObject(res, p.scheduled);
+            if (cucumber) {
               // Save to db and notify all clients
-              this.dbService.updateTestResult(p.testId, 'cucumber', cucumber).then((savedTests) => {
+              this.dbService.updateTestResult(p.testId, 'cucumber', cucumber).then(() => {
                 this._refreshAndNotifyTestResults();
               }, () => {
                 const msg = `Failed to save tests for id ${p.testId}`;
                 Logger.error(msg);
                 this.notifyAllClients('tests:message', msg);
               })
-
             }
           }
         });

@@ -20,7 +20,7 @@ const muiTheme = getMuiTheme({
 });
 
 const styles = {
-  fab: {
+  addTestBtn: {
     position: 'fixed',
     right: 50,
     bottom: 50
@@ -41,8 +41,7 @@ export default class TestResults extends React.Component {
       pipelines: [],
       addTestDialogOpened: false,
       // Snackbar message
-      message: '',
-      showMessage: false
+      msg: ''
     };
   }
 
@@ -63,8 +62,7 @@ export default class TestResults extends React.Component {
 
     this.socket.on('tests:message', (message) => {
       this.setState({
-        showMessage: true,
-        message: message
+        msg: message
       });
     });
 
@@ -156,10 +154,9 @@ export default class TestResults extends React.Component {
     return reportView;
   }
 
-  closeSnackbar() {
+  resetMessage() {
     this.setState({
-      showMessage : false,
-      message: ''
+      msg: ''
     });
   }
 
@@ -193,8 +190,7 @@ export default class TestResults extends React.Component {
 
     const addBtn = adminMode ? (
       <FloatingActionButton
-        style={styles.fab}
-        primary={true}
+        style={styles.addTestBtn}
         onTouchTap={this.openAddTest.bind(this) }>
         <Add />
       </FloatingActionButton>
@@ -235,10 +231,10 @@ export default class TestResults extends React.Component {
             <AddTest pipelines={this.state.pipelines} onPipelineSelect={this.selectTestPipeline.bind(this) } />
           </Dialog>
           <Snackbar
-            open={this.state.showMessage}
-            message={this.state.message}
+            open={this.state.msg.length > 0}
+            message={this.state.msg}
             autoHideDuration={5000}
-            onRequestClose={this.closeSnackbar.bind(this)} />
+            onRequestClose={this.resetMessage.bind(this)} />
           {addBtn}
         </div>
       </MuiThemeProvider>

@@ -2,7 +2,7 @@ import rp from 'request-promise';
 
 import Logger from '../utils/Logger';
 import Util from '../utils/Util';
-import CucumberJsonParser from '../utils/CucumberJsonParser';
+import CucumberParser from '../utils/CucumberParser';
 
 export default class GoTestService {
 
@@ -29,17 +29,8 @@ export default class GoTestService {
               this.getTestsFromUri(`${this.conf.serverUrl}/go/files/${pipeline.name}/${pipeline.counter}/${stage.name}/${stage.counter}/${job.name}.json`)
                 .then((result) => {
                   if (result && result.length > 0) {
-                    const cucumberResult = result.filter(res => res.type === 'cucumber');
-                    if (cucumberResult.length > 0) {
-                      // Concatenate the features from all cucumber tests
-                      const cucumber = cucumberResult.reduce((acc, c) => {
-                        acc.features = acc.features.concat(c.features);
-                        return acc;
-                      }, { features: [] });
-
-                      // Test time 
-                      cucumber.timestamp = job.scheduled_date;
-
+                    const cucumber = CucumberParser.cucumberResultToDbObject(result, job.scheduled_date);
+                    if (cucumber) {
                       return {
                         _id: `${pipeline.name}-${stage.name}-${job.name}`.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '_'),
                         pipeline: pipeline.name,
@@ -81,7 +72,7 @@ export default class GoTestService {
         options.uri = fileUri;
         promises.push(rp(options).then((testReport) => {
           // Parse file and retrieve most relevant info, only cucumber supported atm
-          const testResult = CucumberJsonParser.parse(testReport);
+          const testResult = CucumberParser.parse(testReport);
           if (testResult) {
             testResult.type = 'cucumber';
             return testResult;
@@ -94,7 +85,7 @@ export default class GoTestService {
 
       });
       return Promise.all(promises);
-    }).catch((err) => {
+    }, () => {
       return Promise.resolve();
     });
   }

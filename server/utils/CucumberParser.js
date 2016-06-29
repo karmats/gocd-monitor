@@ -1,7 +1,7 @@
 /**
  * Parses a cucumber test report file
  */
-export default class CucumberJsonParser {
+export default class CucumberParser {
 
   /**
    * @return Parsed cucumber test report
@@ -29,6 +29,28 @@ export default class CucumberJsonParser {
           }
         })
       }
+    }
+    return null;
+  }
+
+  /**
+   * Converts multiple cucumber result files to database object
+   * 
+   * @param {Object}  result    Parsed cucumber from above function
+   * @param {number}  timestamp Test time
+   */
+  static cucumberResultToDbObject(result, timestamp) {
+    const cucumberResult = result.filter(res => res.type === 'cucumber');
+    if (cucumberResult.length > 0) {
+      // Concatenate the features from all cucumber tests
+      const cucumber = cucumberResult.reduce((acc, c) => {
+        acc.features = acc.features.concat(c.features);
+        return acc;
+      }, { features: [] });
+
+      // Test time 
+      cucumber.timestamp = timestamp;
+      return cucumber;
     }
     return null;
   }
