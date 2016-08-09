@@ -27,6 +27,9 @@ const styles = {
   }
 };
 
+// From latest report to this number of days back in time
+const daysInterval = 10;
+
 export default class TestResults extends React.Component {
 
   constructor(props, context) {
@@ -115,6 +118,15 @@ export default class TestResults extends React.Component {
     if (report.cucumber) {
       // Create chart history data      
       reportView.history = report.cucumber
+        // Sort by time descending
+        .sort((a, b) => {
+          return a.timestamp > b.timestamp ? 1 : -1;
+        })
+        // Filter reports that are not in defined interval
+        .filter((report, idx) => {
+          // TODO Logic
+          return true;
+        })
         .reduce((acc, c) => {
           const errors = [];
           let passed = 0;
@@ -141,14 +153,7 @@ export default class TestResults extends React.Component {
             when: c.timestamp
           });
           return acc;
-        }, [])
-        // Sort by time ascending
-        .sort((a, b) => {
-          return a.when > b.when ? -1 : 1;
-        })
-        // 10 latest
-        .slice(0, 10)
-        .reverse();
+        }, []);
 
     }
     return reportView;
