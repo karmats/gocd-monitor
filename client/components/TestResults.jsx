@@ -9,6 +9,8 @@ import Add from 'material-ui/svg-icons/content/add';
 import { purple700 } from 'material-ui/styles/colors';
 import { MuiThemeProvider, getMuiTheme } from 'material-ui/styles';
 
+import moment from 'moment';
+
 import TestReport from './TestReport';
 import AddTest from './AddTest';
 
@@ -28,7 +30,7 @@ const styles = {
 };
 
 // From latest report to this number of days back in time
-const daysInterval = 10;
+const daysInterval = 20;
 
 export default class TestResults extends React.Component {
 
@@ -118,14 +120,16 @@ export default class TestResults extends React.Component {
     if (report.cucumber) {
       // Create chart history data      
       reportView.history = report.cucumber
-        // Sort by time descending
+        // Sort by time ascending
         .sort((a, b) => {
           return a.timestamp > b.timestamp ? 1 : -1;
         })
         // Filter reports that are not in defined interval
-        .filter((report, idx) => {
-          // TODO Logic
-          return true;
+        .filter((report, idx, arr) => {
+          // Latest test case = last in list
+          const latestTestTime = moment(arr[arr.length - 1].timestamp);
+          const currTestTime = moment(report.timestamp);
+          return latestTestTime.diff(currTestTime, 'days') <= daysInterval;
         })
         .reduce((acc, c) => {
           const errors = [];
