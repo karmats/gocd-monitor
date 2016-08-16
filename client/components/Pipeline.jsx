@@ -83,7 +83,7 @@ export default class Pipeline extends React.Component {
    * @return  {string}  Status paused, building, failed or passed
    */
   static status(pipeline) {
-    if (pipeline.pauseinfo.paused) {
+    if (pipeline.pauseinfo && pipeline.pauseinfo.paused) {
       return 'paused';
     } else if (pipeline.stageresults.some(result => result.status === 'building')) {
       return 'building';

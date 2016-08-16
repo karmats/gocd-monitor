@@ -110,4 +110,27 @@ describe('GoBuildService spec', () => {
 
   });
 
+  describe('#getPipelinesPauseInfo()', () => {
+
+    it('should retrieve pipeline pause info', (done) => {
+      mockedRequestPromise = Promise.resolve(JSON.parse(fs.readFileSync(__dirname + '/data/dashboard.json', 'utf-8')));
+      let pipelinePromise = new GoBuildService(config).getPipelinesPauseInfo();
+
+      expect(pipelinePromise).to.eventually.be.ok;
+      expect(pipelinePromise).to.eventually.have.property('first');
+      expect(pipelinePromise).to.eventually.have.deep.property('first.paused', true);
+      expect(pipelinePromise).to.eventually.have.deep.property('first.paused_by', 'admin');
+      expect(pipelinePromise).to.eventually.have.deep.property('first.pause_reason', 'under construction').and.notify(done);
+    });
+
+    it('should return empty object if promise is rejected', (done) => {
+      mockedRequestPromise = Promise.reject({ message: 'Fake error'});
+      let pipelinePromise = new GoBuildService(config).getPipelinesPauseInfo();
+
+      expect(pipelinePromise).to.eventually.be.ok;
+      expect(pipelinePromise).to.eventually.be.empty.and.notify(done);
+    });
+
+  });
+
 });

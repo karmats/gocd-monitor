@@ -39,9 +39,11 @@ describe('PipelineComponent spec', () => {
       expect(Pipeline.status(pipeline)).to.be.equal('passed');
     });
 
-    it('should be paused when all pipeline is paused', () => {
+    it('should be paused when pause info is paused', () => {
       const pipeline = {
-        paused: true,
+        pauseinfo: {
+          paused: true
+        },
         stageresults: [{ status: 'passed' }, { status: 'passed' }]
       };
 
