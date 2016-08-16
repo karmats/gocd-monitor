@@ -31,7 +31,6 @@ export default class GoPipelineParser {
     *    buildtime : 1457085089646,
     *    author: 'Bobby Malone',
     *    counter: 255,
-    *    paused: false,
     *    health: 2,
     *    stageresults: [
     *      {
@@ -82,9 +81,6 @@ export default class GoPipelineParser {
       })
       return stageResult;
     });
-
-    // Pipeline is paused if none of the stagues can run and the pipeline isn't building
-    result.paused = !result.stageresults.some(stageResult => stageResult.status === 'building') && latestPipelineResult.stages.every((stage) => stage.can_run === false);
 
     // Health = number of pipelines failed
     result.health = pipelines.reduce((p, c) => {

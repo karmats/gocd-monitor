@@ -12,11 +12,12 @@ export default class Util {
    * 
    * @return  {Object}   Request configuration
    */
-  static createRequestOptions(url, config, json = false) {
+  static createRequestOptions(url, config, json = false, headers = {}) {
     const options = {
       uri: url,
       rejectUnauthorized: false,
-      json: json
+      json: json,
+      headers: headers
     };
     if (config.user && config.password) {
       options.auth = {
