@@ -13,6 +13,7 @@ export default class GoService {
     this.clients = [];
     this.pipelines = [];
     this.pipelineNames = [];
+    this.pipelinesPauseInfo = {};
     this.testResults = [];
     this.currentSettings = {
       disabledPipelines: []
@@ -54,6 +55,10 @@ export default class GoService {
       const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
       pipelinesToFetch.forEach((name) => {
         this.buildService.getPipelineHistory(name).then((pipeline) => {
+          // Add pause information
+          if (this.pipelinesPauseInfo && this.pipelinesPauseInfo[pipeline.name]) {
+            pipeline.pauseinfo = this.pipelinesPauseInfo[pipeline.name];
+          }
           currentPipelines.push(pipeline);
           if (currentPipelines.length === pipelinesToFetch.length) {
             this.pipelines = currentPipelines;
@@ -73,13 +78,16 @@ export default class GoService {
       if (pollId) {
         clearInterval(pollId);
       }
-      // Fetch the pipelines and start polling pipeline history
+      // Fetch the pipelines with pause info and start polling pipeline history
       this.buildService.getAllPipelines()
         .then((pipelineNames) => {
           this.pipelineNames = pipelineNames;
           this.notifyAllClients('pipelines:names', pipelineNames);
-          refreshPipelines(pipelineNames);
-          pollId = setInterval(refreshPipelines, this.pollingInterval, pipelineNames);
+          this.buildService.getPipelinesPauseInfo().then((pauseInfo) => {
+            this.pipelinesPauseInfo = pauseInfo;
+            refreshPipelines(pipelineNames);
+            pollId = setInterval(refreshPipelines, this.pollingInterval, pipelineNames);
+          });
         })
         .catch((err) => {
           Logger.error('Failed to retrieve pipeline names, retrying');

@@ -32,6 +32,42 @@ export default class GoBuildService {
   }
 
   /**
+   * Retrive all pipelines paused info.
+   * 
+   * @return {Promise<Object}   
+   * Example 
+   * { 
+   *   'pipeline1' : {
+   *     paused : false,
+   *     paused_by: null,
+   *     pause_reason: null},
+   *   'pipeline2' : {
+   *     paused : true,
+   *     paused_by : 'me',
+   *     pause_reason : 'Under construction'
+   *   }
+   * }
+   */
+  getPipelinesPauseInfo() {
+    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/dashboard`, this.conf, true, {'Accept' : 'application/vnd.go.cd.v1+json'});
+
+    return rp(options)
+      .then((res) => {
+        // Return map with pipeline name as key.
+        return res._embedded.pipeline_groups.reduce((acc, curr) => {
+          curr._embedded.pipelines.forEach((cp) => {
+            acc[cp.name] = cp.pause_info;
+          });
+          return acc;
+        }, {});
+      })
+      .catch((err) => {
+        Logger.error('Failed to retrieve pipeline pause information');
+        return {};
+      })
+  }
+
+  /**
    * @param   {string}          name  Name of the pipeline
    * @returns {Promise<Object>}       Pipeline instance. 
    * Example 
