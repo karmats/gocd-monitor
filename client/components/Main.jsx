@@ -212,7 +212,6 @@ export default class Main extends React.Component {
     const settingsBtn = adminMode ? (
       <FloatingActionButton
         style={styles.fab}
-        primary={true}
         onTouchTap={this.openSettings.bind(this)}>
         <Settings />
       </FloatingActionButton>
