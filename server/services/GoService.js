@@ -56,7 +56,7 @@ export default class GoService {
       pipelinesToFetch.forEach((name) => {
         this.buildService.getPipelineHistory(name).then((pipeline) => {
           // Add pause information
-          if (this.pipelinesPauseInfo[name]) {
+          if (this.pipelinesPauseInfo[name] && pipeline) {
             pipeline.pauseinfo = this.pipelinesPauseInfo[name];
           }
           currentPipelines.push(pipeline);

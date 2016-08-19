@@ -28,6 +28,9 @@ const styles = {
     background: Colors.yellowA700,
     marginBottom: '1rem'
   },
+  cardContainer: {
+    paddingBottom: '0'
+  },
   cardTitle: {
     color: '#fff',
     fontSize: '1.2em'
@@ -136,7 +139,7 @@ export default class Pipeline extends React.Component {
                   </svg>
                 </span>);
               } else {
-                return <i key={stage.name} className={'mdi mdi-' + this.stageIcon(stage) }></i>
+                return <i key={stage.name} className={'mdi mdi-14px mdi-' + this.stageIcon(stage) }></i>
               }
             })
           }
@@ -157,7 +160,7 @@ export default class Pipeline extends React.Component {
         break;
     }
     return (
-      <Card style={style}>
+      <Card style={style} containerStyle={styles.cardContainer}>
         <CardHeader
           className="buildtitle"
           title={pipeline.name}
