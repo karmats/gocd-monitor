@@ -151,7 +151,7 @@ div.buildinfo p.right {
   text-align: right;
 }
 div.buildinfo p.right > i {
-  vertical-align: text-bottom;
+  vertical-align: sub;
 }
 div.buildinfo p.right > span {
   padding: 0;
@@ -196,9 +196,15 @@ div.buildinfo span {
     }
 }
 
+/* Missing 14px mdi size  */
+.mdi-set.mdi-14px,
+.mdi.mdi-14px:before {
+  font-size:14px
+}
+
 /* Progress spinner */
 .loader {
-  vertical-align: middle;
+  vertical-align: text-bottom !important;
   margin: 1px 1px 0;
   display: inline-block;
   position: relative;

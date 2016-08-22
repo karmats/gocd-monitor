@@ -25,6 +25,9 @@ const styles = {
   cardFailure: {
     backgroundColor: pink500
   },
+  cardContainer: {
+    paddingBottom: 0
+  },
   cardMedia: {
     margin: '16px'
   },
@@ -254,7 +257,7 @@ export default class TestReport extends React.Component {
       </CardActions>) : null;
 
     return (
-      <Card style={failed ? styles.cardFailure : styles.cardSuccess}>
+      <Card style={failed ? styles.cardFailure : styles.cardSuccess} containerStyle={styles.cardContainer}>
         {actions}
         <CardTitle title={report.title} subtitle={report.subtitle}
           subtitleColor={transWhite} titleColor={white} titleStyle={styles.cardTitle} />
