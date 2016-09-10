@@ -220,7 +220,7 @@ export default class TestResults extends React.Component {
 
     const reports = this.state.testReports.map((report) => {
       return (
-        <div key={report.title} className="item">
+        <div key={report.title} className="col-md-4 col-sm-6 col-xs-12">
           <TestReport report={report} admin={adminMode} onRemoveTest={this.removeTest.bind(this)} />
         </div>)
     });
@@ -228,7 +228,7 @@ export default class TestResults extends React.Component {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div className="appcontainer">
-          <div className="masonry">
+          <div className="row">
             {reports}
           </div>
           <Dialog

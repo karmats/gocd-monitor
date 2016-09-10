@@ -171,7 +171,7 @@ div.buildinfo span {
     column-gap: 1.5em;
 }
 
-.item {
+.masonry .item {
     display: inline-block;
     margin: 0 0 1.5em;
     width: 100%;
