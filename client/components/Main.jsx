@@ -33,7 +33,7 @@ const styles = {
 const sortOrders = [{
   name : 'buildtime',
   label: 'Build time'
-}, 
+},
 {
   name: 'status',
   label: 'Status (building, failed, passed, paused)'
@@ -61,6 +61,10 @@ export default class Main extends React.Component {
       settingsDialogOpened: false,
       // Snackbar message
       showMessage: false,
+      filterRegexProps: {
+        active: true,
+        value: ''
+      },
       message: ''
     };
   }
@@ -90,7 +94,8 @@ export default class Main extends React.Component {
         this.setState({
           pipelines: this.sortPipelines(pipelines, settings.disabledPipelines, settings.sortOrder),
           sortOrder : sortOrders.filter(s => settings.sortOrder === s.name)[0],
-          disabledPipelines: settings.disabledPipelines
+          disabledPipelines: settings.disabledPipelines,
+          filterRegexProps: settings.filterRegexProps
         });
       }
     });
@@ -99,10 +104,22 @@ export default class Main extends React.Component {
     this.socket.emit('pipelines:get');
   }
 
+  updateDisabledPipelinesOnSave(settings) {
+    const regexFilter = new RegExp(settings.filterRegexProps.value);
+    settings.disabledPipelines = this.state.pipelineNames.filter((p) => {
+      if (regexFilter.test(p)){
+        return !settings.filterRegexProps.active;
+      }
+      return settings.filterRegexProps.active;
+    });
+    this.saveSettings(settings);
+  }
+
   saveSettings(settings) {
     this.socket.emit('settings:update', {
       sortOrder: settings.sortOrder.name,
-      disabledPipelines: settings.disabledPipelines
+      disabledPipelines: settings.disabledPipelines,
+      filterRegexProps: settings.filterRegexProps
     });
     this.setState({
       settingsDialogOpened: false,
@@ -124,8 +141,9 @@ export default class Main extends React.Component {
     // Init the configuration properties
     this.configurationProperties = {
       disabledPipelines: this.state.disabledPipelines,
-      sortOrder: this.state.sortOrder
-    }	
+      sortOrder: this.state.sortOrder,
+      filterRegexProps: this.state.filterRegexProps
+    }
     this.setState({
       settingsDialogOpened: true
     });
@@ -133,7 +151,7 @@ export default class Main extends React.Component {
 
   /**
    * Show/hide a pipeline. Used in configuration dialog
-   * 
+   *
    * @param {string}  pipelineName  Name of the pipeline to toggle
    * @param {boolean} active        Weather to show or hide it
    */
@@ -147,9 +165,13 @@ export default class Main extends React.Component {
     this.configurationProperties.disabledPipelines = disabledPipelines;
   }
 
+  updateFilterRegexProps(filterRegexProps) {
+    this.configurationProperties.filterRegexProps = filterRegexProps;
+  }
+
   /**
    * Change current pipeline sort order
-   * 
+   *
    * @param {Object}  newSortOrder  The sort order to change to, @see const sortOrders
    */
   changeSortOrder(newSortOrder) {
@@ -158,11 +180,11 @@ export default class Main extends React.Component {
 
   /**
    * Sort pipelines by date and filter out pipelines without data
-   * 
+   *
    * @param   {Array}   pipelines         The pipelines to sort
    * @param   {Array}   disabledPipelines Pipelines that are disabled
    * @param   {string}  sortOrder         The sort order, 'buildtime' or 'status'
-   * @return  {Array}   Sorted pipelines  
+   * @return  {Array}   Sorted pipelines
    */
   sortPipelines(pipelines, disabledPipelines, sortOrder) {
     const activePipelines = pipelines.filter(p => p && p.name && disabledPipelines.indexOf(p.name) < 0);
@@ -226,7 +248,7 @@ export default class Main extends React.Component {
       <FlatButton
         label="Save"
         primary={true}
-        onTouchTap={this.saveSettings.bind(this, this.configurationProperties)}
+        onTouchTap={this.updateDisabledPipelinesOnSave.bind(this, this.configurationProperties)}
       />
     ];
 
@@ -252,7 +274,7 @@ export default class Main extends React.Component {
             actions={settingsActions}
             autoScrollBodyContent={true}
             onRequestClose={this.closeSettings.bind(this)}>
-            <Configuration pipelines={this.state.pipelineNames} sortOrder={this.state.sortOrder} disabledPipelines={this.state.disabledPipelines} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} />
+            <Configuration pipelines={this.state.pipelineNames} sortOrder={this.state.sortOrder} disabledPipelines={this.state.disabledPipelines} filterRegexProps={this.state.filterRegexProps} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} onFilterRegexPropsChange={this.updateFilterRegexProps.bind(this)} />
           </Dialog>
           <Snackbar
             open={this.state.showMessage}
