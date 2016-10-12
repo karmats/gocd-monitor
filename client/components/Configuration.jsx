@@ -30,6 +30,7 @@ export default class Configuration extends React.Component {
     });
   }
 
+
   // Setup and sort pipelines by name
   setupPipelines(pipelines, disabledPipelines) {
     return pipelines
@@ -67,7 +68,6 @@ export default class Configuration extends React.Component {
   }
 
   updateFilterRegexProps() {
-    console.log("State from config: " + this.state.filterRegexActive, this.state.filterRegex)
     this.props.onFilterRegexPropsChange({
       active: this.state.filterRegexActive,
       value: this.state.filterRegex

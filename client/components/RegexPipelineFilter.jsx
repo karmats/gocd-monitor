@@ -12,7 +12,6 @@ export default class RegexPipelineFilter extends React.Component {
   }
 
   updateFilterRegexProps() {
-    console.log("State from config: " + this.state.filterRegexActive, this.state.filterRegex)
     this.props.onFilterRegexPropsChange({
       active: this.state.filterRegexActive,
       value: this.state.filterRegex

@@ -62,7 +62,7 @@ export default class Main extends React.Component {
       // Snackbar message
       showMessage: false,
       filterRegexProps: {
-        active: true,
+        active: false,
         value: ''
       },
       message: ''
@@ -104,7 +104,11 @@ export default class Main extends React.Component {
     this.socket.emit('pipelines:get');
   }
 
-  updateDisabledPipelinesOnSave(settings) {
+  /**
+   * Update disabled pipelines based upon regex requirement
+   * @param {Object} configurationProperties to update
+   */
+  updateDisabledPipelines(settings) {
     const regexFilter = new RegExp(settings.filterRegexProps.value);
     settings.disabledPipelines = this.state.pipelineNames.filter((p) => {
       if (regexFilter.test(p)){
@@ -112,7 +116,6 @@ export default class Main extends React.Component {
       }
       return settings.filterRegexProps.active;
     });
-    this.saveSettings(settings);
   }
 
   saveSettings(settings) {
@@ -167,6 +170,7 @@ export default class Main extends React.Component {
 
   updateFilterRegexProps(filterRegexProps) {
     this.configurationProperties.filterRegexProps = filterRegexProps;
+    this.updateDisabledPipelines(this.configurationProperties);
   }
 
   /**
@@ -248,7 +252,7 @@ export default class Main extends React.Component {
       <FlatButton
         label="Save"
         primary={true}
-        onTouchTap={this.updateDisabledPipelinesOnSave.bind(this, this.configurationProperties)}
+        onTouchTap={this.saveSettings.bind(this, this.configurationProperties)}
       />
     ];
 
