@@ -95,7 +95,7 @@ export default class Main extends React.Component {
           pipelines: this.sortPipelines(pipelines, settings.disabledPipelines, settings.sortOrder),
           sortOrder : sortOrders.filter(s => settings.sortOrder === s.name)[0],
           disabledPipelines: settings.disabledPipelines,
-          filterRegexProps: settings.filterRegexProps
+          filterRegexProps: settings.filterRegexProps || { active : false, value : '' }
         });
       }
     });
