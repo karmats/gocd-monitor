@@ -111,7 +111,7 @@ export default class GoPipelineParser {
     }
     if (latestPipelineResult.build_cause && latestPipelineResult.build_cause.material_revisions && latestPipelineResult.build_cause.material_revisions[0].modifications) {
       author = latestPipelineResult.build_cause.material_revisions[0].modifications[0].user_name;
-      if (validAuthor(latestPipelineResult.build_cause.approver)) {
+      if (!validAuthor(author) && validAuthor(latestPipelineResult.build_cause.approver)) {
         author = latestPipelineResult.build_cause.approver;
       }
     }
