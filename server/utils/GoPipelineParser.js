@@ -104,11 +104,28 @@ export default class GoPipelineParser {
       return sp;
     }, 0);
 
-    // Author = first modifcator
+    // Author = first modifcator or approver
     let author = 'Unknown';
-    if (latestPipelineResult.build_cause && latestPipelineResult.build_cause.material_revisions && latestPipelineResult.build_cause.material_revisions[0].modifications) {
-      author = latestPipelineResult.build_cause.material_revisions[0].modifications[0].user_name;
+    const validAuthor = (auth) => {
+      return auth && auth !== 'Unknown' && auth !== 'changes' && auth !== 'anonymous' && auth !== 'timer'; 
     }
+    const buildCause = latestPipelineResult.build_cause;
+    if (buildCause && buildCause.material_revisions && buildCause.material_revisions[0].modifications) {
+      author = buildCause.material_revisions[0].modifications[0].user_name;
+    }
+    if (!validAuthor(author)) {
+      if (validAuthor(buildCause.approver)) {
+        author = buildCause.approver;
+      } else {
+        author = latestPipelineResult.stages.reduce((auth, c) => {
+          if (!validAuthor(auth) && validAuthor(c.approved_by)) {
+            return c.approved_by;
+          }
+          return auth;
+        }, author);
+      }
+    }
+
     // Remove email tag if any
     let tagIdx = author.indexOf('<');
     if (tagIdx > 0) {
