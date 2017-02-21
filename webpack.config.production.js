@@ -12,20 +12,20 @@ module.exports = {
         loaders: [
             {
                 test: /.jsx?$/,
-                loader: 'babel',
+                loader: 'babel-loader',
                 exclude: /node_modules/
             }
         ]
     },
     resolve: {
-        extensions: ['', '.js', '.jsx']
+        extensions: ['.js', '.jsx']
     },
     plugins: [
         new webpack.DefinePlugin({
         'process.env.NODE_ENV': '"production"'
         }),
         new webpack.optimize.DedupePlugin(),
-        new webpack.optimize.OccurenceOrderPlugin(),
+        new webpack.optimize.OccurrenceOrderPlugin(),
         new webpack.optimize.UglifyJsPlugin({ mangle: false, sourcemap: false })
     ]
 }
