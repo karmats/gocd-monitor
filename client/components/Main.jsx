@@ -45,7 +45,7 @@ export default class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    this.socket = props.route.socket;
+    this.socket = props.socket;
 
     // Setup initial state
     this.state = {
