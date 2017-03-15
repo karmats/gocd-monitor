@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, Link, IndexRoute, browserHistory } from 'react-router'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
 import io from 'socket.io-client';
@@ -18,13 +18,6 @@ injectTapEventPlugin();
 // Setup a socket to pass to components that uses it
 const socket = io();
 
-// Dummy component to use for Route root
-class App extends React.Component {
-  render() {
-    return <div>{this.props.children}</div>
-  }
-}
-
 // When no route is found
 class NoRoute extends React.Component {
   render() {
@@ -41,16 +34,20 @@ if (switchBetweenPagesInterval && switchBetweenPagesInterval > 0 && !adminMode) 
     } else {
       window.location.replace('/test-results');
     }
-  }, switchBetweenPagesInterval*1000)
+  }, switchBetweenPagesInterval * 1000)
 }
 
 // Render react router routes
 ReactDOM.render((
-  <Router history={browserHistory}>
-    <Route path="/" component={App}>
-      <IndexRoute component={Main} socket={socket}></IndexRoute>
-      <Route path="test-results" component={TestResults} socket={socket}/>
-      <Route path="*" component={NoRoute}/>
-    </Route>
+  <Router>
+    <Switch>
+      <Route exact path="/" render={() => (
+        <Main socket={socket} />
+      )} />
+      <Route path="/test-results" render={() => (
+        <TestResults socket={socket} />
+      )} />
+      <Route component={NoRoute} />
+    </Switch>
   </Router>
 ), document.getElementById('app'))

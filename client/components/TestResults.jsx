@@ -37,7 +37,7 @@ export default class TestResults extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    this.socket = props.route.socket;
+    this.socket = props.socket;
 
     // Setup initial state
     this.state = {
@@ -236,7 +236,7 @@ export default class TestResults extends React.Component {
             open={this.state.addTestDialogOpened}
             actions={addTestActions}
             onRequestClose={this.closeAddTest.bind(this) }>
-            Select a pipeline to generate test reports for.For now only cucumber json is supported.
+            Select a pipeline to generate test reports for. For now only cucumber json is supported.
             <AddTest pipelines={this.state.pipelines} onPipelineSelect={this.selectTestPipeline.bind(this) } />
           </Dialog>
           <Snackbar
