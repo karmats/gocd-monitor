@@ -9,6 +9,7 @@ Build monitor for Go cd build server https://www.go.cd/
 * Green - Pipeline build passed
 * Red - Pipeline has failed
 * Yellow - Pipeline has been paused
+* Orange - Pipeline build been cancelled
 
 ![Pipelines](https://github.com/karmats/gocd-monitor/blob/gh-pages/images/pipelines.png?raw=true)
 
