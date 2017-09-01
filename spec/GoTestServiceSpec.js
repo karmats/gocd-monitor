@@ -61,7 +61,7 @@ describe('GoTestService spec', () => {
 
       expect(testsPromise).to.eventually.be.ok;
       expect(testsPromise).to.eventually.have.length(1);
-      expect(testsPromise).to.eventually.have.deep.property('[0].type', 'cucumber').and.notify(done)
+      expect(testsPromise).to.eventually.have.deep.nested.property('[0].type', 'cucumber').and.notify(done)
     });
 
     it('should be undefined if json file throws error', (done) => {
@@ -86,7 +86,7 @@ describe('GoTestService spec', () => {
 
       let testsPromise = new GoTestService(config).getTestsFromUri(`${config.serverUrl}/go/files/dummy.json`);
 
-      expect(testsPromise).to.eventually.have.deep.property('[0]', null).and.notify(done);
+      expect(testsPromise).to.eventually.have.deep.nested.property('[0]', null).and.notify(done);
     });
 
   });

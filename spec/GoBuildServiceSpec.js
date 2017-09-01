@@ -118,9 +118,9 @@ describe('GoBuildService spec', () => {
 
       expect(pipelinePromise).to.eventually.be.ok;
       expect(pipelinePromise).to.eventually.have.property('first');
-      expect(pipelinePromise).to.eventually.have.deep.property('first.paused', true);
-      expect(pipelinePromise).to.eventually.have.deep.property('first.paused_by', 'admin');
-      expect(pipelinePromise).to.eventually.have.deep.property('first.pause_reason', 'under construction').and.notify(done);
+      expect(pipelinePromise).to.eventually.have.deep.nested.property('first.paused', true);
+      expect(pipelinePromise).to.eventually.have.deep.nested.property('first.paused_by', 'admin');
+      expect(pipelinePromise).to.eventually.have.deep.nested.property('first.pause_reason', 'under construction').and.notify(done);
     });
 
     it('should return empty object if promise is rejected', (done) => {
