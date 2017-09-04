@@ -22,35 +22,35 @@ export default class GoPipelineParser {
     });
   }
 
-  /**
-   * @param   {Array<Object}    pipelineHistory  History for a pipeline, see spec/data/pipeline.json for example
-   * @returns {Object}          Pipeline instance. 
-   * Example 
-   * { 
-   *    name : 'id,
-   *    buildtime : 1457085089646,
-   *    author: 'Bobby Malone',
-   *    counter: 255,
-   *    health: 2,
-   *    stageresults: [
-   *      {
-   *        name: 'Build',
-   *        status: 'passed',
-   *        counter: 1,
-   *        jobresults: [{
-   *          name: 'build-job',
-   *          result: 'passed',
-   *          scheduled: 1457085089646
-   *        }]
-   *      },
-   *      {
-   *        name: 'Test',
-   *        status: 'building',
-   *        counter: 2,
-   *        jobresults: []
-   *      }] 
-   * }
-   */
+   /**
+    * @param   {Array<Object}    pipelineHistory  History for a pipeline, see spec/data/pipeline.json for example
+    * @returns {Object}          Pipeline instance. 
+    * Example 
+    * { 
+    *    name : 'id,
+    *    buildtime : 1457085089646,
+    *    author: 'Bobby Malone',
+    *    counter: 255,
+    *    health: 2,
+    *    stageresults: [
+    *      {
+    *        name: 'Build',
+    *        status: 'passed',
+    *        counter: 1,
+    *        jobresults: [{
+    *          name: 'build-job',
+    *          result: 'passed',
+    *          scheduled: 1457085089646
+    *        }]
+    *      },
+    *      {
+    *        name: 'Test',
+    *        status: 'building',
+    *        counter: 2,
+    *        jobresults: []
+    *      }] 
+    * }
+    */
   static parsePipelineResult(pipelines) {
     let result = {};
 
@@ -108,7 +108,7 @@ export default class GoPipelineParser {
     // Author = first modifcator or approver
     let author = 'Unknown';
     const validAuthor = (auth) => {
-      return auth && auth !== 'Unknown' &&  auth !== 'changes' && auth !== 'anonymous' && auth !== 'timer';
+      return auth && auth !== 'Unknown' && auth !== 'changes' && auth !== 'anonymous' && auth !== 'timer'; 
     }
     const buildCause = latestPipelineResult.build_cause;
     if (buildCause && buildCause.material_revisions && buildCause.material_revisions[0].modifications) {
