@@ -22,7 +22,7 @@ export default class GoPipelineParser {
     });
   }
 
-  /**
+   /**
     * @param   {Array<Object}    pipelineHistory  History for a pipeline, see spec/data/pipeline.json for example
     * @returns {Object}          Pipeline instance. 
     * Example 
@@ -67,7 +67,8 @@ export default class GoPipelineParser {
     // Stage results
     result.stageresults = latestPipelineResult.stages.map((stage) => {
       let stageResult = { name: stage.name, counter: stage.counter };
-      if (stage.jobs.some(job => job.state === 'Scheduled' || job.state === 'Assigned' || job.state === 'Preparing' || job.state === 'Building' || job.state === 'Completing')) {
+      if (stage.result === 'Cancelled') stageResult.status = 'cancelled';
+      else if (stage.jobs.some(job => job.state === 'Scheduled' || job.state === 'Assigned' || job.state === 'Preparing' || job.state === 'Building' || job.state === 'Completing')) {
         stageResult.status = 'building';
       } else {
         stageResult.status = stage.result ? stage.result.toLowerCase() : 'unknown';

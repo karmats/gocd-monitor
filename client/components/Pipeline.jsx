@@ -28,6 +28,10 @@ const styles = {
     background: Colors.yellowA700,
     marginBottom: '1rem'
   },
+  cardCancelled: {
+    background: Colors.orangeA700,
+    marginBottom: '1rem'
+  },
   cardContainer: {
     paddingBottom: '0'
   },
@@ -88,6 +92,8 @@ export default class Pipeline extends React.Component {
   static status(pipeline) {
     if (pipeline.pauseinfo && pipeline.pauseinfo.paused) {
       return 'paused';
+    } else if (pipeline.stageresults.some(result => result.status === 'cancelled')) {
+      return 'cancelled';
     } else if (pipeline.stageresults.some(result => result.status === 'building')) {
       return 'building';
     } else if (pipeline.stageresults.some(result => result.status === 'failed')) {
@@ -157,6 +163,9 @@ export default class Pipeline extends React.Component {
         break;
       case 'passed':
         style = styles.cardSuccess;
+        break;
+      case 'cancelled':
+        style = styles.cardCancelled;
         break;
     }
     return (

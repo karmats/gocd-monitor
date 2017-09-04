@@ -77,7 +77,7 @@ describe('MainComponent spec', () => {
       const pipelines = generatePipelines();
 
       const sortedPipelineNames = mainComponent.sortPipelines(pipelines, [], 'status').map(p => p.name);
-      expect(sortedPipelineNames).to.eql(['pipeline3', 'pipeline2', 'pipeline4', 'pipeline1']);
+      expect(sortedPipelineNames).to.eql(['pipeline3', 'pipeline2', 'pipeline1', 'pipeline4']);
     });
 
     it('should add time ago string', () => {

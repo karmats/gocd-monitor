@@ -58,6 +58,14 @@ describe('PipelineComponent spec', () => {
       expect(Pipeline.status(pipeline)).to.be.equal('failed');
     });
 
+    it('should be cancelled when one stage has cancelled', () => {
+      const pipeline = {
+        stageresults: [{ status: 'passed' }, { status: 'passed' }, { status: 'cancelled' }]
+      };
+
+      expect(Pipeline.status(pipeline)).to.be.equal('cancelled');
+    });
+
     it('should be building when one stage is building', () => {
       const pipeline = {
         stageresults: [{ status: 'passed' }, { status: 'building' }, { status: 'unknown' }]
