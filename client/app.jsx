@@ -1,19 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-import injectTapEventPlugin from 'react-tap-event-plugin';
 
 import io from 'socket.io-client';
 
 import { switchBetweenPagesInterval } from '../app-config';
 import Main from './components/Main';
 import TestResults from './components/TestResults';
-
-//Needed for onTouchTap
-//Can go away when react 1.0 release
-//Check this repo:
-//https://github.com/zilverline/react-tap-event-plugin
-injectTapEventPlugin();
 
 // Setup a socket to pass to components that uses it
 const socket = io();

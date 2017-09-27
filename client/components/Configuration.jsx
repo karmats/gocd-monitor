@@ -92,7 +92,7 @@ export default class Configuration extends React.Component {
       (<List>
           {
             this.props.sortOrders.map((s) => {
-                return <ListItem key={s.name} primaryText={s.label} onTouchTap={this.sortOrderChanged.bind(this, s)}/>
+                return <ListItem key={s.name} primaryText={s.label} onClick={this.sortOrderChanged.bind(this, s)}/>
               }
             ) }
         </List>
@@ -125,7 +125,7 @@ export default class Configuration extends React.Component {
         <List>
           <Subheader>General</Subheader>
           <ListItem primaryText="Sort Order" secondaryText={this.state.currentSortOrder.label}
-                    onTouchTap={this.openSortOrderList.bind(this)}/>
+                    onClick={this.openSortOrderList.bind(this)}/>
           <Divider />
         </List>
         <RegexPipelineFilter filterRegexProps={this.state.filterRegexProps} onFilterRegexPropsChange={this.props.onFilterRegexPropsChange}/>

@@ -114,7 +114,9 @@ const chartOptions = {
       ticks: {
         callback: (value, idx, values) => {
           // To avoid duplicates
-          const stringVals = values.map(val => val.format('ddd, MMM D'));
+          const stringVals = values.map(val => {
+            moment(val.value).format('ddd, MMM D')
+          });
           if (stringVals.indexOf(value) !== idx) {
             return '';
           }
@@ -251,7 +253,7 @@ export default class TestReport extends React.Component {
     const actions = this.props.admin ?
       (<CardActions style={styles.cardActions}>
         <IconButton tooltip="Remove test" tooltipPosition="bottom-left"
-          onTouchTap={this.props.onRemoveTest.bind(this, report) }>
+          onClick={this.props.onRemoveTest.bind(this, report) }>
           <Clear color={white} />
         </IconButton>
       </CardActions>) : null;

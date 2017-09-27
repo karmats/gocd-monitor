@@ -243,7 +243,7 @@ export default class Main extends React.Component {
     const settingsBtn = adminMode ? (
       <FloatingActionButton
         style={styles.fab}
-        onTouchTap={this.openSettings.bind(this)}>
+        onClick={this.openSettings.bind(this)}>
         <Settings />
       </FloatingActionButton>
     ) : null;
@@ -252,12 +252,12 @@ export default class Main extends React.Component {
       <FlatButton
         label="Cancel"
         primary={false}
-        onTouchTap={this.closeSettings.bind(this)}
+        onClick={this.closeSettings.bind(this)}
       />,
       <FlatButton
         label="Save"
         primary={true}
-        onTouchTap={this.saveSettings.bind(this, this.configurationProperties)}
+        onClick={this.saveSettings.bind(this, this.configurationProperties)}
       />
     ];
 

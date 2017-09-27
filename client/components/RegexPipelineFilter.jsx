@@ -53,7 +53,7 @@ export default class RegexPipelineFilter extends React.Component {
           rightIconButton={<FlatButton
               label="Update Regex"
               primary={true}
-              onTouchTap={this.updateFilterRegexProps.bind(this)}
+              onClick={this.updateFilterRegexProps.bind(this)}
             />}
         />
         <Divider />

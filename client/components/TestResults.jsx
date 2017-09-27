@@ -200,7 +200,7 @@ export default class TestResults extends React.Component {
     const addBtn = adminMode ? (
       <FloatingActionButton
         style={styles.addTestBtn}
-        onTouchTap={this.openAddTest.bind(this) }>
+        onClick={this.openAddTest.bind(this) }>
         <Add />
       </FloatingActionButton>
     ) : null;
@@ -209,12 +209,12 @@ export default class TestResults extends React.Component {
       <FlatButton
         label="Cancel"
         primary={false}
-        onTouchTap={this.closeAddTest.bind(this) }
+        onClick={this.closeAddTest.bind(this) }
         />,
       <FlatButton
         label="Add"
         primary={true}
-        onTouchTap={this.addTest.bind(this) }
+        onClick={this.addTest.bind(this) }
         />
     ];
 

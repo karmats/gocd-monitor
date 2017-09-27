@@ -5,6 +5,7 @@ var conf = require('./app-config');
 module.exports = {
   devtool: 'eval',
   entry: [
+    'react-hot-loader/patch',
     'webpack-dev-server/client?http://localhost:' + conf.devPort,
     'webpack/hot/only-dev-server',
     './client/app.jsx'
@@ -18,9 +19,9 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin()
   ],
   module: {
-    loaders: [{
+    rules: [{
       test: /.jsx?$/,
-      loaders: ['react-hot-loader', 'babel-loader'],
+      use: ['babel-loader'],
       include: path.join(__dirname, 'client')
     }]
   },
