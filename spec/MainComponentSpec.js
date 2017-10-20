@@ -72,6 +72,14 @@ describe('MainComponent spec', () => {
       expect(sortedPipelineNames).to.eql(['pipeline2', 'pipeline4', 'pipeline1', 'pipeline3']);
     });
 
+    it('should sort pipelines by name', () => {
+      const mainComponent = new Main(props);
+      const pipelines = generatePipelines();
+
+      const sortedPipelineNames = mainComponent.sortPipelines(pipelines, [], 'name').map(p => p.name);
+      expect(sortedPipelineNames).to.eql(['pipeline1', 'pipeline2', 'pipeline3', 'pipeline4']);
+    });
+
     it('should sort pipelines by status', () => {
       const mainComponent = new Main(props);
       const pipelines = generatePipelines();
