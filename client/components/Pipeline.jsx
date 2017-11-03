@@ -6,7 +6,7 @@ import React from 'react';
 
 import { Card, CardHeader, CardText } from 'material-ui/Card';
 import * as Colors from 'material-ui/styles/colors';
-
+import { showBuildLabels } from '../../app-config';
 
 // Weather icon indicator
 const weatherIconStatuses = ['sunny', 'partlycloudy', 'cloudy', 'cloudy', 'pouring', 'lightning'];
@@ -39,6 +39,11 @@ const styles = {
     color: '#fff',
     fontSize: '1.2em'
   },
+  cardLabel: {
+    color: '#eee',
+    fontSize: '1.0em',
+    fontStyle: 'italic'
+  },
   cardSubTitle: {
     color: '#fff',
     fontSize: '1em',
@@ -56,7 +61,7 @@ export default class Pipeline extends React.Component {
    * Calculates which weather icon to use for a pipeline based on pipeline heath.
    * This function was a bit more advanced back in the days, with api changes it got reduced to this.
    * Let's keep it for now
-   * 
+   *
    * @param   {Object}  pipeline  The pipeline
    * @return  {string}  Pre weather icon classname
    */
@@ -66,7 +71,7 @@ export default class Pipeline extends React.Component {
 
   /**
    * Calculates icon for stage visualization.
-   * 
+   *
    * @param   {Object}  stage   Stage with name and status
    * @return  {string}  Material design icon classname
    */
@@ -85,7 +90,7 @@ export default class Pipeline extends React.Component {
 
   /**
    * Calculate what status a pipeline has
-   * 
+   *
    * @param   {Object}  pipeline  The pipeline to calculate status for
    * @return  {string}  Status paused, building, failed or passed
    */
@@ -168,11 +173,18 @@ export default class Pipeline extends React.Component {
         style = styles.cardCancelled;
         break;
     }
+
+    let buildTitle = pipeline.name;
+
+    if (showBuildLabels) {
+      buildTitle = <div>{pipeline.name}<span style={styles.cardLabel}> : {pipeline.label}</span></div>;
+    }
+
     return (
       <Card style={style} containerStyle={styles.cardContainer}>
         <CardHeader
           className="buildtitle"
-          title={pipeline.name}
+          title={buildTitle}
           titleStyle={styles.cardTitle}
           subtitle={status}
           subtitleStyle={styles.cardSubTitle}>

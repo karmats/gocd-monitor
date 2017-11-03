@@ -88,6 +88,7 @@ describe('GoBuildService spec', () => {
       return pipelinePromise.then(pipeline => {
         expect(pipeline).to.have.property("name");
         expect(pipeline).to.have.property("author");
+        expect(pipeline).to.have.property("label");
         expect(pipeline).to.have.property("buildtime");
         expect(pipeline).to.have.property("counter");
         expect(pipeline).to.have.property("health");
