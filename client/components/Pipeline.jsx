@@ -40,9 +40,7 @@ const styles = {
     fontSize: '1.2em'
   },
   cardLabel: {
-    color: '#eee',
-    fontSize: '1.0em',
-    fontStyle: 'italic'
+    fontWeight: 'normal'
   },
   cardSubTitle: {
     color: '#fff',
@@ -174,19 +172,19 @@ export default class Pipeline extends React.Component {
         break;
     }
 
-    let buildTitle = pipeline.name;
+    let buildStatus = status;
 
     if (showBuildLabels) {
-      buildTitle = <div>{pipeline.name}<span style={styles.cardLabel}> : {pipeline.label}</span></div>;
+      buildStatus = <div>{status}<span style={styles.cardLabel}> : {pipeline.label}</span></div>;
     }
 
     return (
       <Card style={style} containerStyle={styles.cardContainer}>
         <CardHeader
           className="buildtitle"
-          title={buildTitle}
+          title={pipeline.name}
           titleStyle={styles.cardTitle}
-          subtitle={status}
+          subtitle={buildStatus}
           subtitleStyle={styles.cardSubTitle}>
           <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
         </CardHeader>
