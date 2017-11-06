@@ -7,7 +7,7 @@ export default class GoPipelineParser {
 
   /**
    * Parse pipeline.xml from go server. See spec/data/pipelines.xml for example
-   * 
+   *
    * @return {Promise<Array<string>>} Array with pipeline names
    */
   static parsePipelineNames(pipelineXml) {
@@ -24,13 +24,14 @@ export default class GoPipelineParser {
 
    /**
     * @param   {Array<Object}    pipelineHistory  History for a pipeline, see spec/data/pipeline.json for example
-    * @returns {Object}          Pipeline instance. 
-    * Example 
-    * { 
+    * @returns {Object}          Pipeline instance.
+    * Example
+    * {
     *    name : 'id,
     *    buildtime : 1457085089646,
     *    author: 'Bobby Malone',
     *    counter: 255,
+    *    label: v255
     *    health: 2,
     *    stageresults: [
     *      {
@@ -48,7 +49,7 @@ export default class GoPipelineParser {
     *        status: 'building',
     *        counter: 2,
     *        jobresults: []
-    *      }] 
+    *      }]
     * }
     */
   static parsePipelineResult(pipelines) {
@@ -63,6 +64,9 @@ export default class GoPipelineParser {
 
     // Pipeline name
     result.name = latestPipelineResult.name;
+
+    // Pipeline label
+    result.label = latestPipelineResult.label;
 
     // Stage results
     result.stageresults = latestPipelineResult.stages.map((stage) => {
@@ -108,7 +112,7 @@ export default class GoPipelineParser {
     // Author = first modifcator or approver
     let author = 'Unknown';
     const validAuthor = (auth) => {
-      return auth && auth !== 'Unknown' && auth !== 'changes' && auth !== 'anonymous' && auth !== 'timer'; 
+      return auth && auth !== 'Unknown' && auth !== 'changes' && auth !== 'anonymous' && auth !== 'timer';
     }
     const buildCause = latestPipelineResult.build_cause;
     if (buildCause && buildCause.material_revisions && buildCause.material_revisions[0].modifications) {
