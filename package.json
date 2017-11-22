@@ -9,12 +9,13 @@
     "lint": "eslint server/**/*.js client/**/*.jsx",
     "start-server": "babel-node ./bin/appServer",
     "dev-start": "babel-node ./bin/devServer & nodemon --exec \"npm run lint && npm run start-server\" --ignore assets/js --ignore server/data.db",
-    "add-flexbox": "cp node_modules/flexboxgrid/css/index.min.css assets/stylesheets/flexboxgrid.min.css",
-    "add-roboto-font": "cp node_modules/roboto-font/fonts/Roboto/* assets/fonts",
-    "add-material-icons": "cp node_modules/mdi/css/materialdesignicons.min.css* assets/stylesheets/ && cp node_modules/mdi/fonts/* assets/fonts"
+    "add-flexbox": "cpx \"node_modules/flexboxgrid/css/index.min.css\" assets/stylesheets",
+    "add-roboto-font": "cpx \"node_modules/roboto-font/fonts/Roboto/*\" assets/fonts",
+    "add-material-icons": "cpx \"node_modules/mdi/css/materialdesignicons.min.css*\" assets/stylesheets && cpx \"node_modules/mdi/fonts/*\" assets/fonts"
   },
   "dependencies": {
     "chart.js": "^2.7.0",
+    "cpx": "^1.5.0",
     "debug": "^3.1.0",
     "express": "^4.15.5",
     "flexboxgrid": "^6.3.1",
