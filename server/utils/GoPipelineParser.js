@@ -127,7 +127,7 @@ export default class GoPipelineParser {
             return c.approved_by;
           }
           return auth;
-        }, author);
+        }, 'Unknown');
       }
     }
 
