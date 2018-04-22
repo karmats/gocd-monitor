@@ -38,3 +38,4 @@ assets/fonts
 assets/stylesheets
 !style.css
 *.db
+.idea
