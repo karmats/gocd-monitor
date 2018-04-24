@@ -70,6 +70,13 @@ export default class Main extends React.Component {
   }
 
   componentDidMount() {
+    // Listen for connection errors
+    this.socket.on('connect_error', (err) => {
+      this.setState({
+          showMessage: true,
+          message: "Connect Error: " + err.message
+      });
+    });
 
     // Listen for updates
     this.socket.on('pipelines:updated', (newPipelines) => {
