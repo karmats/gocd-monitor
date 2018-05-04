@@ -13,6 +13,7 @@ export default class GoService {
     this.clients = [];
     this.pipelines = [];
     this.pipelineNames = [];
+    this.pipelineNameToGroupName = {};
     this.pipelinesPauseInfo = {};
     this.testResults = [];
     this.currentSettings = {
@@ -96,7 +97,33 @@ export default class GoService {
           setTimeout(refreshPipelinesAndPollForUpdates, 1000);
         });
     };
+    const getPipelineGroups = () => {
+      Logger.info('Retrieving pipeline groups');
+      // Fetch the pipelines with pause info and start polling pipeline history
+      this.buildService.getPipelineGroups()
+        .then((pipelineGroups) => {
+          let pipelineNameToGroupName = new Object();
+          pipelineGroups.forEach((pipelineGroup) => {
+            pipelineGroup.pipelines.map((pipeline) => {
+              if (pipelineNameToGroupName[pipeline.name] == undefined) {
+                pipelineNameToGroupName[pipeline.name] = pipelineGroup.name;
+              }
+            });
+          });
+          this.pipelineNameToGroupName = pipelineNameToGroupName;
+          this.notifyAllClients('pipelineNameToGroupName:updated', pipelineNameToGroupName);
+        })
+        .catch((err) => {
+          Logger.error('Failed to retrieve pipeline groups, retrying');
+          Logger.error(err);
+          // Wait a second before trying again
+          setTimeout(getPipelineGroups, 1000);
+        });
+    };
     // Refresh pipeline names and poll every day for new
+    if (conf.groupPipelines) {
+      getPipelineGroups();
+    }
     refreshPipelinesAndPollForUpdates();
     setInterval(refreshPipelinesAndPollForUpdates, this.checkPipelinesInterval);
 
@@ -222,6 +249,10 @@ export default class GoService {
       // Emit latest pipeline names and settings
       client.emit('pipelines:names', this.pipelineNames);
       client.emit('settings:updated', this.currentSettings);
+
+      if (conf.groupPipelines) {
+        client.emit('pipelineNameToGroupName:updated', this.pipelineNameToGroupName);
+      }
 
       // Register for setting updates
       client.on('settings:update', (settings) => {
