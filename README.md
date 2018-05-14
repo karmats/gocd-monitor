@@ -26,7 +26,11 @@ goUser: 'xxx',
 // Password for go user
 goPassword: 'xxx',
   ```
-Open a terminal and enter
+Optionally, if you want to group pipelines by their pipeline groups.
+```
+groupPipelines: true
+```
+Then open a terminal and enter
 ```
 npm install
 npm start

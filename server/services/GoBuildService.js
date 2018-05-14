@@ -32,6 +32,21 @@ export default class GoBuildService {
   }
 
   /**
+   * @returns {Promise<Array<Object>>} All available pipeline groups from the go.cd server
+   */
+  getPipelineGroups() {
+    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/config/pipeline_groups`, this.conf);
+
+    return rp(options)
+      .then((res) => {
+        return JSON.parse(res);
+      }).catch((err) => {
+        Logger.error('Failed to retrieve pipeline groups');
+        throw err
+      });
+  }
+
+  /**
    * Retrive all pipelines paused info.
    * 
    * @return {Promise<Object}   

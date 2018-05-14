@@ -109,6 +109,14 @@ a {
 }
 
 /* Build title, pipeline name and status */
+div.groupName {
+  color: #9E9E9E;
+  font-weight: 500;
+  font-size: 1.2em;
+  padding-top: 5px;
+  padding-bottom: 10px;
+}
+/* Build title, pipeline name and status */
 div.buildtitle > div {
   width: 80%;
 }

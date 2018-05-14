@@ -55,6 +55,8 @@ export default class Main extends React.Component {
       pipelineNames: [],
       // Pipelines that are disabled
       disabledPipelines: [],
+      // Pipeline name to group name map
+      pipelineNameToGroupName: {},
       // Current sort order
       sortOrder: sortOrders[0],
       // If settings dialog open or not
@@ -91,6 +93,13 @@ export default class Main extends React.Component {
     this.socket.on('pipelines:names', (pipelineNames) => {
       this.setState({
         pipelineNames: pipelineNames
+      })
+    });
+
+    // Pipeline name to group name map
+    this.socket.on('pipelineNameToGroupName:updated', (pipelineNameToGroupName) => {
+      this.setState({
+        pipelineNameToGroupName: pipelineNameToGroupName
       })
     });
 
@@ -268,22 +277,63 @@ export default class Main extends React.Component {
       />
     ];
 
-    let pipelineCards = this.state.pipelines.map((pipeline) => {
-      if (pipeline) {
+    var pipelineElements;
+
+    if (Object.keys(this.state.pipelineNameToGroupName).length < 1) {
+      let pipelineCards = this.state.pipelines.map((pipeline) => {
+        if (pipeline) {
+          return (
+            <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+              <Pipeline pipeline={pipeline} />
+            </div>
+          )
+        }
+      });
+      pipelineElements = (
+        <div className="row">
+          {pipelineCards}
+        </div>
+      )
+    } else {
+      let groupNameToPipelines = new Object();
+      this.state.pipelines.map((pipeline) => {
+        if (pipeline) {
+          let groupName = this.state.pipelineNameToGroupName[pipeline.name];
+          if (groupNameToPipelines[groupName] == undefined) {
+            groupNameToPipelines[groupName] = [pipeline]
+          } else {
+            groupNameToPipelines[groupName].push(pipeline);
+          }
+        }
+      });
+
+      pipelineElements = Object.keys(groupNameToPipelines).map((groupName) => {
+        let pipelineCards = groupNameToPipelines[groupName].map((pipeline) => {
+          if (pipeline) {
+            return (
+              <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <Pipeline pipeline={pipeline} />
+              </div>
+            )
+          }
+        });
         return (
-          <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-            <Pipeline pipeline={pipeline} />
+          <div>
+            <div className="groupName">
+              {groupName}
+            </div>
+            <div className="row">
+              {pipelineCards}
+            </div>
           </div>
         )
-      }
-    });
+      });
+    }
 
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div className="appcontainer">
-          <div className="row">
-            {pipelineCards}
-          </div>
+          {pipelineElements}
           <Dialog
             open={this.state.settingsDialogOpened}
             title="Configuration"
