@@ -26,6 +26,25 @@ goUser: 'xxx',
 // Password for go user
 goPassword: 'xxx',
   ```
+
+Alternatively you can configure via environment variables, these will override values within the config.js file:
+
+```
+gocdmonitor_gocd_host=https://ci.example.com
+gocdmonitor_gocd_user=xxx
+gocdmonitor_gocd_password=xxx
+```
+
+Optional environment variables:
+```
+gocdmonitor_gocd_poll_interval=60
+gocdmonitor_gocd_showbuildlabels=true
+gocdmonitor_gocd_poll_interval=true
+``` 
+
+This can be extremely useful for configuring in Docker environments.
+
+
 Optionally, if you want to group pipelines by their pipeline groups.
 ```
 groupPipelines: true
