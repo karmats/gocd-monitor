@@ -17,7 +17,8 @@ export default class Util {
       uri: url,
       rejectUnauthorized: false,
       json: json,
-      headers: headers
+      headers: headers,
+      jar: true
     };
     if (config.user && config.password) {
       options.auth = {
