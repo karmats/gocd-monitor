@@ -1,7 +1,7 @@
 <img src="https://github.com/karmats/gocd-monitor/blob/master/assets/images/logo.png?raw=true" width="150" align="right" />
 
 
-# GoCD monitor [![Build Status](https://travis-ci.org/karmats/gocd-monitor.svg?branch=master)](https://travis-ci.org/karmats/gocd-monitor) [![Dependencies](https://david-dm.org/karmats/gocd-monitor.svg)](https://david-dm.org/karmats/gocd-monitor) [![Maintainability](https://api.codeclimate.com/v1/badges/fb71221a616ba91dbf8e/maintainability)](https://codeclimate.com/github/karmats/gocd-monitor/maintainability)
+# GoCD monitor [![Build Status](https://travis-ci.org/karmats/gocd-monitor.svg?branch=master)](https://travis-ci.org/karmats/gocd-monitor) [![Dependencies](https://david-dm.org/karmats/gocd-monitor.svg)](https://david-dm.org/karmats/gocd-monitor)
 
 Build monitor for Go cd build server https://www.go.cd/
 #### Pipeline status
