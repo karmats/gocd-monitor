@@ -14,44 +14,46 @@ import { showBuildLabels } from '../../app-config';
 // Weather icon indicator
 const weatherIconStatuses = ['sunny', 'partlycloudy', 'cloudy', 'cloudy', 'pouring', 'lightning'];
 
+const white = '#fff';
 const styles = {
   cardSuccess: {
-    background: Colors.lightGreen,
+    background: Colors.green.A700,
     marginBottom: '1rem'
   },
   cardFailure: {
-    background: Colors.red,
+    background: Colors.red.A700,
     marginBottom: '1rem'
   },
   cardActive: {
-    background: Colors.lightBlue,
+    background: Colors.lightBlue.A700,
     marginBottom: '1rem'
   },
   cardInactive: {
-    background: Colors.yellow,
+    background: Colors.yellow.A700,
     marginBottom: '1rem'
   },
   cardCancelled: {
-    background: Colors.orange,
+    background: Colors.orange.A700,
     marginBottom: '1rem'
   },
   cardContainer: {
-    paddingBottom: '0'
+    position: 'relative',
+    paddingBottom: '0.5rem'
   },
   cardTitle: {
-    color: '#fff',
+    color: white,
     fontSize: '1.2em'
   },
   cardLabel: {
     fontWeight: 'normal'
   },
   cardSubTitle: {
-    color: '#fff',
+    color: white,
     fontSize: '1em',
     fontWeight: 100
   },
   progress: {
-    color: '#fff',
+    color: white,
     float: 'right'
   }
 };
@@ -182,12 +184,12 @@ export default class Pipeline extends React.Component {
     }
 
     return (
-      <Card style={style} containerStyle={styles.cardContainer}>
-        <CardContent>
+      <Card style={style}>
+        <CardContent style={styles.cardContainer}>
           <Typography variant="headline" component="h2" className="buildtitle" style={styles.cardTitle}>
             {pipeline.name}
-            <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
           </Typography>
+          <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
           <Typography style={styles.cardSubTitle} color="textSecondary">
             {buildStatus}
           </Typography>

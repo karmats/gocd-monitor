@@ -17,7 +17,7 @@ import Pipeline from './Pipeline';
 import Configuration from './Configuration';
 
 
-const muiTheme = createMuiTheme({
+const theme = createMuiTheme({
   palette: {
     primary1Color: purple,
   }
@@ -336,7 +336,7 @@ export default class Main extends React.Component {
     }
 
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div className="appcontainer">
           {pipelineElements}
           <Dialog
