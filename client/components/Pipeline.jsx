@@ -4,8 +4,11 @@
 
 import React from 'react';
 
-import { Card, CardHeader, CardText } from 'material-ui/Card';
-import * as Colors from 'material-ui/styles/colors';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import * as Colors from '@material-ui/core/colors';
+import Typography from '@material-ui/core/Typography';
+
 import { showBuildLabels } from '../../app-config';
 
 // Weather icon indicator
@@ -13,23 +16,23 @@ const weatherIconStatuses = ['sunny', 'partlycloudy', 'cloudy', 'cloudy', 'pouri
 
 const styles = {
   cardSuccess: {
-    background: Colors.greenA700,
+    background: Colors.lightGreen,
     marginBottom: '1rem'
   },
   cardFailure: {
-    background: Colors.redA700,
+    background: Colors.red,
     marginBottom: '1rem'
   },
   cardActive: {
-    background: Colors.lightBlueA700,
+    background: Colors.lightBlue,
     marginBottom: '1rem'
   },
   cardInactive: {
-    background: Colors.yellowA700,
+    background: Colors.yellow,
     marginBottom: '1rem'
   },
   cardCancelled: {
-    background: Colors.orangeA700,
+    background: Colors.orange,
     marginBottom: '1rem'
   },
   cardContainer: {
@@ -180,15 +183,15 @@ export default class Pipeline extends React.Component {
 
     return (
       <Card style={style} containerStyle={styles.cardContainer}>
-        <CardHeader
-          className="buildtitle"
-          title={pipeline.name}
-          titleStyle={styles.cardTitle}
-          subtitle={buildStatus}
-          subtitleStyle={styles.cardSubTitle}>
-          <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
-        </CardHeader>
-        <CardText>
+        <CardContent>
+          <Typography variant="headline" component="h2" className="buildtitle" style={styles.cardTitle}>
+            {pipeline.name}
+            <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
+          </Typography>
+          <Typography style={styles.cardSubTitle} color="textSecondary">
+            {buildStatus}
+          </Typography>
+
           <div className="buildinfo">
             <div className="col-xs-6">
               <p>
@@ -202,7 +205,7 @@ export default class Pipeline extends React.Component {
             </div>
             {stages}
           </div>
-        </CardText>
+        </CardContent>
       </Card>
     );
   }

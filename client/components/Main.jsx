@@ -4,10 +4,12 @@
 
 import React from 'react';
 
-import { Dialog, FlatButton, FloatingActionButton, Snackbar } from 'material-ui';
-import Settings from 'material-ui/svg-icons/action/settings';
-import * as Colors from 'material-ui/styles/colors';
-import { MuiThemeProvider, getMuiTheme } from 'material-ui/styles';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import Snackbar from '@material-ui/core/Snackbar';
+import Settings from '@material-ui/icons/Settings';
+import purple from '@material-ui/core/colors/purple';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import moment from 'moment';
 
@@ -15,9 +17,9 @@ import Pipeline from './Pipeline';
 import Configuration from './Configuration';
 
 
-const muiTheme = getMuiTheme({
+const muiTheme = createMuiTheme({
   palette: {
-    primary1Color: Colors.purple700,
+    primary1Color: purple,
   }
 });
 
@@ -257,24 +259,27 @@ export default class Main extends React.Component {
     const adminMode = window.location.search.indexOf('admin') >= 0;
 
     const settingsBtn = adminMode ? (
-      <FloatingActionButton
+      <Button
+        variant="fab"
         style={styles.fab}
         onClick={this.openSettings.bind(this)}>
         <Settings />
-      </FloatingActionButton>
+      </Button>
     ) : null;
 
     const settingsActions = [
-      <FlatButton
-        label="Cancel"
+      <Button
         primary={false}
         onClick={this.closeSettings.bind(this)}
-      />,
-      <FlatButton
-        label="Save"
+      >
+        Cancel
+      </Button>,
+      <Button
         primary={true}
         onClick={this.saveSettings.bind(this, this.configurationProperties)}
-      />
+      >
+        Save
+      </Button>
     ];
 
     var pipelineElements;

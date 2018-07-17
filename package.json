@@ -14,13 +14,14 @@
     "add-material-icons": "cpx \"node_modules/mdi/css/materialdesignicons.min.css*\" assets/stylesheets && cpx \"node_modules/mdi/fonts/*\" assets/fonts"
   },
   "dependencies": {
+    "@material-ui/core": "^1.4.0",
+    "@material-ui/icons": "^1.1.0",
+    "@mdi/font": "^2.5.94",
     "chart.js": "^2.7.2",
     "cpx": "^1.5.0",
     "debug": "^3.1.0",
     "express": "^4.16.3",
     "flexboxgrid": "^6.3.1",
-    "material-ui": "^0.20.1",
-    "mdi": "^2.2.43",
     "mkdirp": "^0.5.1",
     "moment": "^2.22.2",
     "nedb": "^1.8.0",

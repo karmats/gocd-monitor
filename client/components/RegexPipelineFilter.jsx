@@ -1,5 +1,11 @@
 import React from 'react';
-import {Divider, List, ListItem, Subheader, Toggle, FlatButton} from 'material-ui';
+
+import Button from '@material-ui/core/Button';
+import Divider from '@material-ui/core/Divider';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import Switch from '@material-ui/core/Switch';
 
 export default class RegexPipelineFilter extends React.Component {
   constructor(props, context) {
@@ -41,18 +47,18 @@ export default class RegexPipelineFilter extends React.Component {
           />
         }
         rightToggle={
-          <Toggle defaultToggled={this.state.filterRegexActive} onToggle={this.updateFilterRegexActive.bind(this)}/>
+          <Switch checked={this.state.filterRegexActive} onChange={this.updateFilterRegexActive.bind(this)}/>
         }/>
     );
 
     return (
       <List>
-        <Subheader>Filter Pipelines</Subheader>
+        <ListSubheader>Filter Pipelines</ListSubheader>
         {filterByRegex}
         <ListItem
-          rightIconButton={<FlatButton
+          rightIconButton={<Button
               label="Update Regex"
-              primary={true}
+              color="primary"
               onClick={this.updateFilterRegexProps.bind(this)}
             />}
         />

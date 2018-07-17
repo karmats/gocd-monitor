@@ -4,7 +4,8 @@
 
 import React from 'react';
 
-import { SelectField, MenuItem } from 'material-ui';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 
 export default class Configuration extends React.Component {
 
@@ -34,7 +35,7 @@ export default class Configuration extends React.Component {
 
     let pipelines = 
     (
-      <SelectField
+      <Select
         autoWidth={true}
         value={this.state.testToAdd}
         onChange={this.handleChange.bind(this)}
@@ -42,7 +43,7 @@ export default class Configuration extends React.Component {
         { this.state.pipelines.map((p, idx) => {
             return p ? <MenuItem key={idx} primaryText={p} value={p} /> : null
         }) }
-      </SelectField>
+      </Select>
     );
 
     return (

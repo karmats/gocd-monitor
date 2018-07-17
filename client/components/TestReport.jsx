@@ -4,10 +4,20 @@
 
 import React from 'react';
 
-import { Card, CardActions, CardMedia, CardText, CardTitle, IconButton } from 'material-ui';
-import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
-import { grey100, teal100, pink100, teal500, pink500 } from 'material-ui/styles/colors';
-import Clear from 'material-ui/svg-icons/content/clear';
+import Button from '@material-ui/core/Button';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardMedia from '@material-ui/core/CardMedia';
+import CardContent from '@material-ui/core/CardContent';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import teal from '@material-ui/core/colors/teal';
+import pink from '@material-ui/core/colors/pink';
+import Clear from '@material-ui/icons/Clear';
+import Typography from '@material-ui/core/Typography';
 
 import Chart from 'chart.js'
 import moment from 'moment';
@@ -20,10 +30,10 @@ const transWhite = 'rgba(255, 255, 255, 0.5)';
 // Style css
 const styles = {
   cardSuccess: {
-    backgroundColor: teal500
+    backgroundColor: teal
   },
   cardFailure: {
-    backgroundColor: pink500
+    backgroundColor: pink
   },
   cardContainer: {
     paddingBottom: 0
@@ -209,18 +219,18 @@ export default class TestReport extends React.Component {
   generateFailInfo(failures) {
     return (
       <Table selectable={false} wrapperStyle={styles.tableWrapper}>
-        <TableHeader displaySelectAll={false} adjustForCheckbox={false} enableSelectAll={false}>
+        <TableHead displaySelectAll={false} adjustForCheckbox={false} enableSelectAll={false}>
           <TableRow>
-            <TableHeaderColumn>Test</TableHeaderColumn>
-            <TableHeaderColumn>Reason</TableHeaderColumn>
+            <TableCell>Test</TableCell>
+            <TableCell>Reason</TableCell>
           </TableRow>
-        </TableHeader>
+        </TableHead>
         <TableBody displayRowCheckbox={false}>
           {failures.map((failure, idx) => {
             return (
               <TableRow key={idx}>
-                <TableRowColumn title={failure.test}>{failure.test}</TableRowColumn>
-                <TableRowColumn title={failure.message}>{failure.message}</TableRowColumn>
+                <TableCell title={failure.test}>{failure.test}</TableCell>
+                <TableCell title={failure.message}>{failure.message}</TableCell>
               </TableRow>
             )
           }) }
@@ -252,23 +262,27 @@ export default class TestReport extends React.Component {
     // Remove test action
     const actions = this.props.admin ?
       (<CardActions style={styles.cardActions}>
-        <IconButton tooltip="Remove test" tooltipPosition="bottom-left"
+        <Button tooltip="Remove test" tooltipPosition="bottom-left"
           onClick={this.props.onRemoveTest.bind(this, report) }>
           <Clear color={white} />
-        </IconButton>
+        </Button>
       </CardActions>) : null;
 
     return (
       <Card style={failed ? styles.cardFailure : styles.cardSuccess} containerStyle={styles.cardContainer}>
         {actions}
-        <CardTitle title={report.title} subtitle={report.subtitle}
-          subtitleColor={transWhite} titleColor={white} titleStyle={styles.cardTitle} />
         <CardMedia style={styles.cardMedia}>
           <canvas ref="reportChart"></canvas>
         </CardMedia>
-        <CardText style={styles.cardText}>
+        <CardContent style={styles.cardText}>
+          <Typography gutterBottom style={styles.cardTitle} variant="headline" component="h2">
+            {report.title}
+          </Typography>
+          <Typography color="textSecondary">
+            {report.subtitle}
+          </Typography>
           {failed ? this.generateFailInfo(latest.errors) : stableDays}
-        </CardText>
+        </CardContent>
       </Card>
     );
   }

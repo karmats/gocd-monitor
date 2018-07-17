@@ -4,7 +4,11 @@
 
 import React from 'react';
 
-import {Divider, List, ListItem, Popover, Subheader, Toggle} from 'material-ui';
+import Divider from '@material-ui/core/Divider';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import Switch from '@material-ui/core/Switch';
 
 import RegexPipelineFilter from './RegexPipelineFilter';
 
@@ -101,12 +105,17 @@ export default class Configuration extends React.Component {
     let pipelines =
       (
         <List>
-          <Subheader>Toggle Pipelines</Subheader>
+          <ListSubheader>Toggle Pipelines</ListSubheader>
 
-          { this.state.pipelines.map((p) => {
-            return <ListItem key={p.name} primaryText={p.name}
-                             rightToggle={<Toggle defaultToggled={p.active} onToggle={this.togglePipeline.bind(this, p)} />}/>
-          }) }
+          {this.state.pipelines.map((p) => {
+            return (
+              <ListItem key={p.name} primaryText={p.name}>
+                <ListItemSecondaryAction>
+                  <Switch checked={p.active} onChange={this.togglePipeline.bind(this, p)} />
+                </ListItemSecondaryAction>
+              </ListItem>
+            )
+          })}
           <Popover
             open={this.state.sortOrderListOpened}
             anchorEl={this.state.anchorEl}

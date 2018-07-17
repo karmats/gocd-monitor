@@ -4,10 +4,12 @@
 
 import React from 'react';
 
-import { Dialog, FlatButton, FloatingActionButton, Snackbar } from 'material-ui';
-import Add from 'material-ui/svg-icons/content/add';
-import { purple700 } from 'material-ui/styles/colors';
-import { MuiThemeProvider, getMuiTheme } from 'material-ui/styles';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import Snackbar from '@material-ui/core/Snackbar';
+import AddIcon from '@material-ui/icons/Add';
+import purple from '@material-ui/core/colors/purple';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import moment from 'moment';
 
@@ -15,9 +17,9 @@ import TestReport from './TestReport';
 import AddTest from './AddTest';
 
 
-const muiTheme = getMuiTheme({
+const muiTheme = createMuiTheme({
   palette: {
-    primary1Color: purple700,
+    primary1Color: purple,
   }
 });
 
@@ -198,24 +200,27 @@ export default class TestResults extends React.Component {
     const adminMode = window.location.search.indexOf('admin') >= 0;
 
     const addBtn = adminMode ? (
-      <FloatingActionButton
+      <Button
+        variant="fab"
         style={styles.addTestBtn}
         onClick={this.openAddTest.bind(this) }>
-        <Add />
-      </FloatingActionButton>
+        <AddIcon />
+      </Button>
     ) : null;
 
     const addTestActions = [
-      <FlatButton
-        label="Cancel"
-        primary={false}
+      <Button
+        color="primary"
         onClick={this.closeAddTest.bind(this) }
-        />,
-      <FlatButton
-        label="Add"
-        primary={true}
+        >
+        Cancel
+      </Button>,
+      <Button
+        color="primary"
         onClick={this.addTest.bind(this) }
-        />
+        >
+        Add
+      </Button>
     ];
 
     const reports = this.state.testReports.map((report) => {
