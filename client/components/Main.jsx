@@ -19,7 +19,7 @@ import Configuration from './Configuration';
 
 const theme = createMuiTheme({
   palette: {
-    primary1Color: purple,
+    primary: purple
   }
 });
 
@@ -261,6 +261,7 @@ export default class Main extends React.Component {
     const settingsBtn = adminMode ? (
       <Button
         variant="fab"
+        color="primary"
         style={styles.fab}
         onClick={this.openSettings.bind(this)}>
         <Settings />
@@ -282,7 +283,7 @@ export default class Main extends React.Component {
       </Button>
     ];
 
-    var pipelineElements;
+    let pipelineElements;
 
     if (Object.keys(this.state.pipelineNameToGroupName).length < 1) {
       let pipelineCards = this.state.pipelines.map((pipeline) => {

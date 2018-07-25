@@ -8,9 +8,11 @@ import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListSubheader from '@material-ui/core/ListSubheader';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Switch from '@material-ui/core/Switch';
 
 import RegexPipelineFilter from './RegexPipelineFilter';
+import { Radio, ListItemText } from '../../node_modules/@material-ui/core';
 
 export default class Configuration extends React.Component {
 
@@ -92,16 +94,6 @@ export default class Configuration extends React.Component {
 
   render() {
 
-    let sortOrders =
-      (<List>
-          {
-            this.props.sortOrders.map((s) => {
-                return <ListItem key={s.name} primaryText={s.label} onClick={this.sortOrderChanged.bind(this, s)}/>
-              }
-            ) }
-        </List>
-      );
-
     let pipelines =
       (
         <List>
@@ -109,32 +101,35 @@ export default class Configuration extends React.Component {
 
           {this.state.pipelines.map((p) => {
             return (
-              <ListItem key={p.name} primaryText={p.name}>
+              <ListItem key={p.name}>
+                <ListItemText primary={p.name} />
                 <ListItemSecondaryAction>
-                  <Switch checked={p.active} onChange={this.togglePipeline.bind(this, p)} />
+                  <Switch defaultChecked={p.active} color="primary" onChange={this.togglePipeline.bind(this, p)} />
                 </ListItemSecondaryAction>
               </ListItem>
             )
           })}
-          <Popover
-            open={this.state.sortOrderListOpened}
-            anchorEl={this.state.anchorEl}
-            anchorOrigin={{horizontal: 'left', vertical: 'center'}}
-            targetOrigin={{horizontal: 'left', vertical: 'center'}}
-            onRequestClose={this.closeSortOrderList.bind(this)}
-            useLayerForClickAway={true}
-          >
-            {sortOrders}
-          </Popover>
         </List>
       );
 
     return (
       <div>
         <List>
-          <Subheader>General</Subheader>
-          <ListItem primaryText="Sort Order" secondaryText={this.state.currentSortOrder.label}
-                    onClick={this.openSortOrderList.bind(this)}/>
+          <ListSubheader>Sort Order</ListSubheader>
+            {
+            this.props.sortOrders.map((s) => 
+                (
+                  <ListItem key={s.name} onClick={this.sortOrderChanged.bind(this, s)}>
+                    <Radio
+                      color="primary"
+                      checked={this.state.currentSortOrder === s}
+                      tabIndex={-1}
+                    />
+                    <ListItemText primary={s.label} />
+                  </ListItem>
+                )
+            )
+          }
           <Divider />
         </List>
         <RegexPipelineFilter filterRegexProps={this.state.filterRegexProps} onFilterRegexPropsChange={this.props.onFilterRegexPropsChange}/>
