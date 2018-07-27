@@ -22,8 +22,8 @@ var config = {
     // If > 0 switches between pipeline and test results page every n seconds
     switchBetweenPagesInterval: process.env.gocdmonitor_gocd_poll_interval || 0,
     // Whether to display build labels
-    showBuildLabels: process.env.gocdmonitor_gocd_showbuildlabels === "true" ? true : false,
+    showBuildLabels: process.env.gocdmonitor_gocd_showbuildlabels === "true",
     // Whether to group pipelines
-    groupPipelines: process.env.gocdmonitor_gocd_grouppipelines === "true" ? true : false
+    groupPipelines: process.env.gocdmonitor_gocd_grouppipelines === "true"
 }
 module.exports = config;
