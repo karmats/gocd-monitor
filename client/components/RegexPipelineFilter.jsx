@@ -61,6 +61,7 @@ export default class RegexPipelineFilter extends React.Component {
           <ListItemSecondaryAction>
             <Button
                 color="primary"
+                disabled={!this.state.filterRegexActive}
                 onClick={this.updateFilterRegexProps.bind(this)}
             >
               Update Regex

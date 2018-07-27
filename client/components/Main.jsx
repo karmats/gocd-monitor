@@ -6,6 +6,9 @@ import React from 'react';
 
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import Snackbar from '@material-ui/core/Snackbar';
 import Settings from '@material-ui/icons/Settings';
 import purple from '@material-ui/core/colors/purple';
@@ -270,13 +273,14 @@ export default class Main extends React.Component {
 
     const settingsActions = [
       <Button
-        primary={false}
+        key="cancel-settings"
         onClick={this.closeSettings.bind(this)}
       >
         Cancel
       </Button>,
       <Button
-        primary={true}
+        key="save-settings"
+        color="primary"
         onClick={this.saveSettings.bind(this, this.configurationProperties)}
       >
         Save
@@ -342,16 +346,22 @@ export default class Main extends React.Component {
           {pipelineElements}
           <Dialog
             open={this.state.settingsDialogOpened}
-            title="Configuration"
-            actions={settingsActions}
             onClose={this.closeSettings.bind(this)}>
-            <Configuration pipelines={this.state.pipelineNames} sortOrder={this.state.sortOrder} disabledPipelines={this.state.disabledPipelines} filterRegexProps={this.state.filterRegexProps} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} onFilterRegexPropsChange={this.updateFilterRegexProps.bind(this)} />
+            <DialogTitle>
+              Configuration
+            </DialogTitle>
+            <DialogContent>
+              <Configuration pipelines={this.state.pipelineNames} sortOrder={this.state.sortOrder} disabledPipelines={this.state.disabledPipelines} filterRegexProps={this.state.filterRegexProps} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} onFilterRegexPropsChange={this.updateFilterRegexProps.bind(this)} />
+            </DialogContent>
+            <DialogActions>
+              {settingsActions}
+            </DialogActions>
           </Dialog>
           <Snackbar
             open={this.state.showMessage}
             message={this.state.message}
             autoHideDuration={5000}
-            onRequestClose={this.closeSnackbar.bind(this)}
+            onClose={this.closeSnackbar.bind(this)}
           />
           {settingsBtn}
         </div>
