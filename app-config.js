@@ -5,6 +5,12 @@ var config = {
     port: process.env.gocdmonitor_port || 3000,
     // Webpack dev port to run on
     devPort: 3001,
+    // Set to true to use https on the post specified above. If set to true, certificate and key paths must be also defined
+    useHttps: process.env.gocdmonitor_use_https === "true",
+    // Certificate for https
+    httpsCertificatePath: process.env.gocdmonitor_certificate_path || './server/cert/server.cert',
+    // Certificate for https
+    httpsKeyPath: process.env.gocdmonitor_key_path || './server/cert/server.key',
     // Url for your go server
     goServerUrl: process.env.gocdmonitor_gocd_host || 'https://ci.example.com',
     // Go user to use for communication with go server

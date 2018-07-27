@@ -18,7 +18,7 @@ Build monitor for Go cd build server https://www.go.cd/
 
 ## Setup
 Open app-config.js and change the three lines
-```   
+```
 // Url for your go server
 goServerUrl: 'https://ci.example.com',
 // Go user to use for communication with go server
@@ -40,7 +40,16 @@ Optional environment variables:
 gocdmonitor_gocd_poll_interval=60
 gocdmonitor_gocd_showbuildlabels=true
 gocdmonitor_gocd_poll_interval=true
-``` 
+```
+
+Enabling HTTPS of the server
+
+Use env variables or config to enable https and define needed private and public keys. Example for environment variables:
+```
+gocdmonitor_use_https=true
+gocdmonitor_key_path=path/to/your/publicKey
+gocdmonitor_certificate_path=path/to/your/privateKey
+```
 
 This can be extremely useful for configuring in Docker environments.
 
