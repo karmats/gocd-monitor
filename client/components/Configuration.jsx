@@ -24,8 +24,6 @@ export default class Configuration extends React.Component {
       pipelines: this.setupPipelines(props.pipelines, props.disabledPipelines),
       // Configurable sort order
       currentSortOrder: props.sortOrder,
-      // List of sort order options openened or not
-      sortOrderListOpened: false,
       filterRegexProps: props.filterRegexProps
     };
   }
@@ -54,23 +52,9 @@ export default class Configuration extends React.Component {
   // Sort order changed
   sortOrderChanged(sortOrder) {
     this.setState({
-      currentSortOrder: sortOrder,
-      sortOrderListOpened: false
+      currentSortOrder: sortOrder
     });
     this.props.onSortOrderChange(sortOrder);
-  }
-
-  openSortOrderList(e) {
-    this.setState({
-      sortOrderListOpened: true,
-      anchorEl: e.target
-    });
-  }
-
-  closeSortOrderList() {
-    this.setState({
-      sortOrderListOpened: false
-    });
   }
 
   updateFilterRegexProps() {
@@ -93,25 +77,6 @@ export default class Configuration extends React.Component {
   }
 
   render() {
-
-    let pipelines =
-      (
-        <List>
-          <ListSubheader>Toggle Pipelines</ListSubheader>
-
-          {this.state.pipelines.map((p) => {
-            return (
-              <ListItem key={p.name}>
-                <ListItemText primary={p.name} />
-                <ListItemSecondaryAction>
-                  <Switch defaultChecked={p.active} color="primary" onChange={this.togglePipeline.bind(this, p)} />
-                </ListItemSecondaryAction>
-              </ListItem>
-            )
-          })}
-        </List>
-      );
-
     return (
       <div>
         <List>
@@ -119,11 +84,11 @@ export default class Configuration extends React.Component {
             {
             this.props.sortOrders.map((s) => 
                 (
-                  <ListItem key={s.name} onClick={this.sortOrderChanged.bind(this, s)}>
+                  <ListItem key={s.name}>
                     <Radio
                       color="primary"
                       checked={this.state.currentSortOrder === s}
-                      tabIndex={-1}
+                      onChange={this.sortOrderChanged.bind(this, s)}
                     />
                     <ListItemText primary={s.label} />
                   </ListItem>
@@ -133,7 +98,19 @@ export default class Configuration extends React.Component {
           <Divider />
         </List>
         <RegexPipelineFilter filterRegexProps={this.state.filterRegexProps} onFilterRegexPropsChange={this.props.onFilterRegexPropsChange}/>
-        {pipelines}
+        <List>
+          <ListSubheader>Toggle Pipelines</ListSubheader>
+
+          {this.state.pipelines.map((p) => (
+              <ListItem key={p.name}>
+                <ListItemText primary={p.name} />
+                <ListItemSecondaryAction>
+                  <Switch defaultChecked={p.active} color="primary" onChange={this.togglePipeline.bind(this, p)} />
+                </ListItemSecondaryAction>
+              </ListItem>
+            )
+          )}
+        </List>
       </div>
     );
   }

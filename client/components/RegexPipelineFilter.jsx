@@ -2,9 +2,12 @@ import React from 'react';
 
 import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
+import Input from '@material-ui/core/Input';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Switch from '@material-ui/core/Switch';
 
 export default class RegexPipelineFilter extends React.Component {
@@ -37,31 +40,33 @@ export default class RegexPipelineFilter extends React.Component {
   }
 
   render() {
-    let filterByRegex = (
-      <ListItem
-        primaryText={
-          <input
-            type="text"
-            value={this.state.filterRegex}
-            onChange={this.updateFilterRegex.bind(this)}
-          />
-        }
-        rightToggle={
-          <Switch checked={this.state.filterRegexActive} onChange={this.updateFilterRegexActive.bind(this)}/>
-        }/>
-    );
 
     return (
       <List>
         <ListSubheader>Filter Pipelines</ListSubheader>
-        {filterByRegex}
-        <ListItem
-          rightIconButton={<Button
-              label="Update Regex"
-              color="primary"
-              onClick={this.updateFilterRegexProps.bind(this)}
-            />}
-        />
+        <ListItem>
+          <ListItemText primary={
+            <Input
+              type="text"
+              value={this.state.filterRegex}
+              onChange={this.updateFilterRegex.bind(this)}
+            />
+          }
+          />
+          <ListItemSecondaryAction>
+            <Switch color="primary" checked={this.state.filterRegexActive} onChange={this.updateFilterRegexActive.bind(this)}/>
+          </ListItemSecondaryAction>
+        </ListItem>
+        <ListItem>
+          <ListItemSecondaryAction>
+            <Button
+                color="primary"
+                onClick={this.updateFilterRegexProps.bind(this)}
+            >
+              Update Regex
+            </Button>
+          </ListItemSecondaryAction>
+        </ListItem>
         <Divider />
       </List>
     );

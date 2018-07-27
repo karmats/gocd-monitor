@@ -344,8 +344,7 @@ export default class Main extends React.Component {
             open={this.state.settingsDialogOpened}
             title="Configuration"
             actions={settingsActions}
-            autoScrollBodyContent={true}
-            onRequestClose={this.closeSettings.bind(this)}>
+            onClose={this.closeSettings.bind(this)}>
             <Configuration pipelines={this.state.pipelineNames} sortOrder={this.state.sortOrder} disabledPipelines={this.state.disabledPipelines} filterRegexProps={this.state.filterRegexProps} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} onFilterRegexPropsChange={this.updateFilterRegexProps.bind(this)} />
           </Dialog>
           <Snackbar
