@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "build": "webpack --config webpack.config.production.js",
     "test": "mocha spec/ --compilers js:node_modules/babel-core/register --timeout 15000",
     "postinstall": "mkdirp assets/fonts && mkdirp assets/js && npm run add-flexbox && npm run add-roboto-font && npm run add-material-icons",
-    "start": "webpack --config webpack.config.production.js && cross-env NODE_ENV=production npm run start-server",
+    "start": "npm run build && cross-env NODE_ENV=production npm run start-server",
     "lint": "eslint server/**/*.js client/**/*.jsx",
     "start-server": "babel-node ./bin/appServer",
     "dev-start": "babel-node ./bin/devServer & nodemon --exec \"npm run lint && npm run start-server\" --ignore assets/js --ignore server/data.db",
