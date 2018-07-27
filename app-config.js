@@ -8,9 +8,9 @@ var config = {
     // Url for your go server
     goServerUrl: process.env.gocdmonitor_gocd_host || 'https://ci.example.com',
     // Go user to use for communication with go server
-    goUser: process.env.gocdmonitor_gocd_user || 'xxx',
+    goUser: process.env.gocdmonitor_gocd_user || '',
     // Password for go user
-    goPassword: process.env.gocdmonitor_gocd_password || 'xxx',
+    goPassword: process.env.gocdmonitor_gocd_password || '',
     // How often data from go should be refreshed in seconds
     goPollingInterval: process.env.gocdmonitor_gocd_poll_interval || 30,
     // If > 0 switches between pipeline and test results page every n seconds
