@@ -34,8 +34,11 @@ export default class RegexPipelineFilter extends React.Component {
   }
 
   updateFilterRegexActive(e) {
+    const active = e.target.checked;
+    const regex = active ? this.state.filterRegex : '';
     this.setState({
-      filterRegexActive: e.target.checked
+      filterRegexActive: active,
+      filterRegex: regex
     });
   }
 
@@ -48,6 +51,7 @@ export default class RegexPipelineFilter extends React.Component {
           <ListItemText primary={
             <Input
               type="text"
+              disabled={!this.state.filterRegexActive}
               value={this.state.filterRegex}
               onChange={this.updateFilterRegex.bind(this)}
             />
@@ -61,7 +65,6 @@ export default class RegexPipelineFilter extends React.Component {
           <ListItemSecondaryAction>
             <Button
                 color="primary"
-                disabled={!this.state.filterRegexActive}
                 onClick={this.updateFilterRegexProps.bind(this)}
             >
               Update Regex

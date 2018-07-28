@@ -84,11 +84,10 @@ export default class Configuration extends React.Component {
             {
             this.props.sortOrders.map((s) => 
                 (
-                  <ListItem key={s.name}>
+                  <ListItem key={s.name} dense button onClick={this.sortOrderChanged.bind(this, s)}>
                     <Radio
                       color="primary"
                       checked={this.state.currentSortOrder === s}
-                      onChange={this.sortOrderChanged.bind(this, s)}
                     />
                     <ListItemText primary={s.label} />
                   </ListItem>
@@ -102,7 +101,7 @@ export default class Configuration extends React.Component {
           <ListSubheader>Toggle Pipelines</ListSubheader>
 
           {this.state.pipelines.map((p) => (
-              <ListItem key={p.name}>
+              <ListItem key={p.name} button dense>
                 <ListItemText primary={p.name} />
                 <ListItemSecondaryAction>
                   <Switch defaultChecked={p.active} color="primary" onChange={this.togglePipeline.bind(this, p)} />
