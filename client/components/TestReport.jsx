@@ -7,6 +7,7 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
+import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import Table from '@material-ui/core/Table';
@@ -17,7 +18,6 @@ import TableRow from '@material-ui/core/TableRow';
 import teal from '@material-ui/core/colors/teal';
 import pink from '@material-ui/core/colors/pink';
 import Clear from '@material-ui/icons/Clear';
-import Typography from '@material-ui/core/Typography';
 
 import Chart from 'chart.js'
 import moment from 'moment';
@@ -25,15 +25,16 @@ import moment from 'moment';
 
 // White and transparent white colors
 const white = 'rgb(255, 255, 255)';
+const black = 'rgb(0, 0, 0)';
 const transWhite = 'rgba(255, 255, 255, 0.5)';
 
 // Style css
 const styles = {
   cardSuccess: {
-    backgroundColor: teal
+    backgroundColor: teal["500"]
   },
   cardFailure: {
-    backgroundColor: pink
+    backgroundColor: pink["500"]
   },
   cardContainer: {
     paddingBottom: 0
@@ -42,19 +43,16 @@ const styles = {
     margin: '16px'
   },
   cardText: {
-    backgroundColor: white
+    backgroundColor: white,
+    color: black
   },
   cardTitle: {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden'
   },
-  tableWrapper: {
-    maxHeight: 440,
-    overflowY: 'auto'
-  },
   cardActions: {
-    textAlign: 'right',
+    float: 'right',
     marginRight: -10
   }
 }
@@ -218,17 +216,17 @@ export default class TestReport extends React.Component {
    */
   generateFailInfo(failures) {
     return (
-      <Table selectable={false} wrapperStyle={styles.tableWrapper}>
-        <TableHead displaySelectAll={false} adjustForCheckbox={false} enableSelectAll={false}>
+      <Table>
+        <TableHead>
           <TableRow>
             <TableCell>Test</TableCell>
             <TableCell>Reason</TableCell>
           </TableRow>
         </TableHead>
-        <TableBody displayRowCheckbox={false}>
+        <TableBody>
           {failures.map((failure, idx) => {
             return (
-              <TableRow key={idx}>
+              <TableRow key={idx} hover>
                 <TableCell title={failure.test}>{failure.test}</TableCell>
                 <TableCell title={failure.message}>{failure.message}</TableCell>
               </TableRow>
@@ -240,8 +238,7 @@ export default class TestReport extends React.Component {
   }
 
   render() {
-    const report = this.state.report;
-    const latest = this.state.latest;
+    const { report, latest } = this.state;
     const failed = latest.errors.length > 0;
 
     // String that tells how long the test has been stable
@@ -260,27 +257,22 @@ export default class TestReport extends React.Component {
     }
 
     // Remove test action
-    const actions = this.props.admin ?
-      (<CardActions style={styles.cardActions}>
-        <Button tooltip="Remove test" tooltipPosition="bottom-left"
-          onClick={this.props.onRemoveTest.bind(this, report) }>
-          <Clear color={white} />
+    const actions = this.props.admin ? (
+      <CardActions style={styles.cardActions}>
+        <Button title="Remove test" onClick={this.props.onRemoveTest.bind(this, report) }>
+          <Clear color="inherit" />
         </Button>
       </CardActions>) : null;
 
     return (
-      <Card style={failed ? styles.cardFailure : styles.cardSuccess} containerStyle={styles.cardContainer}>
+      <Card style={failed ? styles.cardFailure : styles.cardSuccess}>
         {actions}
-        <CardMedia style={styles.cardMedia}>
+        <CardHeader title={report.title} titleTypographyProps={{color: 'inherit'}}
+                    subheaderTypographyProps={{color: 'textSecondary'}} subheader={report.subtitle} style={styles.cardTitle} />
+        <CardMedia style={styles.cardMedia} src="#">
           <canvas ref="reportChart"></canvas>
         </CardMedia>
         <CardContent style={styles.cardText}>
-          <Typography gutterBottom style={styles.cardTitle} variant="headline" component="h2">
-            {report.title}
-          </Typography>
-          <Typography color="textSecondary">
-            {report.subtitle}
-          </Typography>
           {failed ? this.generateFailInfo(latest.errors) : stableDays}
         </CardContent>
       </Card>

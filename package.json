@@ -15,7 +15,7 @@
     "add-material-icons": "cpx \"node_modules/mdi/css/materialdesignicons.min.css*\" assets/stylesheets && cpx \"node_modules/mdi/fonts/*\" assets/fonts"
   },
   "dependencies": {
-    "@material-ui/core": "^1.4.0",
+    "@material-ui/core": "^1.4.2",
     "@material-ui/icons": "^1.1.0",
     "@mdi/font": "^2.5.94",
     "chart.js": "^2.7.2",
