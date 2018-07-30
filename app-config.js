@@ -9,7 +9,7 @@ var config = {
     useHttps: process.env.gocdmonitor_use_https === "true",
     // Certificate for https
     httpsCertificatePath: process.env.gocdmonitor_certificate_path || './server/cert/server.cert',
-    // Certificate for https
+    // Key for https
     httpsKeyPath: process.env.gocdmonitor_key_path || './server/cert/server.key',
     // Url for your go server
     goServerUrl: process.env.gocdmonitor_gocd_host || 'https://ci.example.com',
