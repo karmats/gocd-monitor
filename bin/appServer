@@ -6,6 +6,8 @@
 
 import app from '../server/app';
 import http from 'http';
+import https from 'https';
+import fs from 'fs';
 import Logger from '../server/utils/Logger';
 import * as conf from '../app-config';
 
@@ -14,12 +16,21 @@ import * as conf from '../app-config';
  */
 const port = conf.port;
 app.set('port', port);
-
 /**
- * Create HTTP server.
+ * Create HTTP(s) server.
  */
-const server = http.createServer(app);
+let server;
+if (conf.useHttps) {
+  const privateKey = fs.readFileSync(conf.httpsKeyPath);
+  const certificate = fs.readFileSync(conf.httpsCertificatePath);
 
+  server = https.createServer({
+      key: privateKey,
+      cert: certificate
+  }, app);
+} else {
+  server = http.createServer(app);
+}
 /**
  * Attach the server to socket.io
  */
