@@ -11,20 +11,11 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import Snackbar from '@material-ui/core/Snackbar';
 import AddIcon from '@material-ui/icons/Add';
-import purple from '@material-ui/core/colors/purple';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import moment from 'moment';
 
 import TestReport from './TestReport';
 import AddTest from './AddTest';
-
-
-const theme = createMuiTheme({
-  palette: {
-    primary: purple
-  }
-});
 
 const styles = {
   addTestBtn: {
@@ -236,33 +227,31 @@ export default class TestResults extends React.Component {
     });
 
     return (
-      <MuiThemeProvider theme={theme}>
-        <div className="appcontainer">
-          <div className="row">
-            {reports}
-          </div>
-          <Dialog
-            open={this.state.addTestDialogOpened}
-            onClose={this.closeAddTest.bind(this) }>
-            <DialogTitle>
-              Add Test
-            </DialogTitle>
-            <DialogContent>
-              Select a pipeline to generate test reports for. For now only cucumber json is supported.
-              <AddTest pipelines={this.state.pipelines} onPipelineSelect={this.selectTestPipeline.bind(this) } />
-            </DialogContent>
-            <DialogActions>
-              {addTestActions}
-            </DialogActions>
-          </Dialog>
-          <Snackbar
-            open={this.state.msg.length > 0}
-            message={this.state.msg}
-            autoHideDuration={5000}
-            onRequestClose={this.resetMessage.bind(this)} />
-          {addBtn}
+      <div className="appcontainer">
+        <div className="row">
+          {reports}
         </div>
-      </MuiThemeProvider>
+        <Dialog
+          open={this.state.addTestDialogOpened}
+          onClose={this.closeAddTest.bind(this) }>
+          <DialogTitle>
+            Add Test
+          </DialogTitle>
+          <DialogContent>
+            Select a pipeline to generate test reports for. For now only cucumber json is supported.
+            <AddTest pipelines={this.state.pipelines} onPipelineSelect={this.selectTestPipeline.bind(this) } />
+          </DialogContent>
+          <DialogActions>
+            {addTestActions}
+          </DialogActions>
+        </Dialog>
+        <Snackbar
+          open={this.state.msg.length > 0}
+          message={this.state.msg}
+          autoHideDuration={5000}
+          onRequestClose={this.resetMessage.bind(this)} />
+        {addBtn}
+      </div>
     );
   }
 }

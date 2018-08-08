@@ -7,6 +7,8 @@ import io from 'socket.io-client';
 import { switchBetweenPagesInterval } from '../app-config';
 import Main from './components/Main';
 import TestResults from './components/TestResults';
+import purple from '@material-ui/core/colors/purple';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 // Setup a socket to pass to components that uses it
 const socket = io();
@@ -30,17 +32,25 @@ if (switchBetweenPagesInterval && switchBetweenPagesInterval > 0 && !adminMode) 
   }, switchBetweenPagesInterval * 1000)
 }
 
+// Application theme
+const theme = createMuiTheme({
+  palette: {
+    primary: purple
+  }
+});
 // Render react router routes
 ReactDOM.render((
-  <Router>
-    <Switch>
-      <Route exact path="/" render={() => (
-        <Main socket={socket} />
-      )} />
-      <Route path="/test-results" render={() => (
-        <TestResults socket={socket} />
-      )} />
-      <Route component={NoRoute} />
-    </Switch>
-  </Router>
+  <MuiThemeProvider theme={theme}>
+    <Router>
+      <Switch>
+        <Route exact path="/" render={() => (
+          <Main socket={socket} />
+        )} />
+        <Route path="/test-results" render={() => (
+          <TestResults socket={socket} />
+        )} />
+        <Route component={NoRoute} />
+      </Switch>
+    </Router>
+  </MuiThemeProvider>
 ), document.getElementById('app'))

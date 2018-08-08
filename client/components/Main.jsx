@@ -11,20 +11,11 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Snackbar from '@material-ui/core/Snackbar';
 import Settings from '@material-ui/icons/Settings';
-import purple from '@material-ui/core/colors/purple';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import moment from 'moment';
 
 import Pipeline from './Pipeline';
 import Configuration from './Configuration';
-
-
-const theme = createMuiTheme({
-  palette: {
-    primary: purple
-  }
-});
 
 const styles = {
   fab: {
@@ -341,31 +332,29 @@ export default class Main extends React.Component {
     }
 
     return (
-      <MuiThemeProvider theme={theme}>
-        <div className="appcontainer">
-          {pipelineElements}
-          <Dialog
-            open={this.state.settingsDialogOpened}
-            onClose={this.closeSettings.bind(this)}>
-            <DialogTitle>
-              Configuration
-            </DialogTitle>
-            <DialogContent>
-              <Configuration pipelines={this.state.pipelineNames} sortOrder={this.state.sortOrder} disabledPipelines={this.state.disabledPipelines} filterRegexProps={this.state.filterRegexProps} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} onFilterRegexPropsChange={this.updateFilterRegexProps.bind(this)} />
-            </DialogContent>
-            <DialogActions>
-              {settingsActions}
-            </DialogActions>
-          </Dialog>
-          <Snackbar
-            open={this.state.showMessage}
-            message={this.state.message}
-            autoHideDuration={5000}
-            onClose={this.closeSnackbar.bind(this)}
-          />
-          {settingsBtn}
-        </div>
-      </MuiThemeProvider>
+      <div className="appcontainer">
+        {pipelineElements}
+        <Dialog
+          open={this.state.settingsDialogOpened}
+          onClose={this.closeSettings.bind(this)}>
+          <DialogTitle>
+            Configuration
+          </DialogTitle>
+          <DialogContent>
+            <Configuration pipelines={this.state.pipelineNames} sortOrder={this.state.sortOrder} disabledPipelines={this.state.disabledPipelines} filterRegexProps={this.state.filterRegexProps} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} onFilterRegexPropsChange={this.updateFilterRegexProps.bind(this)} />
+          </DialogContent>
+          <DialogActions>
+            {settingsActions}
+          </DialogActions>
+        </Dialog>
+        <Snackbar
+          open={this.state.showMessage}
+          message={this.state.message}
+          autoHideDuration={5000}
+          onClose={this.closeSnackbar.bind(this)}
+        />
+        {settingsBtn}
+      </div>
     );
   }
 }
