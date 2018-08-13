@@ -47,9 +47,10 @@ const styles = {
     color: black
   },
   cardTitle: {
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden'
+    color: white
+  },
+  cardSubtitle: {
+    color: transWhite
   },
   cardActions: {
     float: 'right',
@@ -259,7 +260,7 @@ export default class TestReport extends React.Component {
     // Remove test action
     const actions = this.props.admin ? (
       <CardActions style={styles.cardActions}>
-        <Button title="Remove test" onClick={this.props.onRemoveTest.bind(this, report) }>
+        <Button title="Remove test" color="inherit" onClick={this.props.onRemoveTest.bind(this, report) }>
           <Clear color="inherit" />
         </Button>
       </CardActions>) : null;
@@ -267,8 +268,8 @@ export default class TestReport extends React.Component {
     return (
       <Card style={failed ? styles.cardFailure : styles.cardSuccess}>
         {actions}
-        <CardHeader title={report.title} titleTypographyProps={{color: 'inherit'}}
-                    subheaderTypographyProps={{color: 'textSecondary'}} subheader={report.subtitle} style={styles.cardTitle} />
+        <CardHeader title={report.title} subheader={report.subtitle} titleTypographyProps={{ noWrap: true, style: styles.cardTitle }}
+          subheaderTypographyProps={{ style: styles.cardSubtitle }} />
         <CardMedia style={styles.cardMedia} src="#">
           <canvas ref="reportChart"></canvas>
         </CardMedia>
