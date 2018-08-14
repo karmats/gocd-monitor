@@ -35,6 +35,47 @@ const sortOrders = [{
   label: 'Status (building, failed, cancelled, passed, paused)'
 }];
 
+/**
+* Sort pipelines by date and filter out pipelines without data
+*
+* @param   {Array}   pipelines         The pipelines to sort
+* @param   {Array}   disabledPipelines Pipelines that are disabled
+* @param   {string}  sortOrder         The sort order, 'buildtime' or 'status'
+* @return  {Array}   Sorted pipelines
+*/
+const sortPipelines = (pipelines, disabledPipelines, sortOrder) => {
+ const activePipelines = pipelines.filter(p => p && p.name && disabledPipelines.indexOf(p.name) < 0);
+ // Add "time ago" moment string
+ activePipelines.forEach((pipeline) => {
+   pipeline.timeago = moment(pipeline.buildtime).fromNow();
+ });
+ const sortByBuildTime = (a, b) => {
+   return a.buildtime > b.buildtime ? -1 : 1;
+ };
+
+ if (sortOrder === 'buildtime') {
+   return activePipelines.sort(sortByBuildTime);
+ } else {
+   return activePipelines.sort((a, b) => {
+     const aStatus = Pipeline.status(a);
+     const bStatus = Pipeline.status(b);
+
+     if (aStatus === bStatus) {
+       return sortByBuildTime(a, b);
+     }
+
+     const statusIndex = {
+       building: -1,
+       failed: 0,
+       cancelled: 1,
+       passed: 2,
+       paused: 3,
+       unknown: 3,
+     }
+     return statusIndex[aStatus] - statusIndex[bStatus] ;
+   });
+ }
+}
 
 export default class Main extends React.Component {
 
@@ -81,7 +122,7 @@ export default class Main extends React.Component {
       let disabledPipelines = this.state.disabledPipelines.slice();
       let sortOrderName = this.state.sortOrder.name;
       this.setState({
-        pipelines: this.sortPipelines(newPipelines, disabledPipelines, sortOrderName)
+        pipelines: sortPipelines(newPipelines, disabledPipelines, sortOrderName)
       })
     });
 
@@ -104,7 +145,7 @@ export default class Main extends React.Component {
       let pipelines = this.state.pipelines.slice();
       if (settings.disabledPipelines && settings.sortOrder) {
         this.setState({
-          pipelines: this.sortPipelines(pipelines, settings.disabledPipelines, settings.sortOrder),
+          pipelines: sortPipelines(pipelines, settings.disabledPipelines, settings.sortOrder),
           sortOrder : sortOrders.filter(s => settings.sortOrder === s.name)[0],
           disabledPipelines: settings.disabledPipelines,
           filterRegexProps: settings.filterRegexProps || { active : false, value : '' }
@@ -130,14 +171,13 @@ export default class Main extends React.Component {
     });
   }
 
-  saveSettings(settings) {
+  saveSettings() {
     this.socket.emit('settings:update', {
-      sortOrder: settings.sortOrder.name,
-      disabledPipelines: settings.disabledPipelines,
-      filterRegexProps: settings.filterRegexProps
+      sortOrder: this.configurationProperties.sortOrder.name,
+      disabledPipelines: this.configurationProperties.disabledPipelines,
+      filterRegexProps: this.configurationProperties.filterRegexProps
     });
     this.setState({
-      settingsDialogOpened: false,
       showMessage: true,
       message: 'Settings saved. If you activated pipelines hold your breath for a minute, they will show up :)'
     });
@@ -194,53 +234,6 @@ export default class Main extends React.Component {
     this.configurationProperties.sortOrder = newSortOrder;
   }
 
-  /**
-   * Sort pipelines by date and filter out pipelines without data
-   *
-   * @param   {Array}   pipelines         The pipelines to sort
-   * @param   {Array}   disabledPipelines Pipelines that are disabled
-   * @param   {string}  sortOrder         The sort order, 'buildtime' or 'status'
-   * @return  {Array}   Sorted pipelines
-   */
-  sortPipelines(pipelines, disabledPipelines, sortOrder) {
-    const activePipelines = pipelines.filter(p => p && p.name && disabledPipelines.indexOf(p.name) < 0);
-    // Add "time ago" moment string
-    activePipelines.forEach((pipeline) => {
-      pipeline.timeago = moment(pipeline.buildtime).fromNow();
-    });
-    const sortByBuildTime = (a, b) => {
-      return a.buildtime > b.buildtime ? -1 : 1;
-    };
-
-    if (sortOrder === 'buildtime') {
-      return activePipelines.sort(sortByBuildTime);
-    } else {
-      return activePipelines.sort((a, b) => {
-        let aStatus = Pipeline.status(a);
-        let bStatus = Pipeline.status(b);
-
-        if (aStatus === bStatus) {
-          return sortByBuildTime(a, b);
-        }
-
-        let statusIndex = {
-          building: -1,
-          failed: 0,
-          cancelled: 1,
-          passed: 2,
-          paused: 3,
-          unknown: 3,
-        }
-        
-        if (statusIndex[aStatus]  < statusIndex[bStatus] ){
-          return -1;
-        }
-        else
-          return 1;
-      });
-    }
-  }
-
   closeSnackbar() {
     this.setState({
       showMessage : false,
@@ -272,7 +265,7 @@ export default class Main extends React.Component {
       <Button
         key="save-settings"
         color="primary"
-        onClick={this.saveSettings.bind(this, this.configurationProperties)}
+        onClick={this.saveSettings.bind(this)}
       >
         Save
       </Button>
@@ -341,7 +334,9 @@ export default class Main extends React.Component {
             Configuration
           </DialogTitle>
           <DialogContent>
-            <Configuration pipelines={this.state.pipelineNames} sortOrder={this.state.sortOrder} disabledPipelines={this.state.disabledPipelines} filterRegexProps={this.state.filterRegexProps} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)} onTogglePipeline={this.togglePipeline.bind(this)} onFilterRegexPropsChange={this.updateFilterRegexProps.bind(this)} />
+            <Configuration pipelines={this.state.pipelineNames} sortOrder={this.state.sortOrder} disabledPipelines={this.state.disabledPipelines}
+              filterRegexProps={this.state.filterRegexProps} sortOrders={sortOrders} onSortOrderChange={this.changeSortOrder.bind(this)}
+              onTogglePipeline={this.togglePipeline.bind(this)} onFilterRegexPropsChange={this.updateFilterRegexProps.bind(this)} />
           </DialogContent>
           <DialogActions>
             {settingsActions}

@@ -129,10 +129,10 @@ export default class Pipeline extends React.Component {
   }
 
   render() {
-    let pipeline = this.props.pipeline;
-    let status = Pipeline.status(pipeline);
+    const { pipeline } = this.props;
+    const status = Pipeline.status(pipeline);
 
-    let stages = (
+    const stages = (
       <div className='col-xs-6'>
         <p className="right">
           <span>{(status === 'failed' || status === 'building') ? pipeline.stageresults.reduce((p, c) => {

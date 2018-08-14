@@ -45,16 +45,17 @@ export default class Configuration extends React.Component {
   }
 
   // Toggles a pipeline on/off
-  togglePipeline(p, event) {
-    this.props.onTogglePipeline(p.name, event.target.checked);
+  togglePipeline(event) {
+    this.props.onTogglePipeline(event.target.value, event.target.checked);
   }
 
   // Sort order changed
-  sortOrderChanged(sortOrder) {
+  sortOrderChanged(event) {
+    const newSortOrder = this.props.sortOrders.filter(s => s.name === event.target.value).pop();
     this.setState({
-      currentSortOrder: sortOrder
+      currentSortOrder: newSortOrder
     });
-    this.props.onSortOrderChange(sortOrder);
+    this.props.onSortOrderChange(newSortOrder);
   }
 
   updateFilterRegexProps() {
@@ -84,10 +85,12 @@ export default class Configuration extends React.Component {
             {
             this.props.sortOrders.map((s) => 
                 (
-                  <ListItem key={s.name} dense button onClick={this.sortOrderChanged.bind(this, s)}>
+                  <ListItem key={s.name} dense button>
                     <Radio
                       color="primary"
                       checked={this.state.currentSortOrder === s}
+                      value={s.name}
+                      onChange={this.sortOrderChanged.bind(this)}
                     />
                     <ListItemText primary={s.label} />
                   </ListItem>
@@ -104,7 +107,7 @@ export default class Configuration extends React.Component {
               <ListItem key={p.name} button dense>
                 <ListItemText primary={p.name} />
                 <ListItemSecondaryAction>
-                  <Switch defaultChecked={p.active} color="primary" onChange={this.togglePipeline.bind(this, p)} />
+                  <Switch defaultChecked={p.active} color="primary" value={p.name} onChange={this.togglePipeline.bind(this)} />
                 </ListItemSecondaryAction>
               </ListItem>
             )
