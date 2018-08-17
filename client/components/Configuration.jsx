@@ -29,8 +29,9 @@ export default class Configuration extends React.Component {
   }
 
   componentDidMount() {
+    const { pipelines, disabledPipelines } = this.props;
     this.setState({
-      pipelines: this.setupPipelines(this.props.pipelines, this.props.disabledPipelines)
+      pipelines: this.setupPipelines(pipelines, disabledPipelines)
     });
   }
 
@@ -51,17 +52,20 @@ export default class Configuration extends React.Component {
 
   // Sort order changed
   sortOrderChanged(event) {
-    const newSortOrder = this.props.sortOrders.filter(s => s.name === event.target.value).pop();
+    const { sortOrders, onSortOrderChange } = this.props;
+    const newSortOrder = sortOrders.filter(s => s.name === event.target.value).pop();
     this.setState({
       currentSortOrder: newSortOrder
     });
-    this.props.onSortOrderChange(newSortOrder);
+    onSortOrderChange(newSortOrder);
   }
 
   updateFilterRegexProps() {
-    this.props.onFilterRegexPropsChange({
-      active: this.state.filterRegexActive,
-      value: this.state.filterRegex
+    const { filterRegexActive, filterRegex } = this.state;
+    const { onFilterRegexPropsChange } = this.props;
+    onFilterRegexPropsChange({
+      active: filterRegexActive,
+      value: filterRegex
     })
   }
 
@@ -78,17 +82,19 @@ export default class Configuration extends React.Component {
   }
 
   render() {
+    const { sortOrders, onFilterRegexPropsChange } = this.props;
+    const { currentSortOrder, pipelines, filterRegexProps } = this.state;
     return (
       <div>
         <List>
           <ListSubheader>Sort Order</ListSubheader>
             {
-            this.props.sortOrders.map((s) => 
+            sortOrders.map((s) => 
                 (
                   <ListItem key={s.name} dense button>
                     <Radio
                       color="primary"
-                      checked={this.state.currentSortOrder === s}
+                      checked={currentSortOrder === s}
                       value={s.name}
                       onChange={this.sortOrderChanged.bind(this)}
                     />
@@ -99,11 +105,11 @@ export default class Configuration extends React.Component {
           }
           <Divider />
         </List>
-        <RegexPipelineFilter filterRegexProps={this.state.filterRegexProps} onFilterRegexPropsChange={this.props.onFilterRegexPropsChange}/>
+        <RegexPipelineFilter filterRegexProps={filterRegexProps} onFilterRegexPropsChange={onFilterRegexPropsChange}/>
         <List>
           <ListSubheader>Toggle Pipelines</ListSubheader>
 
-          {this.state.pipelines.map((p) => (
+          {pipelines.map((p) => (
               <ListItem key={p.name} button dense>
                 <ListItemText primary={p.name} />
                 <ListItemSecondaryAction>
