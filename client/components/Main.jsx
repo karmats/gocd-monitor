@@ -43,7 +43,7 @@ const sortOrders = [{
 * @param   {string}  sortOrder         The sort order, 'buildtime' or 'status'
 * @return  {Array}   Sorted pipelines
 */
-const sortPipelines = (pipelines, disabledPipelines, sortOrder) => {
+export const sortPipelines = (pipelines, disabledPipelines, sortOrder) => {
  const activePipelines = pipelines.filter(p => p && p.name && disabledPipelines.indexOf(p.name) < 0);
  // Add "time ago" moment string
  activePipelines.forEach((pipeline) => {
