@@ -40,9 +40,10 @@ export default class TestResults extends React.Component {
       // Results
       testReports: [],
       pipelines: [],
+      selectedPipeline: '',
       addTestDialogOpened: false,
       // Snackbar message
-      msg: ''
+      msg: '',
     };
   }
 
@@ -73,10 +74,9 @@ export default class TestResults extends React.Component {
 
   closeAddTest() {
     this.setState({
-      addTestDialogOpened: false
+      addTestDialogOpened: false,
+      selectedPipeline: ''
     });
-    // Reset the test to add
-    this.selectedPipeline = null;
   }
 
   openAddTest() {
@@ -169,7 +169,7 @@ export default class TestResults extends React.Component {
    * Add test reports for a pipeline
    */
   addTest() {
-    this.socket.emit('tests:add', this.selectedPipeline);
+    this.socket.emit('tests:add', this.state.selectedPipeline);
     this.closeAddTest();
   }
 
@@ -185,13 +185,14 @@ export default class TestResults extends React.Component {
   /**
    * Select a pipeline to generate tests for
    */
-  selectTestPipeline(pipelineTest) {
-    this.selectedPipeline = pipelineTest;
+  handleSelectTestPipeline(e) {
+    this.setState({selectedPipeline: e.target.value});
   }
 
   render() {
+    const { testReports, pipelines, selectedPipeline, addTestDialogOpened, msg } = this.state;
     // In adminMode tests can be added
-    const adminMode = window.location.search.indexOf('admin') >= 0;
+    const adminMode = window.location.search.indexOf('admin') >= 0
 
     const addBtn = adminMode ? (
       <Button
@@ -219,7 +220,7 @@ export default class TestResults extends React.Component {
       </Button>
     ];
 
-    const reports = this.state.testReports.map((report) => {
+    const reports = testReports.map((report) => {
       return (
         <div key={report.title} className="col-md-4 col-sm-6 col-xs-12">
           <TestReport report={report} admin={adminMode} onRemoveTest={this.removeTest.bind(this)} />
@@ -232,21 +233,21 @@ export default class TestResults extends React.Component {
           {reports}
         </div>
         <Dialog
-          open={this.state.addTestDialogOpened}
+          open={addTestDialogOpened}
           onClose={this.closeAddTest.bind(this) }>
           <DialogTitle>
             Add Test
           </DialogTitle>
           <DialogContent>
             Select a pipeline to generate test reports for. For now only cucumber json is supported.
-            <AddTest pipelines={this.state.pipelines} onPipelineSelect={this.selectTestPipeline.bind(this) } />
+            <AddTest pipelines={pipelines.sort()} selectedPipeline={selectedPipeline} onPipelineSelect={this.handleSelectTestPipeline.bind(this) } />
           </DialogContent>
           <DialogActions>
             {addTestActions}
           </DialogActions>
         </Dialog>
         <Snackbar
-          open={this.state.msg.length > 0}
+          open={msg.length > 0}
           message={this.state.msg}
           autoHideDuration={5000}
           onRequestClose={this.resetMessage.bind(this)} />
