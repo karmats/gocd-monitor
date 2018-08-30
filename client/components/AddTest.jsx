@@ -4,51 +4,24 @@
 
 import React from 'react';
 
-import { SelectField, MenuItem } from 'material-ui';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
 
-export default class Configuration extends React.Component {
-
-  constructor(props, context) {
-    super(props, context);
-
-    this.state = {
-      pipelines: [],
-      testToAdd: null
-    }
-  }
-
-  componentDidMount() {
-    this.setState({
-      pipelines: this.props.pipelines.sort()
-    });
-  }
-  
-  handleChange(event, index, value) {
-    this.setState({
-      testToAdd: value
-    });
-    this.props.onPipelineSelect(value);
-  }
-
-  render() {
-
-    let pipelines = 
-    (
-      <SelectField
-        autoWidth={true}
-        value={this.state.testToAdd}
-        onChange={this.handleChange.bind(this)}
-        floatingLabelText="Select pipeline">
-        { this.state.pipelines.map((p, idx) => {
-            return p ? <MenuItem key={idx} primaryText={p} value={p} /> : null
-        }) }
-      </SelectField>
-    );
-
-    return (
-      <div>
-        {pipelines}
-      </div>
-    );
-  }
-}
+export default ({ pipelines, selectedPipeline, onPipelineSelect }) => (
+  <div>
+      <FormControl style={{minWidth: 240, marginTop: 20}}>
+        <InputLabel htmlFor="select-pipeline">Select pipeline</InputLabel>
+        <Select
+          value={selectedPipeline}
+          onChange={onPipelineSelect.bind(this)}
+          inputProps={{id : 'select-pipeline'}}>
+          {pipelines.map(p => (
+              p ? <MenuItem key={p} value={p}>{p}</MenuItem> : null
+            )
+          )}
+        </Select>
+      </FormControl>
+    </div>
+)

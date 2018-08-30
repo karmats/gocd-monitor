@@ -4,51 +4,56 @@
 
 import React from 'react';
 
-import { Card, CardHeader, CardText } from 'material-ui/Card';
-import * as Colors from 'material-ui/styles/colors';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import * as Colors from '@material-ui/core/colors';
+import Typography from '@material-ui/core/Typography';
+
 import { showBuildLabels } from '../../app-config';
 
 // Weather icon indicator
 const weatherIconStatuses = ['sunny', 'partlycloudy', 'cloudy', 'cloudy', 'pouring', 'lightning'];
 
+const white = '#fff';
 const styles = {
   cardSuccess: {
-    background: Colors.greenA700,
+    background: Colors.green.A700,
     marginBottom: '1rem'
   },
   cardFailure: {
-    background: Colors.redA700,
+    background: Colors.red.A700,
     marginBottom: '1rem'
   },
   cardActive: {
-    background: Colors.lightBlueA700,
+    background: Colors.lightBlue.A700,
     marginBottom: '1rem'
   },
   cardInactive: {
-    background: Colors.yellowA700,
+    background: Colors.yellow.A700,
     marginBottom: '1rem'
   },
   cardCancelled: {
-    background: Colors.orangeA700,
+    background: Colors.orange.A700,
     marginBottom: '1rem'
   },
   cardContainer: {
-    paddingBottom: '0'
+    position: 'relative',
+    paddingBottom: '0.5rem'
   },
   cardTitle: {
-    color: '#fff',
+    color: white,
     fontSize: '1.2em'
   },
   cardLabel: {
     fontWeight: 'normal'
   },
   cardSubTitle: {
-    color: '#fff',
+    color: white,
     fontSize: '1em',
     fontWeight: 100
   },
   progress: {
-    color: '#fff',
+    color: white,
     float: 'right'
   }
 };
@@ -124,10 +129,10 @@ export default class Pipeline extends React.Component {
   }
 
   render() {
-    let pipeline = this.props.pipeline;
-    let status = Pipeline.status(pipeline);
+    const { pipeline } = this.props;
+    const status = Pipeline.status(pipeline);
 
-    let stages = (
+    const stages = (
       <div className='col-xs-6'>
         <p className="right">
           <span>{(status === 'failed' || status === 'building') ? pipeline.stageresults.reduce((p, c) => {
@@ -179,16 +184,16 @@ export default class Pipeline extends React.Component {
     }
 
     return (
-      <Card style={style} containerStyle={styles.cardContainer}>
-        <CardHeader
-          className="buildtitle"
-          title={pipeline.name}
-          titleStyle={styles.cardTitle}
-          subtitle={buildStatus}
-          subtitleStyle={styles.cardSubTitle}>
+      <Card style={style}>
+        <CardContent style={styles.cardContainer}>
+          <Typography variant="headline" component="h2" className="buildtitle" style={styles.cardTitle}>
+            {pipeline.name}
+          </Typography>
           <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
-        </CardHeader>
-        <CardText>
+          <Typography style={styles.cardSubTitle} color="textSecondary">
+            {buildStatus}
+          </Typography>
+
           <div className="buildinfo">
             <div className="col-xs-6">
               <p>
@@ -202,7 +207,7 @@ export default class Pipeline extends React.Component {
             </div>
             {stages}
           </div>
-        </CardText>
+        </CardContent>
       </Card>
     );
   }

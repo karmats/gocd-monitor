@@ -4,22 +4,18 @@
 
 import React from 'react';
 
-import { Dialog, FlatButton, FloatingActionButton, Snackbar } from 'material-ui';
-import Add from 'material-ui/svg-icons/content/add';
-import { purple700 } from 'material-ui/styles/colors';
-import { MuiThemeProvider, getMuiTheme } from 'material-ui/styles';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import Snackbar from '@material-ui/core/Snackbar';
+import AddIcon from '@material-ui/icons/Add';
 
 import moment from 'moment';
 
 import TestReport from './TestReport';
 import AddTest from './AddTest';
-
-
-const muiTheme = getMuiTheme({
-  palette: {
-    primary1Color: purple700,
-  }
-});
 
 const styles = {
   addTestBtn: {
@@ -44,9 +40,10 @@ export default class TestResults extends React.Component {
       // Results
       testReports: [],
       pipelines: [],
+      selectedPipeline: '',
       addTestDialogOpened: false,
       // Snackbar message
-      msg: ''
+      msg: '',
     };
   }
 
@@ -77,10 +74,9 @@ export default class TestResults extends React.Component {
 
   closeAddTest() {
     this.setState({
-      addTestDialogOpened: false
+      addTestDialogOpened: false,
+      selectedPipeline: ''
     });
-    // Reset the test to add
-    this.selectedPipeline = null;
   }
 
   openAddTest() {
@@ -173,7 +169,7 @@ export default class TestResults extends React.Component {
    * Add test reports for a pipeline
    */
   addTest() {
-    this.socket.emit('tests:add', this.selectedPipeline);
+    this.socket.emit('tests:add', this.state.selectedPipeline);
     this.closeAddTest();
   }
 
@@ -189,36 +185,42 @@ export default class TestResults extends React.Component {
   /**
    * Select a pipeline to generate tests for
    */
-  selectTestPipeline(pipelineTest) {
-    this.selectedPipeline = pipelineTest;
+  handleSelectTestPipeline(e) {
+    this.setState({selectedPipeline: e.target.value});
   }
 
   render() {
+    const { testReports, pipelines, selectedPipeline, addTestDialogOpened, msg } = this.state;
     // In adminMode tests can be added
-    const adminMode = window.location.search.indexOf('admin') >= 0;
+    const adminMode = window.location.search.indexOf('admin') >= 0
 
     const addBtn = adminMode ? (
-      <FloatingActionButton
+      <Button
+        variant="fab"
+        color="primary"
         style={styles.addTestBtn}
         onClick={this.openAddTest.bind(this) }>
-        <Add />
-      </FloatingActionButton>
+        <AddIcon />
+      </Button>
     ) : null;
 
     const addTestActions = [
-      <FlatButton
-        label="Cancel"
-        primary={false}
+      <Button
+        key="cancel-test"
         onClick={this.closeAddTest.bind(this) }
-        />,
-      <FlatButton
-        label="Add"
-        primary={true}
+        >
+        Cancel
+      </Button>,
+      <Button
+        key="add-test"
+        color="primary"
         onClick={this.addTest.bind(this) }
-        />
+        >
+        Add
+      </Button>
     ];
 
-    const reports = this.state.testReports.map((report) => {
+    const reports = testReports.map((report) => {
       return (
         <div key={report.title} className="col-md-4 col-sm-6 col-xs-12">
           <TestReport report={report} admin={adminMode} onRemoveTest={this.removeTest.bind(this)} />
@@ -226,27 +228,31 @@ export default class TestResults extends React.Component {
     });
 
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
-        <div className="appcontainer">
-          <div className="row">
-            {reports}
-          </div>
-          <Dialog
-            title="Add Test"
-            open={this.state.addTestDialogOpened}
-            actions={addTestActions}
-            onRequestClose={this.closeAddTest.bind(this) }>
-            Select a pipeline to generate test reports for. For now only cucumber json is supported.
-            <AddTest pipelines={this.state.pipelines} onPipelineSelect={this.selectTestPipeline.bind(this) } />
-          </Dialog>
-          <Snackbar
-            open={this.state.msg.length > 0}
-            message={this.state.msg}
-            autoHideDuration={5000}
-            onRequestClose={this.resetMessage.bind(this)} />
-          {addBtn}
+      <div className="appcontainer">
+        <div className="row">
+          {reports}
         </div>
-      </MuiThemeProvider>
+        <Dialog
+          open={addTestDialogOpened}
+          onClose={this.closeAddTest.bind(this) }>
+          <DialogTitle>
+            Add Test
+          </DialogTitle>
+          <DialogContent>
+            Select a pipeline to generate test reports for. For now only cucumber json is supported.
+            <AddTest pipelines={pipelines.sort()} selectedPipeline={selectedPipeline} onPipelineSelect={this.handleSelectTestPipeline.bind(this) } />
+          </DialogContent>
+          <DialogActions>
+            {addTestActions}
+          </DialogActions>
+        </Dialog>
+        <Snackbar
+          open={msg.length > 0}
+          message={this.state.msg}
+          autoHideDuration={5000}
+          onRequestClose={this.resetMessage.bind(this)} />
+        {addBtn}
+      </div>
     );
   }
 }

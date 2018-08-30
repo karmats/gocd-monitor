@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "build": "webpack --config webpack.config.production.js",
     "test": "mocha spec/ --compilers js:node_modules/babel-core/register --timeout 15000",
     "postinstall": "mkdirp assets/fonts && mkdirp assets/js && npm run add-flexbox && npm run add-roboto-font && npm run add-material-icons",
-    "start": "webpack --config webpack.config.production.js && cross-env NODE_ENV=production npm run start-server",
+    "start": "npm run build && cross-env NODE_ENV=production npm run start-server",
     "lint": "eslint server/**/*.js client/**/*.jsx",
     "start-server": "babel-node ./bin/appServer",
     "dev-start": "babel-node ./bin/devServer & nodemon --exec \"npm run lint && npm run start-server\" --ignore assets/js --ignore server/data.db",
@@ -14,13 +15,14 @@
     "add-material-icons": "cpx \"node_modules/mdi/css/materialdesignicons.min.css*\" assets/stylesheets && cpx \"node_modules/mdi/fonts/*\" assets/fonts"
   },
   "dependencies": {
+    "@material-ui/core": "^3.0.1",
+    "@material-ui/icons": "^3.0.1",
+    "@mdi/font": "^2.6.95",
     "chart.js": "^2.7.2",
     "cpx": "^1.5.0",
     "debug": "^3.1.0",
     "express": "^4.16.3",
     "flexboxgrid": "^6.3.1",
-    "material-ui": "^0.20.1",
-    "mdi": "^2.2.43",
     "mkdirp": "^0.5.1",
     "moment": "^2.22.2",
     "nedb": "^1.8.0",

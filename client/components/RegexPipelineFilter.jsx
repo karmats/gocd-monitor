@@ -1,5 +1,14 @@
 import React from 'react';
-import {Divider, List, ListItem, Subheader, Toggle, FlatButton} from 'material-ui';
+
+import Button from '@material-ui/core/Button';
+import Divider from '@material-ui/core/Divider';
+import Input from '@material-ui/core/Input';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import Switch from '@material-ui/core/Switch';
 
 export default class RegexPipelineFilter extends React.Component {
   constructor(props, context) {
@@ -12,9 +21,11 @@ export default class RegexPipelineFilter extends React.Component {
   }
 
   updateFilterRegexProps() {
-    this.props.onFilterRegexPropsChange({
-      active: this.state.filterRegexActive,
-      value: this.state.filterRegex
+    const { filterRegex, filterRegexActive } = this.state;
+    const { onFilterRegexPropsChange } = this.props;
+    onFilterRegexPropsChange({
+      active: filterRegexActive,
+      value: filterRegex
     })
   }
 
@@ -25,37 +36,44 @@ export default class RegexPipelineFilter extends React.Component {
   }
 
   updateFilterRegexActive(e) {
+    const active = e.target.checked;
+    const regex = active ? this.state.filterRegex : '';
     this.setState({
-      filterRegexActive: e.target.checked
+      filterRegexActive: active,
+      filterRegex: regex
     });
   }
 
   render() {
-    let filterByRegex = (
-      <ListItem
-        primaryText={
-          <input
-            type="text"
-            value={this.state.filterRegex}
-            onChange={this.updateFilterRegex.bind(this)}
-          />
-        }
-        rightToggle={
-          <Toggle defaultToggled={this.state.filterRegexActive} onToggle={this.updateFilterRegexActive.bind(this)}/>
-        }/>
-    );
+    const { filterRegexActive, filterRegex } = this.state;
 
     return (
       <List>
-        <Subheader>Filter Pipelines</Subheader>
-        {filterByRegex}
-        <ListItem
-          rightIconButton={<FlatButton
-              label="Update Regex"
-              primary={true}
-              onClick={this.updateFilterRegexProps.bind(this)}
-            />}
-        />
+        <ListSubheader>Filter Pipelines</ListSubheader>
+        <ListItem>
+          <ListItemText primary={
+            <Input
+              type="text"
+              disabled={!filterRegexActive}
+              value={filterRegex}
+              onChange={this.updateFilterRegex.bind(this)}
+            />
+          }
+          />
+          <ListItemSecondaryAction>
+            <Switch color="primary" checked={filterRegexActive} onChange={this.updateFilterRegexActive.bind(this)}/>
+          </ListItemSecondaryAction>
+        </ListItem>
+        <ListItem>
+          <ListItemSecondaryAction>
+            <Button
+                color="primary"
+                onClick={this.updateFilterRegexProps.bind(this)}
+            >
+              Update Regex
+            </Button>
+          </ListItemSecondaryAction>
+        </ListItem>
         <Divider />
       </List>
     );

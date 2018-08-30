@@ -4,9 +4,15 @@
 
 import React from 'react';
 
-import {Divider, List, ListItem, Popover, Subheader, Toggle} from 'material-ui';
+import Divider from '@material-ui/core/Divider';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import Switch from '@material-ui/core/Switch';
 
 import RegexPipelineFilter from './RegexPipelineFilter';
+import { Radio, ListItemText } from '../../node_modules/@material-ui/core';
 
 export default class Configuration extends React.Component {
 
@@ -18,15 +24,14 @@ export default class Configuration extends React.Component {
       pipelines: this.setupPipelines(props.pipelines, props.disabledPipelines),
       // Configurable sort order
       currentSortOrder: props.sortOrder,
-      // List of sort order options openened or not
-      sortOrderListOpened: false,
       filterRegexProps: props.filterRegexProps
     };
   }
 
   componentDidMount() {
+    const { pipelines, disabledPipelines } = this.props;
     this.setState({
-      pipelines: this.setupPipelines(this.props.pipelines, this.props.disabledPipelines)
+      pipelines: this.setupPipelines(pipelines, disabledPipelines)
     });
   }
 
@@ -41,36 +46,26 @@ export default class Configuration extends React.Component {
   }
 
   // Toggles a pipeline on/off
-  togglePipeline(p, event) {
-    this.props.onTogglePipeline(p.name, event.target.checked);
+  togglePipeline(event) {
+    this.props.onTogglePipeline(event.target.value, event.target.checked);
   }
 
   // Sort order changed
-  sortOrderChanged(sortOrder) {
+  sortOrderChanged(event) {
+    const { sortOrders, onSortOrderChange } = this.props;
+    const newSortOrder = sortOrders.filter(s => s.name === event.target.value).pop();
     this.setState({
-      currentSortOrder: sortOrder,
-      sortOrderListOpened: false
+      currentSortOrder: newSortOrder
     });
-    this.props.onSortOrderChange(sortOrder);
-  }
-
-  openSortOrderList(e) {
-    this.setState({
-      sortOrderListOpened: true,
-      anchorEl: e.target
-    });
-  }
-
-  closeSortOrderList() {
-    this.setState({
-      sortOrderListOpened: false
-    });
+    onSortOrderChange(newSortOrder);
   }
 
   updateFilterRegexProps() {
-    this.props.onFilterRegexPropsChange({
-      active: this.state.filterRegexActive,
-      value: this.state.filterRegex
+    const { filterRegexActive, filterRegex } = this.state;
+    const { onFilterRegexPropsChange } = this.props;
+    onFilterRegexPropsChange({
+      active: filterRegexActive,
+      value: filterRegex
     })
   }
 
@@ -87,49 +82,43 @@ export default class Configuration extends React.Component {
   }
 
   render() {
-
-    let sortOrders =
-      (<List>
-          {
-            this.props.sortOrders.map((s) => {
-                return <ListItem key={s.name} primaryText={s.label} onClick={this.sortOrderChanged.bind(this, s)}/>
-              }
-            ) }
-        </List>
-      );
-
-    let pipelines =
-      (
-        <List>
-          <Subheader>Toggle Pipelines</Subheader>
-
-          { this.state.pipelines.map((p) => {
-            return <ListItem key={p.name} primaryText={p.name}
-                             rightToggle={<Toggle defaultToggled={p.active} onToggle={this.togglePipeline.bind(this, p)} />}/>
-          }) }
-          <Popover
-            open={this.state.sortOrderListOpened}
-            anchorEl={this.state.anchorEl}
-            anchorOrigin={{horizontal: 'left', vertical: 'center'}}
-            targetOrigin={{horizontal: 'left', vertical: 'center'}}
-            onRequestClose={this.closeSortOrderList.bind(this)}
-            useLayerForClickAway={true}
-          >
-            {sortOrders}
-          </Popover>
-        </List>
-      );
-
+    const { sortOrders, onFilterRegexPropsChange } = this.props;
+    const { currentSortOrder, pipelines, filterRegexProps } = this.state;
     return (
       <div>
         <List>
-          <Subheader>General</Subheader>
-          <ListItem primaryText="Sort Order" secondaryText={this.state.currentSortOrder.label}
-                    onClick={this.openSortOrderList.bind(this)}/>
+          <ListSubheader>Sort Order</ListSubheader>
+            {
+            sortOrders.map((s) => 
+                (
+                  <ListItem key={s.name} dense button>
+                    <Radio
+                      color="primary"
+                      checked={currentSortOrder === s}
+                      value={s.name}
+                      onChange={this.sortOrderChanged.bind(this)}
+                    />
+                    <ListItemText primary={s.label} />
+                  </ListItem>
+                )
+            )
+          }
           <Divider />
         </List>
-        <RegexPipelineFilter filterRegexProps={this.state.filterRegexProps} onFilterRegexPropsChange={this.props.onFilterRegexPropsChange}/>
-        {pipelines}
+        <RegexPipelineFilter filterRegexProps={filterRegexProps} onFilterRegexPropsChange={onFilterRegexPropsChange}/>
+        <List>
+          <ListSubheader>Toggle Pipelines</ListSubheader>
+
+          {pipelines.map((p) => (
+              <ListItem key={p.name} button dense>
+                <ListItemText primary={p.name} />
+                <ListItemSecondaryAction>
+                  <Switch defaultChecked={p.active} color="primary" value={p.name} onChange={this.togglePipeline.bind(this)} />
+                </ListItemSecondaryAction>
+              </ListItem>
+            )
+          )}
+        </List>
       </div>
     );
   }
