@@ -9,7 +9,9 @@ import CardContent from '@material-ui/core/CardContent';
 import * as Colors from '@material-ui/core/colors';
 import Typography from '@material-ui/core/Typography';
 
-import { showBuildLabels } from '../../app-config';
+import { goServerUrl, showBuildLabels, linkToPipelineInGo } from '../../app-config';
+
+const pipelineHistoryUrl = goServerUrl + '/go/tab/pipeline/history/';
 
 // Weather icon indicator
 const weatherIconStatuses = ['sunny', 'partlycloudy', 'cloudy', 'cloudy', 'pouring', 'lightning'];
@@ -183,32 +185,37 @@ export default class Pipeline extends React.Component {
       buildStatus = <div>{status}<span style={styles.cardLabel}> : {pipeline.label}</span></div>;
     }
 
-    return (
-      <Card style={style}>
-        <CardContent style={styles.cardContainer}>
-          <Typography variant="headline" component="h2" className="buildtitle" style={styles.cardTitle}>
-            {pipeline.name}
-          </Typography>
-          <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
-          <Typography style={styles.cardSubTitle} color="textSecondary">
-            {buildStatus}
-          </Typography>
+    const card = (<Card style={style}>
+      <CardContent style={styles.cardContainer}>
+        <Typography variant="headline" component="h2" className="buildtitle" style={styles.cardTitle}>
+          {pipeline.name}
+        </Typography>
+        <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
+        <Typography style={styles.cardSubTitle} color="textSecondary">
+          {buildStatus}
+        </Typography>
 
-          <div className="buildinfo">
-            <div className="col-xs-6">
-              <p>
-                <i className="mdi mdi-clock mdi-24px"></i>
-                <span>{ pipeline.timeago }</span>
-              </p>
-              <p>
-                <i className="mdi mdi-worker mdi-24px"></i>
-                <span>{status === 'paused' ? pipeline.pauseinfo.paused_by : pipeline.author}</span>
-              </p>
-            </div>
-            {stages}
+        <div className="buildinfo">
+          <div className="col-xs-6">
+            <p>
+              <i className="mdi mdi-clock mdi-24px"></i>
+              <span>{ pipeline.timeago }</span>
+            </p>
+            <p>
+              <i className="mdi mdi-worker mdi-24px"></i>
+              <span>{status === 'paused' ? pipeline.pauseinfo.paused_by : pipeline.author}</span>
+            </p>
           </div>
-        </CardContent>
-      </Card>
-    );
+          {stages}
+        </div>
+      </CardContent>
+    </Card>);
+
+
+    return linkToPipelineInGo ? (
+      <a href={pipelineHistoryUrl + pipeline.name} target="_blank">
+        {card}
+      </a>
+    ) : card;
   }
 }
