@@ -24,6 +24,8 @@ var config = {
     // Whether to display build labels
     showBuildLabels: process.env.gocdmonitor_gocd_showbuildlabels === "true",
     // Whether to group pipelines
-    groupPipelines: process.env.gocdmonitor_gocd_grouppipelines === "true"
+    groupPipelines: process.env.gocdmonitor_gocd_grouppipelines === "true",
+    // Whether to link to pipeline in GoCD on click
+    linkToPipelineInGo: process.env.gocdmonitor_gocd_linktopipelineingo === 'true'
 }
 module.exports = config;
