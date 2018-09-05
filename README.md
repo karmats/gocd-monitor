@@ -40,6 +40,8 @@ Optional environment variables:
 gocdmonitor_gocd_poll_interval=60
 gocdmonitor_gocd_showbuildlabels=true
 gocdmonitor_gocd_poll_interval=true
+gocdmonitor_gocd_grouppipelines=true
+gocdmonitor_gocd_linktopipelineingo=true
 ```
 
 Enabling HTTPS of the server
@@ -54,10 +56,16 @@ gocdmonitor_certificate_path=path/to/your/privateKey
 This can be extremely useful for configuring in Docker environments.
 
 
-Optionally, if you want to group pipelines by their pipeline groups.
+Optionally set the following variables in app-config.js.  
+Group pipelines by their pipeline groups:
 ```
 groupPipelines: true
 ```
+Click on a pipeline to open its history in GoCD:
+```
+linkToPipelineInGo: true
+```
+
 Then open a terminal and enter
 ```
 npm install
