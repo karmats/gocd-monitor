@@ -95,7 +95,7 @@
 }
 
 body {
-  font: 12px "Roboto", sans-serif;
+  font: 16px "Roboto", sans-serif;
 }
 
 a {
@@ -106,6 +106,10 @@ a {
   text-align: left;
   margin: 20px;
   color: #fff;
+}
+
+.appcontainer a {
+  font-weight: 400;
 }
 
 /* Build title, pipeline name and status */

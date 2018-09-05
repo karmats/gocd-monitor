@@ -12,7 +12,7 @@
     "dev-start": "babel-node ./bin/devServer & nodemon --exec \"npm run lint && npm run start-server\" --ignore assets/js --ignore server/data.db",
     "add-flexbox": "cpx \"node_modules/flexboxgrid/css/index.min.css\" assets/stylesheets",
     "add-roboto-font": "cpx \"node_modules/roboto-font/fonts/Roboto/*\" assets/fonts",
-    "add-material-icons": "cpx \"node_modules/mdi/css/materialdesignicons.min.css*\" assets/stylesheets && cpx \"node_modules/mdi/fonts/*\" assets/fonts"
+    "add-material-icons": "cpx \"node_modules/@mdi/font/css/materialdesignicons.min.css*\" assets/stylesheets && cpx \"node_modules/@mdi/font/fonts/*\" assets/fonts"
   },
   "dependencies": {
     "@material-ui/core": "^3.0.1",
