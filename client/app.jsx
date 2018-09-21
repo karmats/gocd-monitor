@@ -43,13 +43,12 @@ ReactDOM.render((
   <MuiThemeProvider theme={theme}>
     <Router>
       <Switch>
-        <Route exact path="/" render={() => (
-          <Main socket={socket} />
-        )} />
         <Route path="/test-results" render={() => (
           <TestResults socket={socket} />
         )} />
-        <Route component={NoRoute} />
+        <Route path="/" render={(props) => (
+          <Main socket={socket} {...props} />
+        )} />
       </Switch>
     </Router>
   </MuiThemeProvider>
