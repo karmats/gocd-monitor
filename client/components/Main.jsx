@@ -85,10 +85,6 @@ export default class Main extends React.Component {
     super(props, context);
 
     this.socket = props.socket;
-    this.match = props.match;
-    this.location = props.location;
-    this.history = props.history;
-
     // Setup initial state
     this.state = {
       // All active pipelines
@@ -334,10 +330,12 @@ export default class Main extends React.Component {
 
     let backButton = null;
     if (groupMatch) {
-      backButton = (<button
-        onClick={this.props.history.goBack}>
+      backButton = (<Button
+        variant="contained"
+        color="primary"
+        onClick={() => this.props.history.push('/')}>
           Back to all groups
-      </button>);
+      </Button>);
     }
 
     return (
