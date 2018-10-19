@@ -121,11 +121,14 @@ export default class GoService {
         });
     };
     // Refresh pipeline names and poll every day for new
-    if (conf.groupPipelines) {
-      getPipelineGroups();
-    }
-    refreshPipelinesAndPollForUpdates();
-    setInterval(refreshPipelinesAndPollForUpdates, this.checkPipelinesInterval);
+    const fullRefresh = () => {
+      Logger.info('Performing full refresh');
+      if (conf.groupPipelines) {
+        getPipelineGroups();
+      }
+      refreshPipelinesAndPollForUpdates();
+    };
+    setInterval(fullRefresh, this.checkPipelinesInterval);
 
   }
 
