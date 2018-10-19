@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import { Link } from 'react-router-dom'
 
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -34,7 +35,8 @@ const sortOrders = [{
   name: 'status',
   label: 'Status (building, failed, cancelled, passed, paused)'
 }];
-
+const groupPath = '/group/';
+const groupRegex = new RegExp(`${groupPath}(.+)$`);
 /**
 * Sort pipelines by date and filter out pipelines without data
 *
@@ -83,7 +85,6 @@ export default class Main extends React.Component {
     super(props, context);
 
     this.socket = props.socket;
-
     // Setup initial state
     this.state = {
       // All active pipelines
@@ -272,7 +273,7 @@ export default class Main extends React.Component {
     ];
 
     let pipelineElements;
-
+    const groupMatch = groupRegex.exec(this.props.location.pathname);
     if (Object.keys(this.state.pipelineNameToGroupName).length < 1) {
       let pipelineCards = this.state.pipelines.map((pipeline) => {
         if (pipeline) {
@@ -302,6 +303,9 @@ export default class Main extends React.Component {
       });
 
       pipelineElements = Object.keys(groupNameToPipelines).map((groupName) => {
+        if (groupMatch && groupMatch[1] != groupName) {
+          return null;
+        }
         let pipelineCards = groupNameToPipelines[groupName].map((pipeline) => {
           if (pipeline) {
             return (
@@ -314,7 +318,7 @@ export default class Main extends React.Component {
         return (
           <div>
             <div className="groupName">
-              {groupName}
+              <Link to={`${groupPath}${groupName}`}>{groupName}</Link>
             </div>
             <div className="row">
               {pipelineCards}
@@ -324,9 +328,20 @@ export default class Main extends React.Component {
       });
     }
 
+    let backButton = null;
+    if (groupMatch) {
+      backButton = (<Button
+        variant="contained"
+        color="primary"
+        onClick={() => this.props.history.push('/')}>
+          Back to all groups
+      </Button>);
+    }
+
     return (
       <div className="appcontainer">
         {pipelineElements}
+        {backButton}
         <Dialog
           open={this.state.settingsDialogOpened}
           onClose={this.closeSettings.bind(this)}>
