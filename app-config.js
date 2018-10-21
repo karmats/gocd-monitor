@@ -19,6 +19,8 @@ var config = {
     goPassword: process.env.gocdmonitor_gocd_password || '',
     // How often data from go should be refreshed in seconds
     goPollingInterval: process.env.gocdmonitor_gocd_poll_interval || 30,
+    // How often pipeline structure data should be refreshed in seconds
+    goCheckPipelinesInterval: process.env.gocdmonitor_gocd_check_pipelines_interval || 24 * 60 * 60,
     // If > 0 switches between pipeline and test results page every n seconds
     switchBetweenPagesInterval: process.env.gocdmonitor_gocd_poll_interval || 0,
     // Whether to display build labels
