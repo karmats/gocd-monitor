@@ -21,7 +21,7 @@ export default class GoService {
     };
     this.pollingInterval = conf.goPollingInterval * 1000;
     // Refresh pipelines once every day
-    this.checkPipelinesInterval = 24 * 60 * 60 * 1000;
+    this.checkPipelinesInterval = conf.goCheckPipelinesInterval * 1000;
     this.buildService = new GoBuildService(this.goConfig);
     this.testService = new GoTestService(this.goConfig);
 
