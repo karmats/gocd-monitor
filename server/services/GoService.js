@@ -122,7 +122,7 @@ export default class GoService {
     };
     // Refresh pipeline names and poll every day for new
     const fullRefresh = () => {
-      Logger.info('Performing full refresh');
+      Logger.debug('Performing full refresh');
       if (conf.groupPipelines) {
         getPipelineGroups();
       }
