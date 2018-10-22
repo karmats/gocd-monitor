@@ -19,7 +19,10 @@ export default class DBService {
    */
   saveOrUpdateSettings(settings) {
     const insertSettings = () => {
-      return this._executeDbAction('insert', { settings: settings })
+      return this._executeDbAction('insert', { settings: settings }).then(() => {
+          // Since callback of an insert returns the complete document, we resolve with settings argument
+          return settings;
+      });
     }
     return this.getSettings().then((doc) => {
       if (doc && doc.settings) {
