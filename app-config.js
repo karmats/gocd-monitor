@@ -28,6 +28,10 @@ var config = {
     // Whether to group pipelines
     groupPipelines: process.env.gocdmonitor_gocd_grouppipelines === "true",
     // Whether to link to pipeline in GoCD on click
-    linkToPipelineInGo: process.env.gocdmonitor_gocd_linktopipelineingo === 'true'
+    linkToPipelineInGo: process.env.gocdmonitor_gocd_linktopipelineingo === 'true',
+    // How to sort pipelines by default (buildtime, status) - can be overridden in the admin UI
+    defaultSortOrder: process.env.gocdmonitor_default_sort_order || 'buildtime',
+    // Which pipelines to hide - can be overridden in the admin UI
+    defaultDisabledPipelines: (process.env.gocdmonitor_default_hidden_pipelines || "").split(",").filter((val) => val) || []
 }
 module.exports = config;

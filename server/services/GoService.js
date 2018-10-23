@@ -17,7 +17,8 @@ export default class GoService {
     this.pipelinesPauseInfo = {};
     this.testResults = [];
     this.currentSettings = {
-      disabledPipelines: []
+      disabledPipelines: conf.defaultDisabledPipelines,
+      sortOrder: conf.defaultSortOrder
     };
     this.pollingInterval = conf.goPollingInterval * 1000;
     // Refresh pipelines once every day
@@ -37,7 +38,7 @@ export default class GoService {
     // Retrieve current settings
     this.dbService.getSettings().then((doc) => {
       if (doc && doc.settings) {
-        this.currentSettings = doc.settings;
+        this.currentSettings = Object.assign(this.currentSettings, doc.settings);
       }
     });
 
