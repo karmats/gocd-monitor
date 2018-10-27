@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "webpack --config webpack.config.production.js",
-    "test": "mocha spec/ --compilers js:node_modules/babel-core/register --timeout 15000",
+    "test": "mocha spec/ --require @babel/register --timeout 15000",
     "postinstall": "mkdirp assets/fonts && mkdirp assets/js && npm run add-flexbox && npm run add-roboto-font && npm run add-material-icons",
     "start": "npm run build && cross-env NODE_ENV=production npm run start-server",
     "lint": "eslint server/**/*.js client/**/*.jsx",
