@@ -3,11 +3,8 @@ var webpack = require('webpack');
 var conf = require('./app-config');
 
 module.exports = {
-  devtool: 'eval',
+  mode: 'development',
   entry: [
-    'react-hot-loader/patch',
-    'webpack-dev-server/client?http://localhost:' + conf.devPort,
-    'webpack/hot/only-dev-server',
     './client/app.jsx'
   ],
   output: {
@@ -18,10 +15,16 @@ module.exports = {
   plugins: [
     new webpack.HotModuleReplacementPlugin()
   ],
+  devServer: {
+    contentBase: path.join(__dirname, 'dist'),
+    port: 3000
+  },
   module: {
     rules: [{
       test: /.jsx?$/,
-      use: ['babel-loader'],
+      use: {
+        loader: 'babel-loader'
+      },
       include: path.join(__dirname, 'client')
     }]
   },

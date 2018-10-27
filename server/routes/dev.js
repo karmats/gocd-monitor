@@ -3,7 +3,7 @@ let request = require('request');
 let conf = require('../../app-config');
 let router = express.Router();
 
-var webpackServerUrl = 'http://localhost:' + conf.devPort;
+var webpackServerUrl = 'http://localhost:' + conf.port;
 
 // Proxy all requests through to the webpack server
 router.get('/*', function(req, res) {

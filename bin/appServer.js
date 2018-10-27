@@ -1,9 +1,3 @@
-#!/usr/bin/env node
-
-/**
- * Module dependencies.
- */
-
 import app from '../server/app';
 import http from 'http';
 import https from 'https';

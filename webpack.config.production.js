@@ -9,7 +9,7 @@ module.exports = {
         filename: conf.jsFilename
     },
     module: {
-        loaders: [
+        rules: [
             {
                 test: /.jsx?$/,
                 loader: 'babel-loader',
@@ -20,11 +20,13 @@ module.exports = {
     resolve: {
         extensions: ['.js', '.jsx']
     },
+    optimization: {
+        minimize: false
+    },
     plugins: [
         new webpack.DefinePlugin({
         'process.env.NODE_ENV': '"production"'
         }),
-        new webpack.optimize.OccurrenceOrderPlugin(),
-        new webpack.optimize.UglifyJsPlugin({ mangle: false, sourcemap: false })
+        new webpack.optimize.OccurrenceOrderPlugin()
     ]
 }
