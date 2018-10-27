@@ -8,7 +8,7 @@
     "postinstall": "mkdirp assets/fonts && mkdirp assets/js && npm run add-flexbox && npm run add-roboto-font && npm run add-material-icons",
     "start": "npm run build && cross-env NODE_ENV=production npm run start-server",
     "lint": "eslint server/**/*.js client/**/*.jsx",
-    "start-server": "babel-node ./bin/appServer",
+    "start-server": "babel-node ./bin/appServer.js",
     "dev-start": "webpack-dev-server --config ./webpack.config.dev.js & nodemon --exec \"npm run lint && npm run start-server\" --ignore assets/js --ignore server/data.db",
     "add-flexbox": "cpx \"node_modules/flexboxgrid/css/index.min.css\" assets/stylesheets",
     "add-roboto-font": "cpx \"node_modules/roboto-font/fonts/Roboto/*\" assets/fonts",
@@ -36,21 +36,6 @@
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
     "xml2js": "^0.4.19"
-  },
-  "eslintConfig": {
-    "parser": "babel-eslint",
-    "env": {
-      "node": true,
-      "es6": true
-    },
-    "rules": {
-      "vars-on-top": 2,
-      "no-undef": 2
-    },
-    "globals": {
-      "window": true,
-      "document": true
-    }
   },
   "devDependencies": {
     "@babel/core": "^7.1.2",

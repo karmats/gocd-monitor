@@ -1,12 +1,8 @@
-'use strict';
-
 import express from 'express';
 import path from 'path';
 import Logger from './utils/Logger';
 import socketio from 'socket.io';
-import { parseString } from 'xml2js';
 
-import * as conf from '../app-config';
 import GoService from './services/GoService';
 
 

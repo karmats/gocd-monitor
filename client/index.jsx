@@ -1,14 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-
 import io from 'socket.io-client';
-
+import purple from '@material-ui/core/colors/purple';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { switchBetweenPagesInterval } from '../app-config';
 import Main from './components/Main';
 import TestResults from './components/TestResults';
-import purple from '@material-ui/core/colors/purple';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 // Setup a socket to pass to components that uses it
 const socket = io();
