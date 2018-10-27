@@ -3,13 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "webpack --config webpack.config.production.js",
+    "build": "webpack --config webpack.production.js",
     "test": "mocha spec/ --require @babel/register --timeout 15000",
     "postinstall": "mkdirp assets/fonts && mkdirp assets/js && npm run add-flexbox && npm run add-roboto-font && npm run add-material-icons",
     "start": "npm run build && cross-env NODE_ENV=production npm run start-server",
     "lint": "eslint server/**/*.js client/**/*.jsx",
     "start-server": "babel-node ./bin/appServer.js",
-    "dev-start": "webpack-dev-server --config ./webpack.config.dev.js & nodemon --exec \"npm run lint && npm run start-server\" --ignore assets/js --ignore server/data.db",
+    "dev-start": "webpack-dev-server --config ./webpack.dev.js & nodemon --exec \"npm run lint && npm run start-server\" --ignore assets/js --ignore server/data.db",
     "add-flexbox": "cpx \"node_modules/flexboxgrid/css/index.min.css\" assets/stylesheets",
     "add-roboto-font": "cpx \"node_modules/roboto-font/fonts/Roboto/*\" assets/fonts",
     "add-material-icons": "cpx \"node_modules/@mdi/font/css/materialdesignicons.min.css*\" assets/stylesheets && cpx \"node_modules/@mdi/font/fonts/*\" assets/fonts"
