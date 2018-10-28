@@ -187,7 +187,7 @@ export default class Pipeline extends React.Component {
 
     const card = (<Card style={style}>
       <CardContent style={styles.cardContainer}>
-        <Typography variant="headline" component="h2" className="buildtitle" style={styles.cardTitle}>
+        <Typography variant="h5" className="buildtitle" style={styles.cardTitle}>
           {pipeline.name}
         </Typography>
         <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>

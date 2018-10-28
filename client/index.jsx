@@ -25,6 +25,9 @@ if (switchBetweenPagesInterval && switchBetweenPagesInterval > 0 && !adminMode) 
 
 // Application theme
 const theme = createMuiTheme({
+  typography: {
+    useNextVariants: true,
+  },
   palette: {
     primary: purple
   }
