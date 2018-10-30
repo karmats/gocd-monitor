@@ -2,8 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import io from 'socket.io-client';
-import purple from '@material-ui/core/colors/purple';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { grey, purple } from '@material-ui/core/colors';
 import { switchBetweenPagesInterval } from '../app-config';
 import Main from './components/Main';
 import TestResults from './components/TestResults';
@@ -24,14 +24,21 @@ if (switchBetweenPagesInterval && switchBetweenPagesInterval > 0 && !adminMode) 
 }
 
 // Application theme
+const enableDarkTheme = process.env.ENABLE_DARK_THEME;
 const theme = createMuiTheme({
   typography: {
     useNextVariants: true,
   },
   palette: {
+    type: enableDarkTheme ? 'dark' : 'light',
     primary: purple
   }
 });
+
+if (enableDarkTheme) {
+    document.body.style.background = grey[800];
+}
+
 // Render react router routes
 ReactDOM.render((
   <MuiThemeProvider theme={theme}>

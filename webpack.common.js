@@ -1,5 +1,6 @@
 const path = require("path");
 const webpack = require('webpack');
+const conf = require("./app-config");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 
 module.exports = {
@@ -17,6 +18,11 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(["dist", "assets/js"]),
+    new webpack.DefinePlugin({
+      "process.env": {
+        ENABLE_DARK_THEME: conf.enableDarkTheme
+      }
+    }),
     // Ignore all locale files of moment.js
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
   ],
