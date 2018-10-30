@@ -22,7 +22,10 @@ module.exports = {
     },
     plugins: [
         new webpack.DefinePlugin({
-        'process.env.NODE_ENV': '"production"'
+            'process.env': {
+                'NODE_ENV': '"production"',
+                'ENABLE_DARK_THEME': conf.enableDarkTheme,
+            }
         }),
         new webpack.optimize.OccurrenceOrderPlugin(),
         new webpack.optimize.UglifyJsPlugin({ mangle: false, sourcemap: false })
