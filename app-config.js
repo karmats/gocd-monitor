@@ -2,7 +2,7 @@ var config = {
     // Name of built js-file
     jsFilename: 'app.js',
     // Enable dark theme
-    enableDarkTheme: false,
+    enableDarkTheme: process.env.gocdmonitor_enable_dark_theme === "true",
     // Port to run the application on
     port: process.env.gocdmonitor_port || 3000,
     // Webpack dev port to run on
