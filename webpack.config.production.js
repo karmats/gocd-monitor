@@ -25,6 +25,7 @@ module.exports = {
             'process.env': {
                 'NODE_ENV': '"production"',
                 'ENABLE_DARK_THEME': conf.enableDarkTheme,
+                'SWITCH_BETWEEN_PAGES_INTERVAL': conf.switchBetweenPagesInterval,
             }
         }),
         new webpack.optimize.OccurrenceOrderPlugin(),
