@@ -23,6 +23,7 @@ node_modules/
 # Optional REPL history
 dist/
 .vscode
+.idea
 *.min.js
 assets/js/*
 assets/fonts

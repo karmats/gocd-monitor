@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import io from 'socket.io-client';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { grey, purple } from '@material-ui/core/colors';
-import { switchBetweenPagesInterval } from '../app-config';
 import Main from './components/Main';
 import TestResults from './components/TestResults';
 
@@ -13,6 +12,7 @@ const socket = io();
 
 // Switch between pipeline and test results page, don't when in admin mode
 const adminMode = window.location.search.indexOf('admin') >= 0;
+const switchBetweenPagesInterval = process.env.SWITCH_BETWEEN_PAGES_INTERVAL;
 if (switchBetweenPagesInterval && switchBetweenPagesInterval > 0 && !adminMode) {
   setTimeout(() => {
     if (window.location.pathname.indexOf('test-results') >= 0) {
