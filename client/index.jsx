@@ -1,13 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-
 import io from 'socket.io-client';
-
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { grey, purple } from '@material-ui/core/colors';
 import Main from './components/Main';
 import TestResults from './components/TestResults';
-import {grey, purple} from '@material-ui/core/colors';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 // Setup a socket to pass to components that uses it
 const socket = io();
@@ -26,14 +24,18 @@ if (switchBetweenPagesInterval && switchBetweenPagesInterval > 0 && !adminMode) 
 }
 
 // Application theme
+const enableDarkTheme = process.env.ENABLE_DARK_THEME;
 const theme = createMuiTheme({
+  typography: {
+    useNextVariants: true,
+  },
   palette: {
-    type: process.env.ENABLE_DARK_THEME? 'dark': 'light',
+    type: enableDarkTheme ? 'dark' : 'light',
     primary: purple
   }
 });
 
-if (process.env.ENABLE_DARK_THEME) {
+if (enableDarkTheme) {
     document.body.style.background = grey[800];
 }
 

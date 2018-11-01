@@ -1,4 +1,5 @@
 {
+  "parser": "babel-eslint",
   "env": {
     "node": true,
     "es6": true
@@ -10,11 +11,5 @@
   "globals": {
     "window": true,
     "document": true
-  },
-  "parserOptions": {
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
   }
 }

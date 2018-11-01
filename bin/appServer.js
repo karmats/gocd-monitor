@@ -1,10 +1,4 @@
-#!/usr/bin/env node
-
-/**
- * Module dependencies.
- */
-
-import app from '../server/app';
+import app from '../server';
 import http from 'http';
 import https from 'https';
 import fs from 'fs';
