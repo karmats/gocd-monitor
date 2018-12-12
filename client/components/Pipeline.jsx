@@ -9,7 +9,7 @@ import CardContent from '@material-ui/core/CardContent';
 import * as Colors from '@material-ui/core/colors';
 import Typography from '@material-ui/core/Typography';
 
-import { goServerUrl, showBuildLabels, linkToPipelineInGo } from '../../app-config';
+import { goServerUrl, showBuildLabels, linkToPipelineInGo, hideWeatherIcons } from '../../app-config';
 
 const pipelineHistoryUrl = goServerUrl + '/go/tab/pipeline/history/';
 
@@ -190,7 +190,9 @@ export default class Pipeline extends React.Component {
         <Typography variant="h5" className="buildtitle" style={styles.cardTitle}>
           {pipeline.name}
         </Typography>
-        <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
+        {!hideWeatherIcons &&
+          <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
+        }
         <Typography style={styles.cardSubTitle} color="textSecondary">
           {buildStatus}
         </Typography>
