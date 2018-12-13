@@ -68,6 +68,10 @@ Click on a pipeline to open its history in GoCD:
 ```
 linkToPipelineInGo: true
 ```
+Hide the weather icons:
+```
+hideWeatherIcons: true
+```
 
 Then open a terminal and enter
 ```

@@ -31,6 +31,8 @@ var config = {
     groupPipelines: process.env.gocdmonitor_gocd_grouppipelines === "true",
     // Whether to link to pipeline in GoCD on click
     linkToPipelineInGo: process.env.gocdmonitor_gocd_linktopipelineingo === 'true',
+    // Whether to hide the weather icons
+    hideWeatherIcons: process.env.gocdmonitor_hide_weather_icons === 'true',
     // How to sort pipelines by default (buildtime, status) - can be overridden in the admin UI
     defaultSortOrder: process.env.gocdmonitor_default_sort_order || 'buildtime',
     // Which pipelines to hide - can be overridden in the admin UI
