@@ -21,7 +21,10 @@ module.exports = {
     new webpack.DefinePlugin({
       "process.env": {
         ENABLE_DARK_THEME: conf.enableDarkTheme,
-        SWITCH_BETWEEN_PAGES_INTERVAL: conf.switchBetweenPagesInterval
+        SWITCH_BETWEEN_PAGES_INTERVAL: conf.switchBetweenPagesInterval,
+        SHOW_BUILD_LABELS: conf.showBuildLabels,
+        LINK_TO_PIPELINE_IN_GO: conf.linkToPipelineInGo,
+        HIDE_WEATHER_ICONS: conf.hideWeatherIcons
       }
     }),
     // Ignore all locale files of moment.js

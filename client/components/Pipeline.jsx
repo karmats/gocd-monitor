@@ -9,7 +9,11 @@ import CardContent from '@material-ui/core/CardContent';
 import * as Colors from '@material-ui/core/colors';
 import Typography from '@material-ui/core/Typography';
 
-import { goServerUrl, showBuildLabels, linkToPipelineInGo, hideWeatherIcons } from '../../app-config';
+import { goServerUrl } from '../../app-config';
+
+const showBuildLabels = process.env.SHOW_BUILD_LABELS;
+const linkToPipelineInGo = process.env.LINK_TO_PIPELINE_IN_GO;
+const hideWeatherIcons = process.env.HIDE_WEATHER_ICONS;
 
 const pipelineHistoryUrl = goServerUrl + '/go/tab/pipeline/history/';
 
