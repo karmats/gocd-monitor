@@ -39,12 +39,14 @@ Optional environment variables:
 ```
 gocdmonitor_gocd_poll_interval=60
 gocdmonitor_gocd_check_pipelines_interval=60
-gocdmonitor_gocd_showbuildlabels=true
-gocdmonitor_gocd_poll_interval=true
+gocdmonitor_gocd_switch_pages_interval=60
 gocdmonitor_gocd_grouppipelines=true
-gocdmonitor_gocd_linktopipelineingo=true
 gocdmonitor_default_sort_order=buildtime
 gocdmonitor_default_hidden_pipelines=foo,bar
+gocdmonitor_enable_dark_theme=true
+gocdmonitor_gocd_showbuildlabels=true
+gocdmonitor_gocd_linktopipelineingo=true
+gocdmonitor_gocd_hide_weather_icons=true
 ```
 
 Enabling HTTPS of the server
@@ -60,6 +62,10 @@ This can be extremely useful for configuring in Docker environments.
 
 
 Optionally set the following variables in app-config.js.  
+Enable dark theme:
+```
+enableDarkTheme: true
+```
 Group pipelines by their pipeline groups:
 ```
 groupPipelines: true

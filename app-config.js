@@ -1,8 +1,6 @@
 var config = {
     // Name of built js-file
     jsFilename: 'app.js',
-    // Enable dark theme
-    enableDarkTheme: process.env.gocdmonitor_enable_dark_theme === "true",
     // Port to run the application on
     port: process.env.gocdmonitor_port || 3000,
     // Webpack dev port to run on
@@ -24,18 +22,22 @@ var config = {
     // How often pipeline structure data should be refreshed in seconds
     goCheckPipelinesInterval: process.env.gocdmonitor_gocd_check_pipelines_interval || 24 * 60 * 60,
     // If > 0 switches between pipeline and test results page every n seconds
-    switchBetweenPagesInterval: process.env.gocdmonitor_gocd_poll_interval || 0,
-    // Whether to display build labels
-    showBuildLabels: process.env.gocdmonitor_gocd_showbuildlabels === "true",
+    switchBetweenPagesInterval: process.env.gocdmonitor_gocd_switch_pages_interval || 0,
     // Whether to group pipelines
     groupPipelines: process.env.gocdmonitor_gocd_grouppipelines === "true",
+    // How to sort pipelines by default (buildtime, status) - can be overridden in the admin UI
+    defaultSortOrder: process.env.gocdmonitor_default_sort_order || 'buildtime',
+    // Which pipelines to hide - can be overridden in the admin UI
+    defaultDisabledPipelines: (process.env.gocdmonitor_default_hidden_pipelines || "").split(",").filter((val) => val) || [],
+
+    // --- Client ---
+    // Enable dark theme
+    enableDarkTheme: process.env.gocdmonitor_enable_dark_theme === "true",
+    // Whether to display build labels
+    showBuildLabels: process.env.gocdmonitor_gocd_showbuildlabels === "true",
     // Whether to link to pipeline in GoCD on click
     linkToPipelineInGo: process.env.gocdmonitor_gocd_linktopipelineingo === 'true',
     // Whether to hide the weather icons
     hideWeatherIcons: process.env.gocdmonitor_hide_weather_icons === 'true',
-    // How to sort pipelines by default (buildtime, status) - can be overridden in the admin UI
-    defaultSortOrder: process.env.gocdmonitor_default_sort_order || 'buildtime',
-    // Which pipelines to hide - can be overridden in the admin UI
-    defaultDisabledPipelines: (process.env.gocdmonitor_default_hidden_pipelines || "").split(",").filter((val) => val) || []
 }
 module.exports = config;
