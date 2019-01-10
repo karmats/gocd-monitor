@@ -20,6 +20,7 @@ module.exports = {
     new CleanWebpackPlugin(["dist", "assets/js"]),
     new webpack.DefinePlugin({
       "process.env": {
+        GO_SERVER_URL: `'${conf.goServerUrl}'`,
         ENABLE_DARK_THEME: conf.enableDarkTheme,
         SWITCH_BETWEEN_PAGES_INTERVAL: conf.switchBetweenPagesInterval,
         SHOW_BUILD_LABELS: conf.showBuildLabels,
