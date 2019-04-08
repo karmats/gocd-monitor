@@ -1,5 +1,5 @@
 const path = require("path");
-const webpack = require('webpack');
+const webpack = require("webpack");
 const conf = require("./app-config");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 
@@ -17,7 +17,9 @@ module.exports = {
     ]
   },
   plugins: [
-    new CleanWebpackPlugin(["dist", "assets/js"]),
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: ["dist", "assets/js"]
+    }),
     new webpack.DefinePlugin({
       "process.env": {
         GO_SERVER_URL: `'${conf.goServerUrl}'`,

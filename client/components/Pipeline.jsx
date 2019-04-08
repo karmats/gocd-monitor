@@ -203,7 +203,7 @@ export default class Pipeline extends React.Component {
         <div className="buildinfo">
           <div className="col-xs-6">
             <p>
-              <i className="mdi mdi-clock mdi-24px"></i>
+              <i className="mdi mdi-clock-outline mdi-24px"></i>
               <span>{ pipeline.timeago }</span>
             </p>
             <p>
