@@ -10,6 +10,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Fab from '@material-ui/core/Fab';
 import Snackbar from '@material-ui/core/Snackbar';
 import Settings from '@material-ui/icons/Settings';
 
@@ -247,13 +248,12 @@ export default class Main extends React.Component {
     const adminMode = window.location.search.indexOf('admin') >= 0;
 
     const settingsBtn = adminMode ? (
-      <Button
-        variant="fab"
+      <Fab
         color="primary"
         style={styles.fab}
         onClick={this.openSettings.bind(this)}>
         <Settings />
-      </Button>
+      </Fab>
     ) : null;
 
     const settingsActions = [
