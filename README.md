@@ -47,6 +47,7 @@ gocdmonitor_enable_dark_theme=true
 gocdmonitor_gocd_showbuildlabels=true
 gocdmonitor_gocd_linktopipelineingo=true
 gocdmonitor_gocd_hide_weather_icons=true
+gocdmonitor_db_file_path=server/data.db
 ```
 
 Enabling HTTPS of the server

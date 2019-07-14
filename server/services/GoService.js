@@ -27,7 +27,7 @@ export default class GoService {
     this.testService = new GoTestService(this.goConfig);
 
     // Init db and settings
-    this.dbService = new DBService();
+    this.dbService = new DBService(conf);
 
   }
 
