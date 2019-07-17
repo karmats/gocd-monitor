@@ -16,7 +16,7 @@ export default class GoService {
     this.pipelineNameToGroupName = {};
     this.pipelinesPauseInfo = {};
     this.testResults = [];
-    this.currentSettings = {
+    this.defaultSettings = {
       disabledPipelines: conf.defaultDisabledPipelines,
       sortOrder: conf.defaultSortOrder
     };
@@ -35,13 +35,6 @@ export default class GoService {
    * Starts the service. Polls go server for pipeline and test results
    */
   start() {
-    // Retrieve current settings
-    this.dbService.getSettings().then((doc) => {
-      if (doc && doc.settings) {
-        this.currentSettings = Object.assign(this.currentSettings, doc.settings);
-      }
-    });
-
     // Retrieve stored test results
     this._refreshAndNotifyTestResults();
 
@@ -49,26 +42,38 @@ export default class GoService {
     this.pollGoServer();
   }
 
+  currentSettings() {
+    return this.dbService.getSettings().then((doc) => {
+      if (doc && doc.settings) {
+        return Object.assign({}, this.defaultSettings, doc.settings);
+      } else {
+        return this.defaultSettings
+      }
+    });
+  }
+
   pollGoServer() {
     // Function that refreshes all pipelines
     const refreshPipelines = (pipelineNames) => {
       let currentPipelines = [];
-      const pipelinesToIgnore = this.currentSettings.disabledPipelines;
-      const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
-      pipelinesToFetch.forEach((name) => {
-        this.buildService.getPipelineHistory(name).then((pipeline) => {
-          // Add pause information
-          if (this.pipelinesPauseInfo[name] && pipeline) {
-            pipeline.pauseinfo = this.pipelinesPauseInfo[name];
-          }
-          currentPipelines.push(pipeline);
-          if (currentPipelines.length === pipelinesToFetch.length) {
-            this.pipelines = currentPipelines;
-            // Update tests if needed
-            this.updateTestResults(currentPipelines);
-            Logger.debug(`Emitting ${currentPipelines.length} pipelines to ${this.clients.length} clients`);
-            this.notifyAllClients('pipelines:updated', currentPipelines);
-          }
+      this.currentSettings().then((settings) => {
+        const pipelinesToIgnore = settings.disabledPipelines;
+        const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
+        pipelinesToFetch.forEach((name) => {
+          this.buildService.getPipelineHistory(name).then((pipeline) => {
+            // Add pause information
+            if (this.pipelinesPauseInfo[name] && pipeline) {
+              pipeline.pauseinfo = this.pipelinesPauseInfo[name];
+            }
+            currentPipelines.push(pipeline);
+            if (currentPipelines.length === pipelinesToFetch.length) {
+              this.pipelines = currentPipelines;
+              // Update tests if needed
+              this.updateTestResults(currentPipelines);
+              Logger.debug(`Emitting ${currentPipelines.length} pipelines to ${this.clients.length} clients`);
+              this.notifyAllClients('pipelines:updated', currentPipelines);
+            }
+          });
         });
       });
     };
@@ -253,7 +258,9 @@ export default class GoService {
 
       // Emit latest pipeline names and settings
       client.emit('pipelines:names', this.pipelineNames);
-      client.emit('settings:updated', this.currentSettings);
+      this.currentSettings().then((settings) => {
+        client.emit('settings:updated', settings);
+      });
 
       if (conf.groupPipelines) {
         client.emit('pipelineNameToGroupName:updated', this.pipelineNameToGroupName);
@@ -262,7 +269,6 @@ export default class GoService {
       // Register for setting updates
       client.on('settings:update', (settings) => {
         this.dbService.saveOrUpdateSettings(settings).then((savedSettings) => {
-          this.currentSettings = savedSettings;
           // Notify other clients about the update
           this.notifyAllClients('settings:updated', savedSettings);
         }, () => {
