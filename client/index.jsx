@@ -7,8 +7,9 @@ import { grey, purple } from '@material-ui/core/colors';
 import Main from './components/Main';
 import TestResults from './components/TestResults';
 
-// Setup a socket to pass to components that uses it
-const socket = io(window.location.href);
+// Setup a socket to pass to components that uses it;
+// use the host only, to support group URLs and pass on query parameters for configuration
+const socket = io(window.location.protocol + '//' + window.location.host + window.location.search);
 
 // Switch between pipeline and test results page, don't when in admin mode
 const adminMode = window.location.search.indexOf('admin') >= 0;
