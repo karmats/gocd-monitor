@@ -318,7 +318,7 @@ export default class Main extends React.Component {
         return (
           <div>
             <div className="groupName">
-              <Link to={`${groupPath}${groupName}`}>{groupName}</Link>
+              <Link to={`${groupPath}${groupName}${window.location.search}`}>{groupName}</Link>
             </div>
             <div className="row">
               {pipelineCards}
@@ -333,7 +333,7 @@ export default class Main extends React.Component {
       backButton = (<Button
         variant="contained"
         color="primary"
-        onClick={() => this.props.history.push('/')}>
+        onClick={() => this.props.history.push(`/${window.location.search}`)}>
           Back to all groups
       </Button>);
     }
