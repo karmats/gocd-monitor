@@ -94,6 +94,10 @@ Go to `http://localhost:3000?admin` and click the settings button in the bottom-
 * Filter Pipelines - Disable/enable pipelines to retrieve from go server. It's also possible to write a regex with the pipelines you want.
 ![Configuration](https://github.com/karmats/gocd-monitor/blob/gh-pages/images/configuration.png?raw=true)
 
+### Using multiple configuration profiles
+
+Add the `profile` attribute to your URL, e.g. `http://localhost:3000?admin&profile=team1`. Then continue to configure as usual.
+
 ## Test reports
 To configure test reports, go to `http://localhost:3000/test-results?admin`. Click the '+'-button and choose the pipeline you want to generate test reports for. The system then retrieves all test files and creates graph and possible error table for all tests found in that pipeline. For now only cucumber tests are supported. If defined, the system will switch between monitor and test report page every `switchBetweenPagesInterval` seconds.
 ![Test reports](https://github.com/karmats/gocd-monitor/blob/gh-pages/images/test-report.png?raw=true)
