@@ -5,6 +5,7 @@ import GoTestService from './GoTestService';
 import DBService from './DBService';
 import Logger from '../utils/Logger';
 import CucumberParser from '../utils/CucumberParser';
+import _ from 'lodash'
 
 export default class GoService {
 
@@ -42,8 +43,8 @@ export default class GoService {
     this.pollGoServer();
   }
 
-  currentSettings() {
-    return this.dbService.getSettings().then((doc) => {
+  currentSettings(profile) {
+    return this.dbService.getSettings(profile).then((doc) => {
       if (doc && doc.settings) {
         return Object.assign({}, this.defaultSettings, doc.settings);
       } else {
@@ -52,28 +53,28 @@ export default class GoService {
     });
   }
 
+  profileForClient(client) {
+    return client.handshake.query.profile
+  }
+
   pollGoServer() {
     // Function that refreshes all pipelines
     const refreshPipelines = (pipelineNames) => {
       let currentPipelines = [];
-      this.currentSettings().then((settings) => {
-        const pipelinesToIgnore = settings.disabledPipelines;
-        const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
-        pipelinesToFetch.forEach((name) => {
-          this.buildService.getPipelineHistory(name).then((pipeline) => {
-            // Add pause information
-            if (this.pipelinesPauseInfo[name] && pipeline) {
-              pipeline.pauseinfo = this.pipelinesPauseInfo[name];
-            }
-            currentPipelines.push(pipeline);
-            if (currentPipelines.length === pipelinesToFetch.length) {
-              this.pipelines = currentPipelines;
-              // Update tests if needed
-              this.updateTestResults(currentPipelines);
-              Logger.debug(`Emitting ${currentPipelines.length} pipelines to ${this.clients.length} clients`);
-              this.notifyAllClients('pipelines:updated', currentPipelines);
-            }
-          });
+      pipelineNames.forEach((name) => {
+        this.buildService.getPipelineHistory(name).then((pipeline) => {
+          // Add pause information
+          if (this.pipelinesPauseInfo[name] && pipeline) {
+            pipeline.pauseinfo = this.pipelinesPauseInfo[name];
+          }
+          currentPipelines.push(pipeline);
+          if (currentPipelines.length === pipelineNames.length) {
+            this.pipelines = currentPipelines;
+            // Update tests if needed
+            this.updateTestResults(currentPipelines);
+            Logger.debug(`Emitting ${currentPipelines.length} pipelines to ${this.clients.length} clients`);
+            this.notifyAllClients('pipelines:updated', currentPipelines);
+          }
         });
       });
     };
@@ -256,9 +257,11 @@ export default class GoService {
     // Add client if not in clients list
     if (!this.clients.some(c => client.id === c.id)) {
 
+      const profile = this.profileForClient(client);
+
       // Emit latest pipeline names and settings
       client.emit('pipelines:names', this.pipelineNames);
-      this.currentSettings().then((settings) => {
+      this.currentSettings(profile).then((settings) => {
         client.emit('settings:updated', settings);
       });
 
@@ -268,9 +271,9 @@ export default class GoService {
 
       // Register for setting updates
       client.on('settings:update', (settings) => {
-        this.dbService.saveOrUpdateSettings(settings).then((savedSettings) => {
+        this.dbService.saveOrUpdateSettings(profile, settings).then((savedSettings) => {
           // Notify other clients about the update
-          this.notifyAllClients('settings:updated', savedSettings);
+          this.notifyAllClientsWithProfile(profile, 'settings:updated', savedSettings);
         }, () => {
           Logger.error('Failed to save settings');
         });
@@ -319,6 +322,20 @@ export default class GoService {
    */
   notifyAllClients(event, data) {
     this.clients.forEach((client) => {
+      client.emit(event, data);
+    });
+  }
+
+  /**
+   * Emits an event to all registered clients with a particular profile name
+   *
+   * @param {string}  profile Name of the profile to look for
+   * @param {string}  event   Name of the event
+   * @param {Object}  data    The data to send
+   */
+  notifyAllClientsWithProfile(profile, event, data) {
+    const clientsWithProfile = _.groupBy(this.clients, this.profileForClient)[profile] || []
+    clientsWithProfile.forEach((client) => {
       client.emit(event, data);
     });
   }

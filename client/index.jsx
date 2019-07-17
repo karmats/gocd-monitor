@@ -8,7 +8,7 @@ import Main from './components/Main';
 import TestResults from './components/TestResults';
 
 // Setup a socket to pass to components that uses it
-const socket = io();
+const socket = io(window.location.href);
 
 // Switch between pipeline and test results page, don't when in admin mode
 const adminMode = window.location.search.indexOf('admin') >= 0;

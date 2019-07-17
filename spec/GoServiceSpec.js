@@ -10,6 +10,8 @@ describe('GoService spec', () => {
   chai.use(chaiAsPromised);
   const expect = chai.expect;
 
+  const clientStub = () => {return {id: 'client1', on: () => {}, emit: () => {}, handshake: { query: { }}}};
+
   const goService = new GoService();
 
   describe('#constructor()', () => {
@@ -29,14 +31,14 @@ describe('GoService spec', () => {
     it('should register a client', (done) => {
       expect(goService.clients).to.have.lengthOf(0);
 
-      goService.registerClient({ id: 'client1', on: () => { }, emit: () => { } });
+      goService.registerClient(clientStub());
       expect(goService.clients).to.have.lengthOf(1);
 
       done();
     });
 
     it('should not register client if client is already registered', (done) => {
-      let client = { id: 'client1', on: () => { }, emit: () => { } };
+      let client = clientStub();
 
       goService.registerClient(client);
       expect(goService.clients).to.have.lengthOf(1);
@@ -47,7 +49,7 @@ describe('GoService spec', () => {
     });
 
     it('should unregister a client', (done) => {
-      let client = { id: 'client1', on: () => { }, emit: () => { } };
+      let client = clientStub();
 
       goService.registerClient(client);
       expect(goService.clients).to.have.lengthOf(1);
@@ -59,7 +61,7 @@ describe('GoService spec', () => {
     });
 
     it('should not affect client list if a client that does not exists is unregistered', (done) => {
-      let client = { id: 'client1', on: () => { }, emit: () => { } };
+      let client = clientStub();
 
       expect(goService.clients).to.have.lengthOf(0);
       goService.unregisterClient(client);
