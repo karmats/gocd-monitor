@@ -2,8 +2,8 @@ import Datastore from 'nedb';
 
 export default class DBService {
 
-  constructor(conf) {
-    this.datastore = new Datastore({ filename: conf.dbFilePath, autoload: true });
+  constructor(dbFilePath) {
+    this.datastore = new Datastore({ filename: dbFilePath, autoload: true });
   }
 
   /**
