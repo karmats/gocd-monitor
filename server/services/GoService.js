@@ -46,8 +46,13 @@ export default class GoService {
   currentSettings(profile) {
     return this.dbService.getSettings(profile).then((doc) => {
       if (doc && doc.settings) {
+        // saved settings exist, merge them with default settings
         return Object.assign({}, this.defaultSettings, doc.settings);
+      } else if (profile !== null) {
+        // no saved settings exist for a profile; fall back to settings for default profile
+        return this.currentSettings(null)
       } else {
+        // no settings exist for default profile; fall back to default settings from the config
         return this.defaultSettings
       }
     });
