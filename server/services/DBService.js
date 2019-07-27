@@ -19,6 +19,13 @@ export default class DBService {
   }
 
   /**
+   * @return {Promise<boolean>}           true if the database contains saved settings for a profile
+   */
+  numberOfSettingsWithProfile() {
+    return this._executeDbAction('count', {profile: {$exists: true}});
+  }
+
+  /**
    * @param {string}          profile    The new settings to save or update
    * @param {Object}          settings   The new settings to save or update
    * @return {Promise<Object>}           The updated settings

@@ -62,24 +62,40 @@ export default class GoService {
     return client.handshake.query.profile
   }
 
+  pipelinesToIgnore() {
+    return this.dbService.numberOfSettingsWithProfile().then((count) => {
+      if (count > 0) {
+        // we have multiple profiles, don't filter
+        return []
+      } else {
+        // no profiles, ignore pipelines disabled in the default profile
+        return this.currentSettings(null).then(settings => settings.disabledPipelines)
+      }
+    })
+  }
+
   pollGoServer() {
     // Function that refreshes all pipelines
     const refreshPipelines = (pipelineNames) => {
       let currentPipelines = [];
-      pipelineNames.forEach((name) => {
-        this.buildService.getPipelineHistory(name).then((pipeline) => {
-          // Add pause information
-          if (this.pipelinesPauseInfo[name] && pipeline) {
-            pipeline.pauseinfo = this.pipelinesPauseInfo[name];
-          }
-          currentPipelines.push(pipeline);
-          if (currentPipelines.length === pipelineNames.length) {
-            this.pipelines = currentPipelines;
-            // Update tests if needed
-            this.updateTestResults(currentPipelines);
-            Logger.debug(`Emitting ${currentPipelines.length} pipelines to ${this.clients.length} clients`);
-            this.notifyAllClients('pipelines:updated', currentPipelines);
-          }
+      this.pipelinesToIgnore().then((pipelinesToIgnore) => {
+        const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
+        Logger.debug(`Refreshing pipeline status. Fetching: ${JSON.stringify(pipelinesToFetch)}; Ignoring: ${JSON.stringify(pipelinesToIgnore)}`)
+        pipelinesToFetch.forEach((name) => {
+          this.buildService.getPipelineHistory(name).then((pipeline) => {
+            // Add pause information
+            if (this.pipelinesPauseInfo[name] && pipeline) {
+              pipeline.pauseinfo = this.pipelinesPauseInfo[name];
+            }
+            currentPipelines.push(pipeline);
+            if (currentPipelines.length === pipelinesToFetch.length) {
+              this.pipelines = currentPipelines;
+              // Update tests if needed
+              this.updateTestResults(currentPipelines);
+              Logger.debug(`Emitting ${currentPipelines.length} pipelines to ${this.clients.length} clients`);
+              this.notifyAllClients('pipelines:updated', currentPipelines);
+            }
+          });
         });
       });
     };
