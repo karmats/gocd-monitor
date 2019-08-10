@@ -1,0 +1,144 @@
+/**
+ * ConfigurationDialog dialog
+ */
+
+import React from 'react';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import Switch from '@material-ui/core/Switch';
+import {ListItemText, Radio} from '../../node_modules/@material-ui/core';
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import FormControl from "@material-ui/core/FormControl";
+import FormLabel from "@material-ui/core/FormLabel";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import DialogActions from "@material-ui/core/DialogActions";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Input from "@material-ui/core/Input";
+import Button from "@material-ui/core/Button";
+
+export default class ConfigurationDialog extends React.Component {
+
+  constructor(props, context) {
+    super(props, context);
+
+    this.state = {
+      disabledPipelines: new Set(this.props.disabledPipelines),
+      filterRegex: this.props.filterRegex,
+      pipelineNames: this.props.pipelineNames,
+      sortOrder: this.props.sortOrder,
+    };
+  }
+
+  isRegexValid() {
+    try {
+      new RegExp(this.state.filterRegex);
+      return true
+    } catch (_) {
+      return false
+    }
+  }
+
+  isPipelineSelectionDisabled(pipelineName) {
+    return !this.isRegexValid() || !pipelineName.match(this.state.filterRegex)
+  }
+
+  isPipelineToggledOn(pipelineName) {
+    return !this.isPipelineSelectionDisabled(pipelineName) && !this.state.disabledPipelines.has(pipelineName)
+  }
+
+  sortOrderChanged(e) {
+    this.setState({
+      sortOrder: e.target.value
+    })
+  }
+
+  regexChanged(e) {
+    this.setState({
+      filterRegex: e.target.value
+    })
+  }
+
+  togglePipeline(event) {
+    let pipelineName = event.target.value;
+    let pipelineEnabled = event.target.checked;
+    let newDisabledPipelines = new Set(this.state.disabledPipelines)
+    if (pipelineEnabled) {
+      newDisabledPipelines.delete(pipelineName)
+    } else {
+      newDisabledPipelines.add(pipelineName)
+    }
+    this.setState({
+      disabledPipelines: newDisabledPipelines
+    })
+  }
+
+  onCancel() {
+    this.props.onCancel()
+  }
+
+  onSave() {
+    this.props.onSave({
+      disabledPipelines: Array.from(this.state.disabledPipelines),
+      sortOrder: this.state.sortOrder,
+      filterRegex: this.state.filterRegex
+    })
+  }
+
+  render() {
+    return (<Dialog
+      open={true}>
+      <DialogTitle>
+        Configuration
+      </DialogTitle>
+
+      <DialogContent>
+        <FormControl component="fieldset">
+          <FormLabel component="legend">Sort Order</FormLabel>
+          <RadioGroup
+            value={this.state.sortOrder}
+            onChange={this.sortOrderChanged.bind(this)}
+            aria-label="sort-order"
+            name="sort-order">
+            <FormControlLabel value="buildtime" control={<Radio color="primary"/>} label="Build time"/>
+            <FormControlLabel value="status" control={<Radio color="primary"/>}
+                              label="Status (building, failed, cancelled, passed, paused)"/>
+
+          </RadioGroup>
+        </FormControl>
+        <FormControl component="fieldset" style={{width: "100%", marginTop: "8px"}} error={!this.isRegexValid()}>
+          <FormLabel component="legend">Filter Pipelines</FormLabel>
+          <List component="ul" disablePadding>
+            <ListSubheader disableGutters>
+              <Input
+
+                placeholder="some regular expression"
+                value={this.state.filterRegex}
+                onChange={this.regexChanged.bind(this)}
+                fullWidth={true}
+              />
+            </ListSubheader>
+            {this.state.pipelineNames.map(p => (
+              <ListItem key={p} dense disabled={this.isPipelineSelectionDisabled(p)} disableGutters>
+                <ListItemText primary={p}/>
+                <ListItemSecondaryAction>
+                  <Switch checked={this.isPipelineToggledOn(p)} color="primary" value={p}
+
+                          disabled={this.isPipelineSelectionDisabled(p)} onChange={this.togglePipeline.bind(this)}/>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+          </List>
+        </FormControl>
+
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={this.onCancel.bind(this)}>Cancel</Button>
+        <Button onClick={this.onSave.bind(this)}>Save</Button>
+      </DialogActions>
+    </Dialog>)
+  }
+}
