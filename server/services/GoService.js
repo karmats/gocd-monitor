@@ -5,7 +5,6 @@ import GoTestService from './GoTestService';
 import DBService from './DBService';
 import Logger from '../utils/Logger';
 import CucumberParser from '../utils/CucumberParser';
-import _ from 'lodash'
 
 export default class GoService {
 
@@ -355,8 +354,9 @@ export default class GoService {
    * @param {Object}  data    The data to send
    */
   notifyAllClientsWithProfile(profile, event, data) {
-    const clientsWithProfile = _.groupBy(this.clients, this.profileForClient)[profile] || []
-    clientsWithProfile.forEach((client) => {
+    this.clients.filter((client) => {
+      return this.profileForClient(client) === profile
+    }).forEach((client) => {
       client.emit(event, data);
     });
   }
