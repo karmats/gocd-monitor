@@ -5,6 +5,7 @@ import GoTestService from './GoTestService';
 import DBService from './DBService';
 import Logger from '../utils/Logger';
 import CucumberParser from '../utils/CucumberParser';
+import Datastore from 'nedb';
 
 export default class GoService {
 
@@ -27,7 +28,7 @@ export default class GoService {
     this.testService = new GoTestService(this.goConfig);
 
     // Init db and settings
-    this.dbService = new DBService(conf.dbFilePath);
+    this.dbService = new DBService(new Datastore({ filename: conf.dbFilePath, autoload: true }));
 
   }
 

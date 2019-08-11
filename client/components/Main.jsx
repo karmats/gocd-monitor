@@ -99,10 +99,7 @@ export default class Main extends React.Component {
       settingsDialogOpened: false,
       // Snackbar message
       showMessage: false,
-      filterRegexProps: {
-        active: false,
-        value: ''
-      },
+      filterRegex: '',
       message: ''
     };
   }
@@ -120,7 +117,7 @@ export default class Main extends React.Component {
     this.socket.on('pipelines:updated', (newPipelines) => {
       let disabledPipelines = this.state.disabledPipelines.slice();
       this.setState({
-        pipelines: sortAndFilterPipelines(newPipelines, disabledPipelines, this.state.sortOrder, this.state.filterRegexProps.value)
+        pipelines: sortAndFilterPipelines(newPipelines, disabledPipelines, this.state.sortOrder, this.state.filterRegex)
       })
     });
 
@@ -143,10 +140,10 @@ export default class Main extends React.Component {
       let pipelines = this.state.pipelines.slice();
       if (settings.disabledPipelines && settings.sortOrder) {
         this.setState({
-          pipelines: sortAndFilterPipelines(pipelines, settings.disabledPipelines, settings.sortOrder, this.state.filterRegexProps.value),
+          pipelines: sortAndFilterPipelines(pipelines, settings.disabledPipelines, settings.sortOrder, this.state.filterRegex),
           sortOrder : settings.sortOrder,
           disabledPipelines: settings.disabledPipelines,
-          filterRegexProps: settings.filterRegexProps || { active : false, value : '' }
+          filterRegex: settings.filterRegex || ''
         });
       }
     });
@@ -171,7 +168,7 @@ export default class Main extends React.Component {
     this.socket.emit('settings:update', {
       sortOrder: newSettings.sortOrder,
       disabledPipelines: newSettings.disabledPipelines,
-      filterRegexProps: {active: true, value: newSettings.filterRegex}
+      filterRegex: newSettings.filterRegex
     });
 
     this.setState({
@@ -272,7 +269,7 @@ export default class Main extends React.Component {
       newConfigurationDialog = <ConfigurationDialog onCancel={this.cancelSettings.bind(this)}
                                                     onSave={this.saveSettings.bind(this)}
                                                     disabledPipelines={this.state.disabledPipelines}
-                                                    filterRegex={this.state.filterRegexProps.value}
+                                                    filterRegex={this.state.filterRegex}
                                                     pipelineNames={this.state.pipelineNames}
                                                     sortOrder={this.state.sortOrder}/>
     }
