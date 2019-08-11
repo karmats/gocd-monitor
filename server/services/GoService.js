@@ -74,13 +74,29 @@ export default class GoService {
     })
   }
 
+  filterRegex() {
+    return this.dbService.numberOfSettingsWithProfile().then((count) => {
+      if (count > 0) {
+        // we have multiple profiles, don't filter
+        return ''
+      } else {
+        // no profiles, ignore pipelines disabled in the default profile
+        return this.currentSettings(null).then(settings => settings.filterRegex)
+      }
+    })
+  }
+
   pollGoServer() {
     // Function that refreshes all pipelines
     const refreshPipelines = (pipelineNames) => {
       let currentPipelines = [];
-      this.pipelinesToIgnore().then((pipelinesToIgnore) => {
-        const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
-        Logger.debug(`Refreshing pipeline status. Fetching: ${JSON.stringify(pipelinesToFetch)}; Ignoring: ${JSON.stringify(pipelinesToIgnore)}`)
+      Promise.all([this.pipelinesToIgnore(), this.filterRegex()]).then(([pipelinesToIgnore,filterRegex]) => {
+        const pipelineFilterRegex = filterRegex || '';
+        const pipelinesToFetch = pipelineNames
+          .filter(p => pipelinesToIgnore.indexOf(p) < 0)
+          .filter(p => p.match(pipelineFilterRegex));
+
+        Logger.debug(`Refreshing pipeline status. Fetching: ${JSON.stringify(pipelinesToFetch)}; Ignoring: ${JSON.stringify(pipelinesToIgnore)} and everything not matching ${JSON.stringify(pipelineFilterRegex)}`)
         pipelinesToFetch.forEach((name) => {
           this.buildService.getPipelineHistory(name).then((pipeline) => {
             // Add pause information
