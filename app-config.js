@@ -29,6 +29,8 @@ var config = {
     defaultSortOrder: process.env.gocdmonitor_default_sort_order || 'buildtime',
     // Which pipelines to hide - can be overridden in the admin UI
     defaultDisabledPipelines: (process.env.gocdmonitor_default_hidden_pipelines || "").split(",").filter((val) => val) || [],
+    // Only show pipelines that match this regular expression
+    defaultPipelineFilterRegex: process.env.gocdmonitor_default_pipeline_filter_regex || '',
     // Where to store the database file
     dbFilePath: process.env.gocdmonitor_db_file_path || 'server/data.db',
 

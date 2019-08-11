@@ -19,6 +19,7 @@ export default class GoService {
     this.testResults = [];
     this.defaultSettings = {
       disabledPipelines: conf.defaultDisabledPipelines,
+      filterRegex: conf.defaultPipelineFilterRegex,
       sortOrder: conf.defaultSortOrder
     };
     this.pollingInterval = conf.goPollingInterval * 1000;
