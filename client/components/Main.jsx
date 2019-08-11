@@ -140,7 +140,7 @@ export default class Main extends React.Component {
       let pipelines = this.state.pipelines.slice();
       if (settings.disabledPipelines && settings.sortOrder) {
         this.setState({
-          pipelines: sortAndFilterPipelines(pipelines, settings.disabledPipelines, settings.sortOrder, this.state.filterRegex),
+          pipelines: sortAndFilterPipelines(pipelines, settings.disabledPipelines, settings.sortOrder, settings.filterRegex),
           sortOrder : settings.sortOrder,
           disabledPipelines: settings.disabledPipelines,
           filterRegex: settings.filterRegex || ''
