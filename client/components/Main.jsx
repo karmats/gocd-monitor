@@ -32,14 +32,23 @@ const groupRegex = new RegExp(`${groupPath}(.+)$`);
 * @param   {Array}   pipelines         The pipelines to sort
 * @param   {Array}   disabledPipelines Pipelines that are disabled
 * @param   {string}  sortOrder         The sort order, 'buildtime' or 'status'
+* @param   {string}  filterRegex       Regular expression to filter for
 * @return  {Array}   Sorted pipelines
 */
-export const sortPipelines = (pipelines, disabledPipelines, sortOrder) => {
- const activePipelines = pipelines.filter(p => p && p.name && disabledPipelines.indexOf(p.name) < 0);
+export const sortAndFilterPipelines = (pipelines, disabledPipelines, sortOrder, filterRegex) => {
+ const pipelineIsValid = p => p && p.name
+ const pipelineIsNotDisabled =  p => disabledPipelines.indexOf(p.name) < 0
+ const pipelineMatchesRegex = p => p.name.match(filterRegex)
+
+  const activePipelines = pipelines.filter(pipelineIsValid)
+   .filter(pipelineIsNotDisabled)
+   .filter(pipelineMatchesRegex);
+
  // Add "time ago" moment string
  activePipelines.forEach((pipeline) => {
    pipeline.timeago = moment(pipeline.buildtime).fromNow();
  });
+
  const sortByBuildTime = (a, b) => {
    return a.buildtime > b.buildtime ? -1 : 1;
  };
@@ -111,7 +120,7 @@ export default class Main extends React.Component {
     this.socket.on('pipelines:updated', (newPipelines) => {
       let disabledPipelines = this.state.disabledPipelines.slice();
       this.setState({
-        pipelines: sortPipelines(newPipelines, disabledPipelines, this.state.sortOrder)
+        pipelines: sortAndFilterPipelines(newPipelines, disabledPipelines, this.state.sortOrder, this.state.filterRegexProps.value)
       })
     });
 
@@ -134,7 +143,7 @@ export default class Main extends React.Component {
       let pipelines = this.state.pipelines.slice();
       if (settings.disabledPipelines && settings.sortOrder) {
         this.setState({
-          pipelines: sortPipelines(pipelines, settings.disabledPipelines, settings.sortOrder),
+          pipelines: sortAndFilterPipelines(pipelines, settings.disabledPipelines, settings.sortOrder, this.state.filterRegexProps.value),
           sortOrder : settings.sortOrder,
           disabledPipelines: settings.disabledPipelines,
           filterRegexProps: settings.filterRegexProps || { active : false, value : '' }
