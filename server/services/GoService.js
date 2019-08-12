@@ -63,41 +63,32 @@ export default class GoService {
     return client.handshake.query.profile
   }
 
-  pipelinesToIgnore() {
+  pipelinesToFetch(pipelineNames) {
     return this.dbService.numberOfSettingsWithProfile().then((count) => {
       if (count > 0) {
         // we have multiple profiles, don't filter
-        return []
+        Logger.debug(`Refreshing pipeline status: Multiple profiles present, fetching all pipelines.`)
+        return pipelineNames
       } else {
         // no profiles, ignore pipelines disabled in the default profile
-        return this.currentSettings(null).then(settings => settings.disabledPipelines)
-      }
-    })
-  }
+        return this.currentSettings(null).then((settings) => {
+          const pipelinesToIgnore = settings.disabledPipelines;
+          const pipelineFilterRegex = settings.filterRegex;
 
-  filterRegex() {
-    return this.dbService.numberOfSettingsWithProfile().then((count) => {
-      if (count > 0) {
-        // we have multiple profiles, don't filter
-        return ''
-      } else {
-        // no profiles, ignore pipelines disabled in the default profile
-        return this.currentSettings(null).then(settings => settings.filterRegex)
-      }
-    })
-  }
+          const pipelinesToFetch = pipelineNames
+            .filter(p => pipelinesToIgnore.indexOf(p) < 0)
+            .filter(p => p.match(pipelineFilterRegex));
+          Logger.debug(`Refreshing pipeline status: Fetching: ${JSON.stringify(pipelinesToFetch)}; Ignoring: ${JSON.stringify(pipelinesToIgnore)} and everything not matching ${JSON.stringify(pipelineFilterRegex)}`)
+          return pipelinesToFetch
+        });
+      }});
+  };
 
   pollGoServer() {
     // Function that refreshes all pipelines
     const refreshPipelines = (pipelineNames) => {
       let currentPipelines = [];
-      Promise.all([this.pipelinesToIgnore(), this.filterRegex()]).then(([pipelinesToIgnore,filterRegex]) => {
-        const pipelineFilterRegex = filterRegex || '';
-        const pipelinesToFetch = pipelineNames
-          .filter(p => pipelinesToIgnore.indexOf(p) < 0)
-          .filter(p => p.match(pipelineFilterRegex));
-
-        Logger.debug(`Refreshing pipeline status. Fetching: ${JSON.stringify(pipelinesToFetch)}; Ignoring: ${JSON.stringify(pipelinesToIgnore)} and everything not matching ${JSON.stringify(pipelineFilterRegex)}`)
+      this.pipelinesToFetch(pipelineNames).then((pipelinesToFetch) => {
         pipelinesToFetch.forEach((name) => {
           this.buildService.getPipelineHistory(name).then((pipeline) => {
             // Add pause information
