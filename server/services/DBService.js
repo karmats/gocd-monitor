@@ -7,27 +7,40 @@ export default class DBService {
   }
 
   /**
-   * @return {Promise<Object>}  Settings stored in db
+   * @param {string}           profile   Name of the settings profile
+   * @return {Promise<Object>}           Settings stored in db
    */
-  getSettings() {
-    return this._executeDbAction('findOne', { settings: { $exists: true } });
+  getSettings(profile) {
+    if (profile) {
+      return this._executeDbAction('findOne',{$and: [{settings: {$exists: true}}, {profile: profile}]});
+    } else {
+      return this._executeDbAction('findOne',{$and: [{settings: {$exists: true}}, {profile: {$exists: false}}]});
+    }
   }
 
   /**
+   * @return {Promise<boolean>}           true if the database contains saved settings for a profile
+   */
+  numberOfSettingsWithProfile() {
+    return this._executeDbAction('count', {profile: {$exists: true}});
+  }
+
+  /**
+   * @param {string}          profile    The new settings to save or update
    * @param {Object}          settings   The new settings to save or update
    * @return {Promise<Object>}           The updated settings
    */
-  saveOrUpdateSettings(settings) {
+  saveOrUpdateSettings(profile, settings) {
     const insertSettings = () => {
-      return this._executeDbAction('insert', { settings: settings }).then(() => {
+      return this._executeDbAction('insert', { settings: settings, profile }).then(() => {
           // Since callback of an insert returns the complete document, we resolve with settings argument
           return settings;
       });
     }
-    return this.getSettings().then((doc) => {
+    return this.getSettings(profile).then((doc) => {
       if (doc && doc.settings) {
         return this._executeDbAction('update', { _id: doc._id }, { $set: { settings: settings } }, {}).then(() => {
-          // Since callback of an update returns number of affected documents, we resolve with settings argument 
+          // Since callback of an update returns number of affected documents, we resolve with settings argument
           return settings;
         });
       } else {
@@ -78,7 +91,7 @@ export default class DBService {
 
   /**
    * Executes a database action
-   * 
+   *
    * @param   {string}        action    The action to execute e.g. find, update, remove etc
    * @parma   {Array<Object>} args      Database arguments
    */
