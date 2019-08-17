@@ -10,7 +10,7 @@ describe('ConfigurationDialog spec', () => {
     describe('#isPipelineToggledOn()', function () {
       it('should display disabled pipelines as toggled off, the rest as toggled on', () => {
         const dialog = new ConfigurationDialog({
-          disabledPipelines: new Set(['pipeline-3']),
+          disabledPipelines: ['pipeline-3'],
           filterRegex: '',
           pipelineNames: ['pipeline-1','pipeline-2','pipeline-3','pipeline-4'],
           sortOrder: 'buildtime'
@@ -24,7 +24,7 @@ describe('ConfigurationDialog spec', () => {
 
       it('should display pipelines as toggled off when they dont match the regex', () => {
         const dialog = new ConfigurationDialog({
-          disabledPipelines: new Set([]),
+          disabledPipelines: [],
           filterRegex: 'pipeline-[1-2]',
           pipelineNames: ['pipeline-1','pipeline-2','pipeline-3','pipeline-4'],
           sortOrder: 'buildtime'
@@ -39,7 +39,7 @@ describe('ConfigurationDialog spec', () => {
     describe('#isPipelineSelectionDisabled()', function () {
       it('should not allow pipelines to be toggled when they dont match the regex', () => {
         const dialog = new ConfigurationDialog({
-          disabledPipelines: new Set([]),
+          disabledPipelines: [],
           filterRegex: 'pipeline-[1-2]',
           pipelineNames: ['pipeline-1','pipeline-2','pipeline-3','pipeline-4'],
           sortOrder: 'buildtime'
@@ -51,7 +51,7 @@ describe('ConfigurationDialog spec', () => {
       })
       it('should not allow any pipeline to be toggled when the regex is invalid', () => {
         const dialog = new ConfigurationDialog({
-          disabledPipelines: new Set([]),
+          disabledPipelines: [],
           filterRegex: 'pipeline-[',
           pipelineNames: ['pipeline-1','pipeline-2','pipeline-3','pipeline-4'],
           sortOrder: 'buildtime'

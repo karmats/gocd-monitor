@@ -26,7 +26,7 @@ export default class ConfigurationDialog extends React.Component {
     super(props, context);
 
     this.state = {
-      disabledPipelines: new Set(this.props.disabledPipelines),
+      disabledPipelines: this.props.disabledPipelines,
       filterRegex: this.props.filterRegex,
       pipelineNames: this.props.pipelineNames,
       sortOrder: this.props.sortOrder,
@@ -47,7 +47,7 @@ export default class ConfigurationDialog extends React.Component {
   }
 
   isPipelineToggledOn(pipelineName) {
-    return !this.isPipelineSelectionDisabled(pipelineName) && !this.state.disabledPipelines.has(pipelineName)
+    return !this.isPipelineSelectionDisabled(pipelineName) && this.state.disabledPipelines.indexOf(pipelineName) === -1
   }
 
   sortOrderChanged(e) {
@@ -65,11 +65,11 @@ export default class ConfigurationDialog extends React.Component {
   togglePipeline(event) {
     let pipelineName = event.target.value;
     let pipelineEnabled = event.target.checked;
-    let newDisabledPipelines = new Set(this.state.disabledPipelines)
+    let newDisabledPipelines = [...this.state.disabledPipelines]
     if (pipelineEnabled) {
-      newDisabledPipelines.delete(pipelineName)
+      newDisabledPipelines.splice(newDisabledPipelines.indexOf(pipelineName), 1)
     } else {
-      newDisabledPipelines.add(pipelineName)
+      newDisabledPipelines.push(pipelineName)
     }
     this.setState({
       disabledPipelines: newDisabledPipelines
@@ -82,7 +82,7 @@ export default class ConfigurationDialog extends React.Component {
 
   onSave() {
     this.props.onSave({
-      disabledPipelines: Array.from(this.state.disabledPipelines),
+      disabledPipelines: this.state.disabledPipelines,
       sortOrder: this.state.sortOrder,
       filterRegex: this.state.filterRegex
     })
