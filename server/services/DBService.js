@@ -1,9 +1,9 @@
-import Datastore from 'nedb';
+
 
 export default class DBService {
 
-  constructor(dbFilePath) {
-    this.datastore = new Datastore({ filename: dbFilePath, autoload: true });
+  constructor(datastore) {
+    this.datastore = datastore
   }
 
   /**
@@ -11,11 +11,24 @@ export default class DBService {
    * @return {Promise<Object>}           Settings stored in db
    */
   getSettings(profile) {
+    let resultPromise
     if (profile) {
-      return this._executeDbAction('findOne',{$and: [{settings: {$exists: true}}, {profile: profile}]});
+      resultPromise = this._executeDbAction('findOne',{$and: [{settings: {$exists: true}}, {profile: profile}]});
     } else {
-      return this._executeDbAction('findOne',{$and: [{settings: {$exists: true}}, {profile: {$exists: false}}]});
+      resultPromise = this._executeDbAction('findOne',{$and: [{settings: {$exists: true}}, {profile: {$exists: false}}]});
     }
+
+    return resultPromise.then((result) => {
+      // Convert settings that were stored when filterRegex was only used for the configuration UI but not for filtering
+      // Can be removed at some point when we expect most users to have upgraded
+      if (result && result.settings) {
+        if (result.settings.filterRegexProps && result.settings.filterRegexProps.active) {
+          result.settings.filterRegex = result.settings.filterRegexProps.value
+        }
+        delete result.settings.filterRegexProps
+      }
+      return result
+    });
   }
 
   /**

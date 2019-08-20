@@ -43,6 +43,7 @@ gocdmonitor_gocd_switch_pages_interval=60
 gocdmonitor_gocd_grouppipelines=true
 gocdmonitor_default_sort_order=buildtime
 gocdmonitor_default_hidden_pipelines=foo,bar
+gocdmonitor_default_pipeline_filter_regex=pipeline.*-[0-9]+
 gocdmonitor_enable_dark_theme=true
 gocdmonitor_gocd_showbuildlabels=true
 gocdmonitor_gocd_linktopipelineingo=true

@@ -5,6 +5,7 @@ import GoTestService from './GoTestService';
 import DBService from './DBService';
 import Logger from '../utils/Logger';
 import CucumberParser from '../utils/CucumberParser';
+import Datastore from 'nedb';
 
 export default class GoService {
 
@@ -18,6 +19,7 @@ export default class GoService {
     this.testResults = [];
     this.defaultSettings = {
       disabledPipelines: conf.defaultDisabledPipelines,
+      filterRegex: conf.defaultPipelineFilterRegex,
       sortOrder: conf.defaultSortOrder
     };
     this.pollingInterval = conf.goPollingInterval * 1000;
@@ -27,7 +29,7 @@ export default class GoService {
     this.testService = new GoTestService(this.goConfig);
 
     // Init db and settings
-    this.dbService = new DBService(conf.dbFilePath);
+    this.dbService = new DBService(new Datastore({ filename: conf.dbFilePath, autoload: true }));
 
   }
 
@@ -61,25 +63,32 @@ export default class GoService {
     return client.handshake.query.profile
   }
 
-  pipelinesToIgnore() {
+  pipelinesToFetch(pipelineNames) {
     return this.dbService.numberOfSettingsWithProfile().then((count) => {
       if (count > 0) {
         // we have multiple profiles, don't filter
-        return []
+        Logger.debug(`Refreshing pipeline status: Multiple profiles present, fetching all pipelines.`)
+        return pipelineNames
       } else {
         // no profiles, ignore pipelines disabled in the default profile
-        return this.currentSettings(null).then(settings => settings.disabledPipelines)
-      }
-    })
-  }
+        return this.currentSettings(null).then((settings) => {
+          const pipelinesToIgnore = settings.disabledPipelines;
+          const pipelineFilterRegex = settings.filterRegex;
+
+          const pipelinesToFetch = pipelineNames
+            .filter(p => pipelinesToIgnore.indexOf(p) < 0)
+            .filter(p => p.match(pipelineFilterRegex));
+          Logger.debug(`Refreshing pipeline status: Fetching: ${JSON.stringify(pipelinesToFetch)}; Ignoring: ${JSON.stringify(pipelinesToIgnore)} and everything not matching ${JSON.stringify(pipelineFilterRegex)}`)
+          return pipelinesToFetch
+        });
+      }});
+  };
 
   pollGoServer() {
     // Function that refreshes all pipelines
     const refreshPipelines = (pipelineNames) => {
       let currentPipelines = [];
-      this.pipelinesToIgnore().then((pipelinesToIgnore) => {
-        const pipelinesToFetch = pipelineNames.filter(p => pipelinesToIgnore.indexOf(p) < 0);
-        Logger.debug(`Refreshing pipeline status. Fetching: ${JSON.stringify(pipelinesToFetch)}; Ignoring: ${JSON.stringify(pipelinesToIgnore)}`)
+      this.pipelinesToFetch(pipelineNames).then((pipelinesToFetch) => {
         pipelinesToFetch.forEach((name) => {
           this.buildService.getPipelineHistory(name).then((pipeline) => {
             // Add pause information
