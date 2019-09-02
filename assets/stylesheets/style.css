@@ -109,7 +109,11 @@ a {
 }
 
 .appcontainer a {
+  color: #c158dc;
   font-weight: 400;
+}
+.appcontainer a:hover {
+  color: #5c007a;
 }
 
 /* Build title, pipeline name and status */
