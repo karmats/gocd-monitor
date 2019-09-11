@@ -13,13 +13,14 @@ const goServerUrl = process.env.GO_SERVER_URL;
 const showBuildLabels = process.env.SHOW_BUILD_LABELS;
 const linkToPipelineInGo = process.env.LINK_TO_PIPELINE_IN_GO;
 const hideWeatherIcons = process.env.HIDE_WEATHER_ICONS;
+const enableDarkTheme = process.env.ENABLE_DARK_THEME;
 
 const pipelineHistoryUrl = goServerUrl + '/go/tab/pipeline/history/';
 
 // Weather icon indicator
 const weatherIconStatuses = ['sunny', 'partlycloudy', 'cloudy', 'cloudy', 'pouring', 'lightning'];
 
-const white = '#fff';
+const fontColor = enableDarkTheme ? '#000': '#fff';
 const styles = {
   cardSuccess: {
     background: Colors.green.A700,
@@ -46,20 +47,29 @@ const styles = {
     paddingBottom: '0.5rem'
   },
   cardTitle: {
-    color: white,
+    color: fontColor,
     fontSize: '1.2em'
   },
   cardLabel: {
     fontWeight: 'normal'
   },
   cardSubTitle: {
-    color: white,
+    color: fontColor,
     fontSize: '1em',
     fontWeight: 100
   },
   progress: {
-    color: white,
+    color: fontColor,
     float: 'right'
+  },
+  buildInfo: {
+    color: fontColor
+  },
+  weatherIcon: {
+    color: fontColor
+  },
+  loader: {
+    stroke: fontColor
   }
 };
 
@@ -154,7 +164,7 @@ export default class Pipeline extends React.Component {
               if (stage.status === 'building') {
                 return (<span key={stage.name} className="loader">
                   <svg className="circular" viewBox="25 25 50 50">
-                    <circle className="path" cx="50" cy="50" r="20" fill="none" strokeWidth="4" strokeMiterlimit="10" />
+                    <circle className="path" cx="50" cy="50" r="20" fill="none" strokeWidth="4" strokeMiterlimit="10" style={styles.loader} />
                   </svg>
                 </span>);
               } else {
@@ -194,13 +204,13 @@ export default class Pipeline extends React.Component {
           {pipeline.name}
         </Typography>
         {!hideWeatherIcons &&
-          <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'}></i>
+          <i className={'mdi-weather-' + this.weatherIcon(pipeline) + ' mdi mdi-48px buildstatus'} style={styles.weatherIcon}></i>
         }
         <Typography style={styles.cardSubTitle} color="textSecondary">
           {buildStatus}
         </Typography>
 
-        <div className="buildinfo">
+        <div className="buildinfo" style={styles.buildInfo}>
           <div className="col-xs-6">
             <p>
               <i className="mdi mdi-clock-outline mdi-24px"></i>
