@@ -16,11 +16,15 @@ import Pipeline from './Pipeline';
 
 import ConfigurationDialog from "./ConfigurationDialog";
 
+const enableDarkTheme = process.env.ENABLE_DARK_THEME;
+
+const fontColor = enableDarkTheme ? '#000': '#fff';
 const styles = {
   fab: {
     position: 'fixed',
     right: 50,
-    bottom: 50
+    bottom: 50,
+    color: fontColor
   }
 };
 
