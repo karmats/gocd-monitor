@@ -34,7 +34,7 @@ export default class ConfigurationDialog extends React.Component {
       filterRegex: this.props.filterRegex,
       pipelineNames: this.props.pipelineNames,
       sortOrder: this.props.sortOrder,
-      darkTheme: false
+      darkTheme: this.props.darkTheme
     };
   }
 

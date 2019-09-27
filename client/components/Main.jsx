@@ -16,18 +16,6 @@ import Pipeline from './Pipeline';
 
 import ConfigurationDialog from "./ConfigurationDialog";
 
-const enableDarkTheme = process.env.ENABLE_DARK_THEME;
-
-const fontColor = enableDarkTheme ? '#000': '#fff';
-const styles = {
-  fab: {
-    position: 'fixed',
-    right: 50,
-    bottom: 50,
-    color: fontColor
-  }
-};
-
 const groupPath = '/group/';
 const groupRegex = new RegExp(`${groupPath}(.+)$`);
 /**
@@ -128,14 +116,14 @@ export default class Main extends React.Component {
     // Names of all pipelines
     this.socket.on('pipelines:names', (pipelineNames) => {
       this.setState({
-        pipelineNames: pipelineNames
+        pipelineNames
       })
     });
 
     // Pipeline name to group name map
     this.socket.on('pipelineNameToGroupName:updated', (pipelineNameToGroupName) => {
       this.setState({
-        pipelineNameToGroupName: pipelineNameToGroupName
+        pipelineNameToGroupName
       })
     });
 
@@ -169,10 +157,11 @@ export default class Main extends React.Component {
   }
 
   saveSettings(newSettings) {
-    this.socket.emit('settings:update', {
+    this.props.socket.emit('settings:update', {
       sortOrder: newSettings.sortOrder,
       disabledPipelines: newSettings.disabledPipelines,
-      filterRegex: newSettings.filterRegex
+      filterRegex: newSettings.filterRegex,
+      darkTheme: newSettings.darkTheme
     });
 
     this.setState({
@@ -196,7 +185,12 @@ export default class Main extends React.Component {
     const settingsBtn = adminMode ? (
       <Fab
         color="primary"
-        style={styles.fab}
+        style={{
+          position: 'fixed',
+          right: 50,
+          bottom: 50,
+          color: this.props.darkTheme ? '#000': '#fff'
+        }}
         onClick={this.openSettings.bind(this)}>
         <Settings />
       </Fab>
@@ -209,7 +203,7 @@ export default class Main extends React.Component {
         if (pipeline) {
           return (
             <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-              <Pipeline pipeline={pipeline} />
+              <Pipeline pipeline={pipeline} darkTheme={this.props.darkTheme} />
             </div>
           )
         }
@@ -240,7 +234,7 @@ export default class Main extends React.Component {
           if (pipeline) {
             return (
               <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-                <Pipeline pipeline={pipeline} />
+                <Pipeline pipeline={pipeline} darkTheme={this.props.darkTheme} />
               </div>
             )
           }
@@ -275,7 +269,9 @@ export default class Main extends React.Component {
                                                     disabledPipelines={this.state.disabledPipelines}
                                                     filterRegex={this.state.filterRegex}
                                                     pipelineNames={this.state.pipelineNames}
-                                                    sortOrder={this.state.sortOrder}/>
+                                                    sortOrder={this.state.sortOrder}
+                                                    darkTheme={this.props.darkTheme}
+                                                    />
     }
 
     return (

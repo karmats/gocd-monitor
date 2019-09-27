@@ -7,9 +7,18 @@ import { grey, purple } from '@material-ui/core/colors';
 import Main from './components/Main';
 import TestResults from './components/TestResults';
 
+// Application theme
+let enableDarkTheme = false;
 // Setup a socket to pass to components that uses it;
 // use the host only, to support group URLs and pass on query parameters for configuration
 const socket = io(window.location.protocol + '//' + window.location.host + window.location.search);
+// If dark theme setting is changed, a remount is needed
+socket.on('settings:updated', (settings) => {
+  if (settings.darkTheme !== enableDarkTheme) {
+    enableDarkTheme = settings.darkTheme;
+    renderApp();
+  }
+})
 
 // Switch between pipeline and test results page, don't when in admin mode
 const adminMode = window.location.search.indexOf('admin') >= 0;
@@ -24,34 +33,40 @@ if (switchBetweenPagesInterval && switchBetweenPagesInterval > 0 && !adminMode) 
   }, switchBetweenPagesInterval * 1000)
 }
 
-// Application theme
-const enableDarkTheme = process.env.ENABLE_DARK_THEME;
-const theme = createMuiTheme({
+const createTheme = (darkTheme) => createMuiTheme({
   typography: {
     useNextVariants: true,
   },
   palette: {
-    type: enableDarkTheme ? 'dark' : 'light',
+    type: darkTheme ? 'dark' : 'light',
     primary: purple
   }
 });
 
-if (enableDarkTheme) {
-    document.body.style.background = grey[800];
-}
 
 // Render react router routes
-ReactDOM.render((
-  <MuiThemeProvider theme={theme}>
-    <Router>
-      <Switch>
-        <Route path="/test-results" render={() => (
-          <TestResults socket={socket} />
-        )} />
-        <Route path="/" render={(props) => (
-          <Main socket={socket} {...props} />
-        )} />
-      </Switch>
-    </Router>
-  </MuiThemeProvider>
-), document.getElementById('app'))
+const renderApp = () => {
+  const appNode = document.getElementById('app');
+  // Unmount if this is a remount
+  if (appNode.children.length) {
+    ReactDOM.unmountComponentAtNode(appNode);
+  }
+  // Theme specific
+  const theme = createTheme(enableDarkTheme);
+  document.body.style.background = enableDarkTheme ? grey[800] : grey[100];
+  ReactDOM.render((
+    <MuiThemeProvider theme={theme}>
+      <Router>
+        <Switch>
+          <Route path="/test-results" render={() => (
+            <TestResults socket={socket} />
+          )} />
+          <Route path="/" render={(props) => (
+            <Main socket={socket} darkTheme={enableDarkTheme} {...props} />
+          )} />
+        </Switch>
+      </Router>
+    </MuiThemeProvider>
+  ), appNode)
+}
+renderApp();
