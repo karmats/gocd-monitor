@@ -20,6 +20,10 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Input from "@material-ui/core/Input";
 import Button from "@material-ui/core/Button";
 
+const styles = {
+  formControl: { width: "100%", marginTop: "16px" }
+}
+
 export default class ConfigurationDialog extends React.Component {
 
   constructor(props, context) {
@@ -30,6 +34,7 @@ export default class ConfigurationDialog extends React.Component {
       filterRegex: this.props.filterRegex,
       pipelineNames: this.props.pipelineNames,
       sortOrder: this.props.sortOrder,
+      darkTheme: false
     };
   }
 
@@ -62,6 +67,12 @@ export default class ConfigurationDialog extends React.Component {
     })
   }
 
+  darkThemeChanged(e) {
+    this.setState({
+      darkTheme: e.target.checked
+    })
+  }
+
   togglePipeline(event) {
     let pipelineName = event.target.value;
     let pipelineEnabled = event.target.checked;
@@ -84,7 +95,8 @@ export default class ConfigurationDialog extends React.Component {
     this.props.onSave({
       disabledPipelines: this.state.disabledPipelines,
       sortOrder: this.state.sortOrder,
-      filterRegex: this.state.filterRegex
+      filterRegex: this.state.filterRegex,
+      darkTheme: this.state.darkTheme
     })
   }
 
@@ -109,7 +121,11 @@ export default class ConfigurationDialog extends React.Component {
 
           </RadioGroup>
         </FormControl>
-        <FormControl component="fieldset" style={{width: "100%", marginTop: "8px"}} error={!this.isRegexValid()}>
+        <FormControl component="fieldset" style={styles.formControl}>
+          <FormLabel component="legend">Dark Theme</FormLabel>
+          <Switch checked={this.state.darkTheme} value="darkTheme" color="primary" onChange={this.darkThemeChanged.bind(this)}/>
+        </FormControl>
+        <FormControl component="fieldset" style={styles.formControl} error={!this.isRegexValid()}>
           <FormLabel component="legend">Filter Pipelines</FormLabel>
           <List component="ul" disablePadding>
             <ListSubheader disableGutters>
@@ -126,7 +142,6 @@ export default class ConfigurationDialog extends React.Component {
                 <ListItemText primary={p}/>
                 <ListItemSecondaryAction>
                   <Switch checked={this.isPipelineToggledOn(p)} color="primary" value={p}
-
                           disabled={this.isPipelineSelectionDisabled(p)} onChange={this.togglePipeline.bind(this)}/>
                 </ListItemSecondaryAction>
               </ListItem>
