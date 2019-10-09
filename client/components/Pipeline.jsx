@@ -19,62 +19,62 @@ const pipelineHistoryUrl = goServerUrl + '/go/tab/pipeline/history/';
 // Weather icon indicator
 const weatherIconStatuses = ['sunny', 'partlycloudy', 'cloudy', 'cloudy', 'pouring', 'lightning'];
 
-export default class Pipeline extends React.Component {
+const createStyles = darkTheme => {
+  const fontColor = darkTheme ? '#000': '#fff'
+  return {
+    cardSuccess: {
+      background: Colors.green.A700,
+      marginBottom: '1rem'
+    },
+    cardFailure: {
+      background: Colors.red.A700,
+      marginBottom: '1rem'
+    },
+    cardActive: {
+      background: Colors.lightBlue.A700,
+      marginBottom: '1rem'
+    },
+    cardInactive: {
+      background: Colors.yellow.A700,
+      marginBottom: '1rem'
+    },
+    cardCancelled: {
+      background: Colors.orange.A700,
+      marginBottom: '1rem'
+    },
+    cardContainer: {
+      position: 'relative',
+      paddingBottom: '0.5rem'
+    },
+    cardTitle: {
+      color: fontColor,
+      fontSize: '1.2em'
+    },
+    cardLabel: {
+      fontWeight: 'normal'
+    },
+    cardSubTitle: {
+      color: fontColor,
+      fontSize: '1em',
+      fontWeight: 100
+    },
+    progress: {
+      color: fontColor,
+      float: 'right'
+    },
+    buildInfo: {
+      color: fontColor
+    },
+    weatherIcon: {
+      color: fontColor
+    },
+    loader: {
+      stroke: fontColor
+    }
+  };
+}
 
-  componentStyles() {
-    const fontColor = this.props.darkTheme ? '#000': '#fff'
-    return {
-      cardSuccess: {
-        background: Colors.green.A700,
-        marginBottom: '1rem'
-      },
-      cardFailure: {
-        background: Colors.red.A700,
-        marginBottom: '1rem'
-      },
-      cardActive: {
-        background: Colors.lightBlue.A700,
-        marginBottom: '1rem'
-      },
-      cardInactive: {
-        background: Colors.yellow.A700,
-        marginBottom: '1rem'
-      },
-      cardCancelled: {
-        background: Colors.orange.A700,
-        marginBottom: '1rem'
-      },
-      cardContainer: {
-        position: 'relative',
-        paddingBottom: '0.5rem'
-      },
-      cardTitle: {
-        color: fontColor,
-        fontSize: '1.2em'
-      },
-      cardLabel: {
-        fontWeight: 'normal'
-      },
-      cardSubTitle: {
-        color: fontColor,
-        fontSize: '1em',
-        fontWeight: 100
-      },
-      progress: {
-        color: fontColor,
-        float: 'right'
-      },
-      buildInfo: {
-        color: fontColor
-      },
-      weatherIcon: {
-        color: fontColor
-      },
-      loader: {
-        stroke: fontColor
-      }
-    };
-  }  
+export default class Pipeline extends React.Component {
 
   /**
    * Calculates which weather icon to use for a pipeline based on pipeline heath.
@@ -145,9 +145,9 @@ export default class Pipeline extends React.Component {
   }
 
   render() {
-    const { pipeline } = this.props;
+    const { pipeline, darkTheme } = this.props;
     const status = Pipeline.status(pipeline);
-    const styles = this.componentStyles();
+    const styles = createStyles(darkTheme);
 
     const stages = (
       <div className='col-xs-6'>

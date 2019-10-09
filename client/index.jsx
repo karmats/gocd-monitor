@@ -56,7 +56,7 @@ const renderApp = () => {
       <Router>
         <Switch>
           <Route path="/test-results" render={() => (
-            <TestResults />
+            <TestResults darkTheme={enableDarkTheme} />
           )} />
           <Route path="/" render={(props) => (
             <Main darkTheme={enableDarkTheme} {...props} />

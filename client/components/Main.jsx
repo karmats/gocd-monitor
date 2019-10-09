@@ -18,6 +18,15 @@ import Pipeline from './Pipeline';
 
 import ConfigurationDialog from "./ConfigurationDialog";
 
+const createStyles = darkTheme => ({
+  fab: {
+    position: 'fixed',
+    right: 50,
+    bottom: 50,
+    color: darkTheme ? '#000' : '#fff'
+  }
+});
+
 const groupPath = '/group/';
 const groupRegex = new RegExp(`${groupPath}(.+)$`);
 /**
@@ -175,18 +184,14 @@ export default class Main extends React.Component {
   }
 
   render() {
+    const styles = createStyles(this.props.darkTheme);
     // In adminMode settings can be configured
     const adminMode = window.location.search.indexOf('admin') >= 0;
 
     const settingsBtn = adminMode ? (
       <Fab
         color="primary"
-        style={{
-          position: 'fixed',
-          right: 50,
-          bottom: 50,
-          color: this.props.darkTheme ? '#000': '#fff'
-        }}
+        style={styles.fab}
         onClick={this.openSettings.bind(this)}>
         <Settings />
       </Fab>

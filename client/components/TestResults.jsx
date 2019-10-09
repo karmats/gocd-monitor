@@ -19,13 +19,14 @@ import TestReport from './TestReport';
 import AddTest from './AddTest';
 import { subscribeToPipelineNames, subscribeToTestResultUpdates, subscribeToTestMessage, emitTestResults, emitTestResultAdd, emitTestResultRemove } from '../api';
 
-const styles = {
+const createStyles = darkTheme => ({
   addTestBtn: {
     position: 'fixed',
     right: 50,
-    bottom: 50
+    bottom: 50,
+    color: darkTheme ? '#000' : '#fff'
   }
-};
+});
 
 // From latest report to this number of days back in time
 const daysInterval = 20;
@@ -190,6 +191,7 @@ export default class TestResults extends React.Component {
   }
 
   render() {
+    const styles = createStyles(this.props.darkTheme);
     const { testReports, pipelines, selectedPipeline, addTestDialogOpened, msg } = this.state;
     // In adminMode tests can be added
     const adminMode = window.location.search.indexOf('admin') >= 0
@@ -197,12 +199,7 @@ export default class TestResults extends React.Component {
     const addBtn = adminMode ? (
       <Fab
         color="primary"
-        style={{
-          position: 'fixed',
-          right: 50,
-          bottom: 50,
-          color: this.props.darkTheme ? '#000': '#fff'
-        }}
+        style={styles.addTestBtn}
         onClick={this.openAddTest.bind(this)}>
         <AddIcon />
       </Fab>
