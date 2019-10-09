@@ -1,5 +1,5 @@
 import { describe, it } from 'mocha';
-import { sortAndFilterPipelines } from '../client/components/Main';
+import { sortAndFilterPipelines } from '../client/components/Main.util';
 import { expect } from 'chai';
 
 
