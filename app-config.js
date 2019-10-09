@@ -35,8 +35,6 @@ var config = {
     dbFilePath: process.env.gocdmonitor_db_file_path || 'server/data.db',
 
     // --- Client ---
-    // Enable dark theme
-    enableDarkTheme: process.env.gocdmonitor_enable_dark_theme === "true",
     // Whether to display build labels
     showBuildLabels: process.env.gocdmonitor_gocd_showbuildlabels === "true",
     // Whether to link to pipeline in GoCD on click
