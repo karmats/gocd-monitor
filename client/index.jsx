@@ -1,24 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-import io from 'socket.io-client';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { grey, purple } from '@material-ui/core/colors';
+import { subscribeToSettingsUpdates } from './api';
 import Main from './components/Main';
 import TestResults from './components/TestResults';
 
 // Application theme
 let enableDarkTheme = false;
-// Setup a socket to pass to components that uses it;
-// use the host only, to support group URLs and pass on query parameters for configuration
-const socket = io(window.location.protocol + '//' + window.location.host + window.location.search);
 // If dark theme setting is changed, a remount is needed
-socket.on('settings:updated', (settings) => {
+subscribeToSettingsUpdates((settings) => {
   if (settings.darkTheme !== enableDarkTheme) {
     enableDarkTheme = settings.darkTheme;
     renderApp();
   }
-})
+});
 
 // Switch between pipeline and test results page, don't when in admin mode
 const adminMode = window.location.search.indexOf('admin') >= 0;
@@ -59,10 +56,10 @@ const renderApp = () => {
       <Router>
         <Switch>
           <Route path="/test-results" render={() => (
-            <TestResults socket={socket} />
+            <TestResults />
           )} />
           <Route path="/" render={(props) => (
-            <Main socket={socket} darkTheme={enableDarkTheme} {...props} />
+            <Main darkTheme={enableDarkTheme} {...props} />
           )} />
         </Switch>
       </Router>

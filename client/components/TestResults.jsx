@@ -9,6 +9,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
+import Fab from '@material-ui/core/Fab';
 import Snackbar from '@material-ui/core/Snackbar';
 import AddIcon from '@material-ui/icons/Add';
 
@@ -16,6 +17,7 @@ import moment from 'moment';
 
 import TestReport from './TestReport';
 import AddTest from './AddTest';
+import { subscribeToPipelineNames, subscribeToTestResultUpdates, subscribeToTestMessage, emitTestResults, emitTestResultAdd, emitTestResultRemove } from '../api';
 
 const styles = {
   addTestBtn: {
@@ -33,8 +35,6 @@ export default class TestResults extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    this.socket = props.socket;
-
     // Setup initial state
     this.state = {
       // Results
@@ -49,27 +49,27 @@ export default class TestResults extends React.Component {
 
   componentDidMount() {
     // All pipeline names
-    this.socket.on('pipelines:names', (pipelines) => {
+    subscribeToPipelineNames((pipelines) => {
       this.setState({
         pipelines: pipelines
       });
     });
 
     // Updated test results
-    this.socket.on('tests:updated', (testReports) => {
+    subscribeToTestResultUpdates((testReports) => {
       this.setState({
         testReports: testReports.map(this.convertReport).sort(this.sortReports)
       });
     });
 
-    this.socket.on('tests:message', (message) => {
+    subscribeToTestMessage((message) => {
       this.setState({
         msg: message
       });
     });
 
     // Request latest test results
-    this.socket.emit('tests:get');
+    emitTestResults();
   }
 
   closeAddTest() {
@@ -169,7 +169,7 @@ export default class TestResults extends React.Component {
    * Add test reports for a pipeline
    */
   addTest() {
-    this.socket.emit('tests:add', this.state.selectedPipeline);
+    emitTestResultAdd(this.state.selectedPipeline);
     this.closeAddTest();
   }
 
@@ -179,7 +179,7 @@ export default class TestResults extends React.Component {
    * @param {Object} report The report to remove
    */
   removeTest(report) {
-    this.socket.emit('tests:remove', report.id);
+    emitTestResultRemove(report.id);
   }
 
   /**
@@ -195,13 +195,17 @@ export default class TestResults extends React.Component {
     const adminMode = window.location.search.indexOf('admin') >= 0
 
     const addBtn = adminMode ? (
-      <Button
-        variant="fab"
+      <Fab
         color="primary"
-        style={styles.addTestBtn}
-        onClick={this.openAddTest.bind(this) }>
+        style={{
+          position: 'fixed',
+          right: 50,
+          bottom: 50,
+          color: this.props.darkTheme ? '#000': '#fff'
+        }}
+        onClick={this.openAddTest.bind(this)}>
         <AddIcon />
-      </Button>
+      </Fab>
     ) : null;
 
     const addTestActions = [
@@ -250,7 +254,7 @@ export default class TestResults extends React.Component {
           open={msg.length > 0}
           message={this.state.msg}
           autoHideDuration={5000}
-          onRequestClose={this.resetMessage.bind(this)} />
+          onClose={this.resetMessage.bind(this)} />
         {addBtn}
       </div>
     );

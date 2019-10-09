@@ -108,8 +108,8 @@ export default class ConfigurationDialog extends React.Component {
       </DialogTitle>
 
       <DialogContent>
-        <FormControl component="fieldset">
-          <FormLabel component="legend">Sort Order</FormLabel>
+        <FormControl>
+          <FormLabel>Sort Order</FormLabel>
           <RadioGroup
             value={this.state.sortOrder}
             onChange={this.sortOrderChanged.bind(this)}
@@ -121,12 +121,12 @@ export default class ConfigurationDialog extends React.Component {
 
           </RadioGroup>
         </FormControl>
-        <FormControl component="fieldset" style={styles.formControl}>
-          <FormLabel component="legend">Dark Theme</FormLabel>
+        <FormControl style={styles.formControl}>
+          <FormLabel>Dark Theme</FormLabel>
           <Switch checked={this.state.darkTheme} value="darkTheme" color="primary" onChange={this.darkThemeChanged.bind(this)}/>
         </FormControl>
-        <FormControl component="fieldset" style={styles.formControl} error={!this.isRegexValid()}>
-          <FormLabel component="legend">Filter Pipelines</FormLabel>
+        <FormControl style={styles.formControl} error={!this.isRegexValid()}>
+          <FormLabel>Filter Pipelines</FormLabel>
           <List component="ul" disablePadding>
             <ListSubheader disableGutters>
               <Input

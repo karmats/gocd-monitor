@@ -12,6 +12,8 @@ import Settings from '@material-ui/icons/Settings';
 
 import moment from 'moment';
 
+import { subscribeToErrors, subscribeToPipelineUpdates, subscribeToPipelineNames, subscribeToPipelineNameToGroupUpdates, subscribeToSettingsUpdates, emitSettingsUpdate, emitPipelineNames } from '../api';
+
 import Pipeline from './Pipeline';
 
 import ConfigurationDialog from "./ConfigurationDialog";
@@ -74,7 +76,6 @@ export default class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    this.socket = props.socket;
     // Setup initial state
     this.state = {
       // All active pipelines
@@ -98,7 +99,7 @@ export default class Main extends React.Component {
 
   componentDidMount() {
     // Listen for connection errors
-    this.socket.on('connect_error', (err) => {
+    subscribeToErrors((err) => {
       this.setState({
           showMessage: true,
           message: "Connect Error: " + err.message
@@ -106,7 +107,7 @@ export default class Main extends React.Component {
     });
 
     // Listen for updates
-    this.socket.on('pipelines:updated', (newPipelines) => {
+    subscribeToPipelineUpdates((newPipelines) => {
       let disabledPipelines = this.state.disabledPipelines.slice();
       this.setState({
         pipelines: sortAndFilterPipelines(newPipelines, disabledPipelines, this.state.sortOrder, this.state.filterRegex)
@@ -114,21 +115,21 @@ export default class Main extends React.Component {
     });
 
     // Names of all pipelines
-    this.socket.on('pipelines:names', (pipelineNames) => {
+    subscribeToPipelineNames((pipelineNames) => {
       this.setState({
         pipelineNames
       })
     });
 
     // Pipeline name to group name map
-    this.socket.on('pipelineNameToGroupName:updated', (pipelineNameToGroupName) => {
+    subscribeToPipelineNameToGroupUpdates((pipelineNameToGroupName) => {
       this.setState({
         pipelineNameToGroupName
       })
     });
 
     // Settings from server
-    this.socket.on('settings:updated', (settings) => {
+    subscribeToSettingsUpdates((settings) => {
       let pipelines = this.state.pipelines.slice();
       if (settings.disabledPipelines && settings.sortOrder) {
         this.setState({
@@ -141,7 +142,7 @@ export default class Main extends React.Component {
     });
 
     // Request latest pipelines
-    this.socket.emit('pipelines:get');
+    emitPipelineNames();
   }
 
   openSettings() {
@@ -157,12 +158,7 @@ export default class Main extends React.Component {
   }
 
   saveSettings(newSettings) {
-    this.props.socket.emit('settings:update', {
-      sortOrder: newSettings.sortOrder,
-      disabledPipelines: newSettings.disabledPipelines,
-      filterRegex: newSettings.filterRegex,
-      darkTheme: newSettings.darkTheme
-    });
+    emitSettingsUpdate(newSettings);
 
     this.setState({
       settingsDialogOpened: false,
