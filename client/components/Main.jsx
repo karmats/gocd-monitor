@@ -12,7 +12,20 @@ import Settings from '@material-ui/icons/Settings';
 
 import moment from 'moment';
 
-import { subscribeToErrors, subscribeToPipelineUpdates, subscribeToPipelineNames, subscribeToPipelineNameToGroupUpdates, subscribeToSettingsUpdates, emitSettingsUpdate, emitPipelineNames } from '../api';
+import {
+  subscribeToErrors,
+  subscribeToPipelineUpdates,
+  subscribeToPipelineNames,
+  subscribeToPipelineNameToGroupUpdates,
+  subscribeToSettingsUpdates,
+  emitSettingsUpdate,
+  emitPipelineNames,
+  unsubscribeToPipelineUpdates,
+  unsubscribeToSettingsUpdates,
+  unsubscribeToPipelineNameToGroupUpdates,
+  unsubscribeToPipelineNames,
+  unsubscribeToErrors
+} from "../api";
 
 import Pipeline from './Pipeline';
 
@@ -106,54 +119,65 @@ export default class Main extends React.Component {
     };
   }
 
-  componentDidMount() {
-    // Listen for connection errors
-    subscribeToErrors((err) => {
+  // Listeners
+  pipelinesListener = (newPipelines) => {
+    const { disabledPipelines, sortOrder, filterRegex } = this.state;
+    this.setState({
+      pipelines: sortAndFilterPipelines(newPipelines, disabledPipelines, sortOrder, filterRegex)
+    })
+  }
+
+  settingsListener = (settings) => {
+    const { pipelines } = this.state;
+    if (settings.disabledPipelines && settings.sortOrder) {
       this.setState({
-          showMessage: true,
-          message: "Connect Error: " + err.message
+        pipelines: sortAndFilterPipelines(pipelines, settings.disabledPipelines, settings.sortOrder, settings.filterRegex),
+        sortOrder : settings.sortOrder,
+        disabledPipelines: settings.disabledPipelines,
+        filterRegex: settings.filterRegex || ''
       });
-    });
+    }
+  }
 
-    // Listen for updates
-    subscribeToPipelineUpdates((newPipelines) => {
-      let disabledPipelines = this.state.disabledPipelines.slice();
-      this.setState({
-        pipelines: sortAndFilterPipelines(newPipelines, disabledPipelines, this.state.sortOrder, this.state.filterRegex)
-      })
-    });
+  pipelineNameToGroupListener = (pipelineNameToGroupName) => {
+    this.setState({
+      pipelineNameToGroupName
+    })
+  }
 
-    // Names of all pipelines
-    subscribeToPipelineNames((pipelineNames) => {
-      this.setState({
-        pipelineNames
-      })
-    });
+  pipelineNamesListener = (pipelineNames) => {
+    this.setState({
+      pipelineNames
+    })
+  }
 
-    // Pipeline name to group name map
-    subscribeToPipelineNameToGroupUpdates((pipelineNameToGroupName) => {
-      this.setState({
-        pipelineNameToGroupName
-      })
+  errorsListener = (err) => {
+    this.setState({
+        showMessage: true,
+        message: "Connect Error: " + err.message
     });
+  }
 
-    // Settings from server
-    subscribeToSettingsUpdates((settings) => {
-      let pipelines = this.state.pipelines.slice();
-      if (settings.disabledPipelines && settings.sortOrder) {
-        this.setState({
-          pipelines: sortAndFilterPipelines(pipelines, settings.disabledPipelines, settings.sortOrder, settings.filterRegex),
-          sortOrder : settings.sortOrder,
-          disabledPipelines: settings.disabledPipelines,
-          filterRegex: settings.filterRegex || ''
-        });
-      }
-    });
-
+  // React lifecycle functions
+  componentDidMount() {
+    subscribeToErrors(this.errorsListener);
+    subscribeToPipelineUpdates(this.pipelinesListener);
+    subscribeToPipelineNames(this.pipelineNamesListener);
+    subscribeToPipelineNameToGroupUpdates(this.pipelineNameToGroupListener);
+    subscribeToSettingsUpdates(this.settingsListener);
     // Request latest pipelines
     emitPipelineNames();
   }
 
+  componentWillUnmount() {
+    unsubscribeToErrors(this.errorsListener);
+    unsubscribeToPipelineUpdates(this.pipelinesListener);
+    unsubscribeToPipelineNames(this.pipelineNamesListener);
+    unsubscribeToPipelineNameToGroupUpdates(this.pipelineNameToGroupListener);
+    unsubscribeToSettingsUpdates(this.settingsListener);
+  }
+
+  // Handlers
   openSettings() {
     this.setState({
       settingsDialogOpened: true
@@ -167,12 +191,12 @@ export default class Main extends React.Component {
   }
 
   saveSettings(newSettings) {
-    emitSettingsUpdate(newSettings);
-
     this.setState({
       settingsDialogOpened: false,
       showMessage: true,
       message: 'Settings saved. If you activated pipelines hold your breath for a minute, they will show up :)'
+    }, () => {
+      emitSettingsUpdate(newSettings);
     });
   }
 

@@ -15,9 +15,20 @@ import AddIcon from '@material-ui/icons/Add';
 
 import moment from 'moment';
 
+import {
+  subscribeToPipelineNames,
+  subscribeToTestResultUpdates,
+  subscribeToTestMessage,
+  unsubscribeToPipelineNames,
+  unsubscribeToTestResultUpdates,
+  unsubscribeToTestMessage,
+  emitTestResults,
+  emitTestResultAdd,
+  emitTestResultRemove
+} from "../api";
+
 import TestReport from './TestReport';
 import AddTest from './AddTest';
-import { subscribeToPipelineNames, subscribeToTestResultUpdates, subscribeToTestMessage, emitTestResults, emitTestResultAdd, emitTestResultRemove } from '../api';
 
 const createStyles = darkTheme => ({
   addTestBtn: {
@@ -48,31 +59,40 @@ export default class TestResults extends React.Component {
     };
   }
 
+  // Listeners
+  pipelineNamesListener = (pipelines) => {
+    this.setState({
+      pipelines: pipelines
+    });
+  }
+  testResultsListener = (testReports) => {
+    this.setState({
+      testReports: testReports.map(this.convertReport).sort(this.sortReports)
+    });
+  }
+  testMessageListener = (message) => {
+    this.setState({
+      msg: message
+    });
+  }
+
+  // React lifecycle functions
   componentDidMount() {
-    // All pipeline names
-    subscribeToPipelineNames((pipelines) => {
-      this.setState({
-        pipelines: pipelines
-      });
-    });
-
-    // Updated test results
-    subscribeToTestResultUpdates((testReports) => {
-      this.setState({
-        testReports: testReports.map(this.convertReport).sort(this.sortReports)
-      });
-    });
-
-    subscribeToTestMessage((message) => {
-      this.setState({
-        msg: message
-      });
-    });
+    subscribeToPipelineNames(this.pipelineNamesListener);
+    subscribeToTestResultUpdates(this.testResultsListener);
+    subscribeToTestMessage(this.testMessageListener);
 
     // Request latest test results
     emitTestResults();
   }
 
+  componentWillUnmount() {
+    unsubscribeToPipelineNames(this.pipelineNamesListener);
+    unsubscribeToTestResultUpdates(this.testResultsListener);
+    unsubscribeToTestMessage(this.testMessageListener);
+  }
+
+  // Handlers
   closeAddTest() {
     this.setState({
       addTestDialogOpened: false,

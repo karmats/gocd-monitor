@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { grey, purple } from '@material-ui/core/colors';
-import { subscribeToSettingsUpdates } from './api';
+import { subscribeToSettingsUpdates, reconnect } from './api';
 import Main from './components/Main';
 import TestResults from './components/TestResults';
 
@@ -13,7 +13,9 @@ let enableDarkTheme = false;
 subscribeToSettingsUpdates((settings) => {
   if (settings.darkTheme !== enableDarkTheme) {
     enableDarkTheme = settings.darkTheme;
-    renderApp();
+    renderApp(enableDarkTheme);
+    // Need to reconnect socket.io since we're rerendering the whole app
+    reconnect();
   }
 });
 
@@ -42,28 +44,31 @@ const createTheme = (darkTheme) => createMuiTheme({
 
 
 // Render react router routes
-const renderApp = () => {
-  const appNode = document.getElementById('app');
-  // Unmount if this is a remount
-  if (appNode.children.length) {
-    ReactDOM.unmountComponentAtNode(appNode);
-  }
-  // Theme specific
-  const theme = createTheme(enableDarkTheme);
-  document.body.style.background = enableDarkTheme ? grey[800] : grey[100];
-  ReactDOM.render((
-    <MuiThemeProvider theme={theme}>
-      <Router>
-        <Switch>
-          <Route path="/test-results" render={() => (
-            <TestResults darkTheme={enableDarkTheme} />
-          )} />
-          <Route path="/" render={(props) => (
-            <Main darkTheme={enableDarkTheme} {...props} />
-          )} />
-        </Switch>
-      </Router>
-    </MuiThemeProvider>
-  ), appNode)
+const renderApp = (darkTheme) => {
+  // Need to wrap it in a timeout since there's a race condition that takes place when settings are updated with dark theme
+  setTimeout(() => {
+    const appNode = document.getElementById('app');
+    // Unmount if this is a remount
+    if (appNode.children.length) {
+      ReactDOM.unmountComponentAtNode(appNode);
+    }
+    // Theme specific
+    const theme = createTheme(darkTheme);
+    document.body.style.background = darkTheme ? grey[800] : grey[100];
+    ReactDOM.render((
+      <MuiThemeProvider theme={theme}>
+        <Router>
+          <Switch>
+            <Route path="/test-results" render={() => (
+              <TestResults darkTheme={darkTheme} />
+            )} />
+            <Route path="/" render={(props) => (
+              <Main darkTheme={darkTheme} {...props} />
+            )} />
+          </Switch>
+        </Router>
+      </MuiThemeProvider>
+    ), appNode)
+  }, 0)
 }
-renderApp();
+renderApp(enableDarkTheme);

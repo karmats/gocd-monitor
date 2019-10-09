@@ -130,7 +130,6 @@ export default class ConfigurationDialog extends React.Component {
           <List component="ul" disablePadding>
             <ListSubheader disableGutters>
               <Input
-
                 placeholder="some regular expression"
                 value={this.state.filterRegex}
                 onChange={this.regexChanged.bind(this)}
