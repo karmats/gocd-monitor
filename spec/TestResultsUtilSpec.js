@@ -1,9 +1,9 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
-import { sortReports, convertReport } from '../client/components/TestResults.util';
+import { sortReports, convertReport } from '../client/components/TestResultsUtil';
 
 
-describe('TestResults spec', () => {
+describe('TestResults util spec', () => {
 
   describe('#convertReport()', () => {
 

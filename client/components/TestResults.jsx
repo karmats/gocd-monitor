@@ -25,7 +25,8 @@ import {
   emitTestResultRemove
 } from "../api";
 
-import { sortReports, convertReport } from './TestResults.util';
+import { sortReports, convertReport } from './TestResultsUtil';
+
 import TestReport from './TestReport';
 import AddTest from './AddTest';
 

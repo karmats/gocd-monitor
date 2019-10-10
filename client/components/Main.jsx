@@ -25,10 +25,11 @@ import {
   unsubscribeToErrors
 } from "../api";
 
-import Pipeline from './Pipeline';
-import { sortAndFilterPipelines } from './Main.util'
+import { sortAndFilterPipelines } from './MainUtil'
 
+import Pipeline from './Pipeline';
 import ConfigurationDialog from "./ConfigurationDialog";
+
 
 const createStyles = darkTheme => ({
   fab: {
