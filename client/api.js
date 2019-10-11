@@ -1,9 +1,9 @@
 import io from "socket.io-client";
 
-// Setup a socket to pass to components that uses it;
-// use the host only, to support group URLs and pass on query parameters for configuration
+// Use the host only, to support group URLs and pass on query parameters for configuration
 const socket = io(window.location.protocol + "//" + window.location.host + window.location.search);
 
+// Reconnects the socket
 export function reconnect() {
   socket.disconnect();
   socket.connect();
@@ -18,7 +18,7 @@ export function unsubscribeToSettingsUpdates(callback) {
   socket.off('settings:updated', callback);
 }
 
-export function emitSettingsUpdate(newSettings) {
+export function publishSettingsUpdate(newSettings) {
   socket.emit('settings:update', newSettings);
 }
 
@@ -47,7 +47,7 @@ export function unsubscribeToPipelineNameToGroupUpdates(callback) {
   socket.off('pipelineNameToGroupName:updated', callback);
 }
 
-export function emitPipelineNames() {
+export function publishPipelineNames() {
   socket.emit('pipelines:get');
 }
 
@@ -68,15 +68,15 @@ export function unsubscribeToTestMessage(callback) {
   socket.off('tests:message', callback);
 }
 
-export function emitTestResults() {
+export function publishTestResults() {
   socket.emit('tests:get');
 }
 
-export function emitTestResultAdd(pipeline) {
+export function publishTestResultAdd(pipeline) {
   socket.emit('tests:add', pipeline);
 }
 
-export function emitTestResultRemove(id) {
+export function publishTestResultRemove(id) {
   socket.emit('tests:remove', id);
 }
 

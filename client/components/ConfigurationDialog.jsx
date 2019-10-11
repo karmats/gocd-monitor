@@ -21,7 +21,7 @@ import Input from "@material-ui/core/Input";
 import Button from "@material-ui/core/Button";
 
 const styles = {
-  formControl: { width: "100%", marginTop: "16px" }
+  formControl: { display: "block", marginTop: "16px" }
 }
 
 export default class ConfigurationDialog extends React.Component {

@@ -20,9 +20,9 @@ import {
   unsubscribeToPipelineNames,
   unsubscribeToTestResultUpdates,
   unsubscribeToTestMessage,
-  emitTestResults,
-  emitTestResultAdd,
-  emitTestResultRemove
+  publishTestResults,
+  publishTestResultAdd,
+  publishTestResultRemove
 } from "../api";
 
 import { sortReports, convertReport } from './TestResultsUtil';
@@ -80,7 +80,7 @@ export default class TestResults extends React.Component {
     subscribeToTestMessage(this.testMessageListener);
 
     // Request latest test results
-    emitTestResults();
+    publishTestResults();
   }
 
   componentWillUnmount() {
@@ -113,7 +113,7 @@ export default class TestResults extends React.Component {
    * Add test reports for a pipeline
    */
   addTest() {
-    emitTestResultAdd(this.state.selectedPipeline);
+    publishTestResultAdd(this.state.selectedPipeline);
     this.closeAddTest();
   }
 
@@ -123,7 +123,7 @@ export default class TestResults extends React.Component {
    * @param {Object} report The report to remove
    */
   removeTest(report) {
-    emitTestResultRemove(report.id);
+    publishTestResultRemove(report.id);
   }
 
   /**

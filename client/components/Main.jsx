@@ -16,8 +16,8 @@ import {
   subscribeToPipelineNames,
   subscribeToPipelineNameToGroupUpdates,
   subscribeToSettingsUpdates,
-  emitSettingsUpdate,
-  emitPipelineNames,
+  publishSettingsUpdate,
+  publishPipelineNames,
   unsubscribeToPipelineUpdates,
   unsubscribeToSettingsUpdates,
   unsubscribeToPipelineNameToGroupUpdates,
@@ -116,7 +116,7 @@ export default class Main extends React.Component {
     subscribeToPipelineNameToGroupUpdates(this.pipelineNameToGroupListener);
     subscribeToSettingsUpdates(this.settingsListener);
     // Request latest pipelines
-    emitPipelineNames();
+    publishPipelineNames();
   }
 
   componentWillUnmount() {
@@ -146,7 +146,7 @@ export default class Main extends React.Component {
       showMessage: true,
       message: 'Settings saved. If you activated pipelines hold your breath for a minute, they will show up :)'
     }, () => {
-      emitSettingsUpdate(newSettings);
+      publishSettingsUpdate(newSettings);
     });
   }
 
