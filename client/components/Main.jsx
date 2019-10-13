@@ -10,83 +10,44 @@ import Fab from '@material-ui/core/Fab';
 import Snackbar from '@material-ui/core/Snackbar';
 import Settings from '@material-ui/icons/Settings';
 
-import moment from 'moment';
+import {
+  subscribeToErrors,
+  subscribeToPipelineUpdates,
+  subscribeToPipelineNames,
+  subscribeToPipelineNameToGroupUpdates,
+  subscribeToSettingsUpdates,
+  publishSettingsUpdate,
+  publishPipelineNames,
+  unsubscribeToPipelineUpdates,
+  unsubscribeToSettingsUpdates,
+  unsubscribeToPipelineNameToGroupUpdates,
+  unsubscribeToPipelineNames,
+  unsubscribeToErrors
+} from "../api";
+
+import { sortAndFilterPipelines } from './MainUtil'
 
 import Pipeline from './Pipeline';
-
 import ConfigurationDialog from "./ConfigurationDialog";
 
-const enableDarkTheme = process.env.ENABLE_DARK_THEME;
 
-const fontColor = enableDarkTheme ? '#000': '#fff';
-const styles = {
+const createStyles = darkTheme => ({
   fab: {
     position: 'fixed',
     right: 50,
     bottom: 50,
-    color: fontColor
+    color: darkTheme ? '#000' : '#fff'
   }
-};
+});
 
 const groupPath = '/group/';
 const groupRegex = new RegExp(`${groupPath}(.+)$`);
-/**
-* Sort pipelines by date and filter out pipelines without data
-*
-* @param   {Array}   pipelines         The pipelines to sort
-* @param   {Array}   disabledPipelines Pipelines that are disabled
-* @param   {string}  sortOrder         The sort order, 'buildtime' or 'status'
-* @param   {string}  filterRegex       Regular expression to filter for
-* @return  {Array}   Sorted pipelines
-*/
-export const sortAndFilterPipelines = (pipelines, disabledPipelines, sortOrder, filterRegex) => {
- const pipelineIsValid = p => p && p.name
- const pipelineIsNotDisabled =  p => disabledPipelines.indexOf(p.name) < 0
- const pipelineMatchesRegex = p => p.name.match(filterRegex)
-
-  const activePipelines = pipelines.filter(pipelineIsValid)
-   .filter(pipelineIsNotDisabled)
-   .filter(pipelineMatchesRegex);
-
- // Add "time ago" moment string
- activePipelines.forEach((pipeline) => {
-   pipeline.timeago = moment(pipeline.buildtime).fromNow();
- });
-
- const sortByBuildTime = (a, b) => {
-   return a.buildtime > b.buildtime ? -1 : 1;
- };
-
- if (sortOrder === 'buildtime') {
-   return activePipelines.sort(sortByBuildTime);
- } else {
-   return activePipelines.sort((a, b) => {
-     const aStatus = Pipeline.status(a);
-     const bStatus = Pipeline.status(b);
-
-     if (aStatus === bStatus) {
-       return sortByBuildTime(a, b);
-     }
-
-     const statusIndex = {
-       building: -1,
-       failed: 0,
-       cancelled: 1,
-       passed: 2,
-       paused: 3,
-       unknown: 3,
-     }
-     return statusIndex[aStatus] - statusIndex[bStatus] ;
-   });
- }
-}
 
 export default class Main extends React.Component {
 
   constructor(props, context) {
     super(props, context);
 
-    this.socket = props.socket;
     // Setup initial state
     this.state = {
       // All active pipelines
@@ -108,54 +69,65 @@ export default class Main extends React.Component {
     };
   }
 
-  componentDidMount() {
-    // Listen for connection errors
-    this.socket.on('connect_error', (err) => {
-      this.setState({
-          showMessage: true,
-          message: "Connect Error: " + err.message
-      });
-    });
-
-    // Listen for updates
-    this.socket.on('pipelines:updated', (newPipelines) => {
-      let disabledPipelines = this.state.disabledPipelines.slice();
-      this.setState({
-        pipelines: sortAndFilterPipelines(newPipelines, disabledPipelines, this.state.sortOrder, this.state.filterRegex)
-      })
-    });
-
-    // Names of all pipelines
-    this.socket.on('pipelines:names', (pipelineNames) => {
-      this.setState({
-        pipelineNames: pipelineNames
-      })
-    });
-
-    // Pipeline name to group name map
-    this.socket.on('pipelineNameToGroupName:updated', (pipelineNameToGroupName) => {
-      this.setState({
-        pipelineNameToGroupName: pipelineNameToGroupName
-      })
-    });
-
-    // Settings from server
-    this.socket.on('settings:updated', (settings) => {
-      let pipelines = this.state.pipelines.slice();
-      if (settings.disabledPipelines && settings.sortOrder) {
-        this.setState({
-          pipelines: sortAndFilterPipelines(pipelines, settings.disabledPipelines, settings.sortOrder, settings.filterRegex),
-          sortOrder : settings.sortOrder,
-          disabledPipelines: settings.disabledPipelines,
-          filterRegex: settings.filterRegex || ''
-        });
-      }
-    });
-
-    // Request latest pipelines
-    this.socket.emit('pipelines:get');
+  // Listeners
+  pipelinesListener = (newPipelines) => {
+    const { disabledPipelines, sortOrder, filterRegex } = this.state;
+    this.setState({
+      pipelines: sortAndFilterPipelines(newPipelines, disabledPipelines, sortOrder, filterRegex)
+    })
   }
 
+  settingsListener = (settings) => {
+    const { pipelines } = this.state;
+    if (settings.disabledPipelines && settings.sortOrder) {
+      this.setState({
+        pipelines: sortAndFilterPipelines(pipelines, settings.disabledPipelines, settings.sortOrder, settings.filterRegex),
+        sortOrder : settings.sortOrder,
+        disabledPipelines: settings.disabledPipelines,
+        filterRegex: settings.filterRegex || ''
+      });
+    }
+  }
+
+  pipelineNameToGroupListener = (pipelineNameToGroupName) => {
+    this.setState({
+      pipelineNameToGroupName
+    })
+  }
+
+  pipelineNamesListener = (pipelineNames) => {
+    this.setState({
+      pipelineNames
+    })
+  }
+
+  errorsListener = (err) => {
+    this.setState({
+        showMessage: true,
+        message: "Connect Error: " + err.message
+    });
+  }
+
+  // React lifecycle functions
+  componentDidMount() {
+    subscribeToErrors(this.errorsListener);
+    subscribeToPipelineUpdates(this.pipelinesListener);
+    subscribeToPipelineNames(this.pipelineNamesListener);
+    subscribeToPipelineNameToGroupUpdates(this.pipelineNameToGroupListener);
+    subscribeToSettingsUpdates(this.settingsListener);
+    // Request latest pipelines
+    publishPipelineNames();
+  }
+
+  componentWillUnmount() {
+    unsubscribeToErrors(this.errorsListener);
+    unsubscribeToPipelineUpdates(this.pipelinesListener);
+    unsubscribeToPipelineNames(this.pipelineNamesListener);
+    unsubscribeToPipelineNameToGroupUpdates(this.pipelineNameToGroupListener);
+    unsubscribeToSettingsUpdates(this.settingsListener);
+  }
+
+  // Handlers
   openSettings() {
     this.setState({
       settingsDialogOpened: true
@@ -169,16 +141,12 @@ export default class Main extends React.Component {
   }
 
   saveSettings(newSettings) {
-    this.socket.emit('settings:update', {
-      sortOrder: newSettings.sortOrder,
-      disabledPipelines: newSettings.disabledPipelines,
-      filterRegex: newSettings.filterRegex
-    });
-
     this.setState({
       settingsDialogOpened: false,
       showMessage: true,
       message: 'Settings saved. If you activated pipelines hold your breath for a minute, they will show up :)'
+    }, () => {
+      publishSettingsUpdate(newSettings);
     });
   }
 
@@ -190,6 +158,7 @@ export default class Main extends React.Component {
   }
 
   render() {
+    const styles = createStyles(this.props.darkTheme);
     // In adminMode settings can be configured
     const adminMode = window.location.search.indexOf('admin') >= 0;
 
@@ -209,7 +178,7 @@ export default class Main extends React.Component {
         if (pipeline) {
           return (
             <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-              <Pipeline pipeline={pipeline} />
+              <Pipeline pipeline={pipeline} darkTheme={this.props.darkTheme} />
             </div>
           )
         }
@@ -240,7 +209,7 @@ export default class Main extends React.Component {
           if (pipeline) {
             return (
               <div key={pipeline.name} className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-                <Pipeline pipeline={pipeline} />
+                <Pipeline pipeline={pipeline} darkTheme={this.props.darkTheme} />
               </div>
             )
           }
@@ -275,7 +244,9 @@ export default class Main extends React.Component {
                                                     disabledPipelines={this.state.disabledPipelines}
                                                     filterRegex={this.state.filterRegex}
                                                     pipelineNames={this.state.pipelineNames}
-                                                    sortOrder={this.state.sortOrder}/>
+                                                    sortOrder={this.state.sortOrder}
+                                                    darkTheme={this.props.darkTheme}
+                                                    />
     }
 
     return (

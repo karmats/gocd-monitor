@@ -1,42 +1,9 @@
-import { describe, before, after, it } from 'mocha';
-import mockery from 'mockery';
-import { chai, expect } from 'chai';
+import { describe, it } from 'mocha';
+import { expect } from 'chai';
+import { sortReports, convertReport } from '../client/components/TestResultsUtil';
 
 
-describe('TestResults spec', () => {
-
-  const props = { route: {} };
-
-  let TestResults;
-
-  before((done) => {
-    mockery.enable({
-      warnOnReplace: false,
-      warnOnUnregistered: false,
-      useCleanCache: true
-    });
-
-    // Mock the chart.js library
-    mockery.registerMock('chart.js', {
-      defaults: {
-        global: {
-          defaultFontColor: '',
-          defaultFontFamily: ''
-        }
-      }
-    });
-
-    // Init TestResults
-    TestResults = require('../client/components/TestResults').default;
-
-    done();
-  });
-
-  after((done) => {
-    mockery.disable();
-    mockery.deregisterAll();
-    done();
-  });
+describe('TestResults util spec', () => {
 
   describe('#convertReport()', () => {
 
@@ -60,9 +27,7 @@ describe('TestResults spec', () => {
     }
 
     it('should convert cucumber report', () => {
-      const testResultsComponent = new TestResults(props);
-
-      const report = testResultsComponent.convertReport({
+      const report = convertReport({
         _id: 123,
         pipeline: 'TestPipeline',
         stage: 'TestStage',
@@ -109,9 +74,7 @@ describe('TestResults spec', () => {
       }]
 
     it('should convert cucumber report', () => {
-      const testResultsComponent = new TestResults(props);
-
-      const sortedReportTitles = reports.sort(testResultsComponent.sortReports).map(r => r.title)
+      const sortedReportTitles = reports.sort(sortReports).map(r => r.title)
 
       expect(sortedReportTitles).to.eql(['report2','report3','report1',]);
     });

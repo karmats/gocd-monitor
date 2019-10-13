@@ -20,6 +20,10 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Input from "@material-ui/core/Input";
 import Button from "@material-ui/core/Button";
 
+const styles = {
+  formControl: { display: "block", marginTop: "16px" }
+}
+
 export default class ConfigurationDialog extends React.Component {
 
   constructor(props, context) {
@@ -30,6 +34,7 @@ export default class ConfigurationDialog extends React.Component {
       filterRegex: this.props.filterRegex,
       pipelineNames: this.props.pipelineNames,
       sortOrder: this.props.sortOrder,
+      darkTheme: this.props.darkTheme
     };
   }
 
@@ -62,6 +67,12 @@ export default class ConfigurationDialog extends React.Component {
     })
   }
 
+  darkThemeChanged(e) {
+    this.setState({
+      darkTheme: e.target.checked
+    })
+  }
+
   togglePipeline(event) {
     let pipelineName = event.target.value;
     let pipelineEnabled = event.target.checked;
@@ -84,7 +95,8 @@ export default class ConfigurationDialog extends React.Component {
     this.props.onSave({
       disabledPipelines: this.state.disabledPipelines,
       sortOrder: this.state.sortOrder,
-      filterRegex: this.state.filterRegex
+      filterRegex: this.state.filterRegex,
+      darkTheme: this.state.darkTheme
     })
   }
 
@@ -96,8 +108,8 @@ export default class ConfigurationDialog extends React.Component {
       </DialogTitle>
 
       <DialogContent>
-        <FormControl component="fieldset">
-          <FormLabel component="legend">Sort Order</FormLabel>
+        <FormControl>
+          <FormLabel>Sort Order</FormLabel>
           <RadioGroup
             value={this.state.sortOrder}
             onChange={this.sortOrderChanged.bind(this)}
@@ -109,12 +121,15 @@ export default class ConfigurationDialog extends React.Component {
 
           </RadioGroup>
         </FormControl>
-        <FormControl component="fieldset" style={{width: "100%", marginTop: "8px"}} error={!this.isRegexValid()}>
-          <FormLabel component="legend">Filter Pipelines</FormLabel>
+        <FormControl style={styles.formControl}>
+          <FormLabel>Dark Theme</FormLabel>
+          <Switch checked={this.state.darkTheme} value="darkTheme" color="primary" onChange={this.darkThemeChanged.bind(this)}/>
+        </FormControl>
+        <FormControl style={styles.formControl} error={!this.isRegexValid()}>
+          <FormLabel>Filter Pipelines</FormLabel>
           <List component="ul" disablePadding>
             <ListSubheader disableGutters>
               <Input
-
                 placeholder="some regular expression"
                 value={this.state.filterRegex}
                 onChange={this.regexChanged.bind(this)}
@@ -126,7 +141,6 @@ export default class ConfigurationDialog extends React.Component {
                 <ListItemText primary={p}/>
                 <ListItemSecondaryAction>
                   <Switch checked={this.isPipelineToggledOn(p)} color="primary" value={p}
-
                           disabled={this.isPipelineSelectionDisabled(p)} onChange={this.togglePipeline.bind(this)}/>
                 </ListItemSecondaryAction>
               </ListItem>

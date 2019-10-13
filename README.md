@@ -64,10 +64,6 @@ This can be extremely useful for configuring in Docker environments.
 
 
 Optionally set the following variables in app-config.js.  
-Enable dark theme:
-```
-enableDarkTheme: true
-```
 Group pipelines by their pipeline groups:
 ```
 groupPipelines: true
@@ -93,6 +89,7 @@ Enjoy :)
 ## Configuration
 Go to `http://localhost:3000?admin` and click the settings button in the bottom-right corner to open the configuration dialog.
 * Sort Order - Sort pipelines by status or latest build time
+* Dark Theme - Enables dark theme
 * Filter Pipelines - Disable/enable pipelines to retrieve from go server. It's also possible to write a regex with the pipelines you want.
 ![Configuration](https://github.com/karmats/gocd-monitor/blob/gh-pages/images/configuration.png?raw=true)
 

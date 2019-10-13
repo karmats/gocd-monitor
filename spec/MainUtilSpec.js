@@ -1,9 +1,9 @@
 import { describe, it } from 'mocha';
-import { sortAndFilterPipelines } from '../client/components/Main';
+import { sortAndFilterPipelines } from '../client/components/MainUtil';
 import { expect } from 'chai';
 
 
-describe('MainComponent spec', () => {
+describe('Main util spec', () => {
 
   describe('#sortAndFilterPipelines()', () => {
 

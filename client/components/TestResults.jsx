@@ -9,31 +9,40 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
+import Fab from '@material-ui/core/Fab';
 import Snackbar from '@material-ui/core/Snackbar';
 import AddIcon from '@material-ui/icons/Add';
 
-import moment from 'moment';
+import {
+  subscribeToPipelineNames,
+  subscribeToTestResultUpdates,
+  subscribeToTestMessage,
+  unsubscribeToPipelineNames,
+  unsubscribeToTestResultUpdates,
+  unsubscribeToTestMessage,
+  publishTestResults,
+  publishTestResultAdd,
+  publishTestResultRemove
+} from "../api";
+
+import { sortReports, convertReport } from './TestResultsUtil';
 
 import TestReport from './TestReport';
 import AddTest from './AddTest';
 
-const styles = {
+const createStyles = darkTheme => ({
   addTestBtn: {
     position: 'fixed',
     right: 50,
-    bottom: 50
+    bottom: 50,
+    color: darkTheme ? '#000' : '#fff'
   }
-};
-
-// From latest report to this number of days back in time
-const daysInterval = 20;
+});
 
 export default class TestResults extends React.Component {
 
   constructor(props, context) {
     super(props, context);
-
-    this.socket = props.socket;
 
     // Setup initial state
     this.state = {
@@ -47,31 +56,40 @@ export default class TestResults extends React.Component {
     };
   }
 
-  componentDidMount() {
-    // All pipeline names
-    this.socket.on('pipelines:names', (pipelines) => {
-      this.setState({
-        pipelines: pipelines
-      });
+  // Listeners
+  pipelineNamesListener = (pipelines) => {
+    this.setState({
+      pipelines: pipelines
     });
-
-    // Updated test results
-    this.socket.on('tests:updated', (testReports) => {
-      this.setState({
-        testReports: testReports.map(this.convertReport).sort(this.sortReports)
-      });
+  }
+  testResultsListener = (testReports) => {
+    this.setState({
+      testReports: testReports.map(convertReport).sort(sortReports)
     });
-
-    this.socket.on('tests:message', (message) => {
-      this.setState({
-        msg: message
-      });
+  }
+  testMessageListener = (message) => {
+    this.setState({
+      msg: message
     });
-
-    // Request latest test results
-    this.socket.emit('tests:get');
   }
 
+  // React lifecycle functions
+  componentDidMount() {
+    subscribeToPipelineNames(this.pipelineNamesListener);
+    subscribeToTestResultUpdates(this.testResultsListener);
+    subscribeToTestMessage(this.testMessageListener);
+
+    // Request latest test results
+    publishTestResults();
+  }
+
+  componentWillUnmount() {
+    unsubscribeToPipelineNames(this.pipelineNamesListener);
+    unsubscribeToTestResultUpdates(this.testResultsListener);
+    unsubscribeToTestMessage(this.testMessageListener);
+  }
+
+  // Handlers
   closeAddTest() {
     this.setState({
       addTestDialogOpened: false,
@@ -85,80 +103,6 @@ export default class TestResults extends React.Component {
     });
   }
 
-  /**
-   * Sort reports. Failed first, then time for latest report
-   */
-  sortReports(r1, r2) {
-    const latest1 = r1.history[r1.history.length - 1];
-    const latest2 = r2.history[r2.history.length - 1];
-    if (latest2.failed > 0 && latest1.failed <= 0) {
-      return 1;
-    }
-    if (latest1.failed > 0 && latest2.failed <= 0) {
-      return -1;
-    }
-    if (latest2.when > latest1.when) {
-      return 1;
-    }
-    return -1;
-  }
-
-  /**
-   * Converts report data to report object
-   */
-  convertReport(report) {
-    // Report model
-    const reportView = {
-      id: report._id,
-      title: `${report.pipeline} (${report.stage})`,
-      subtitle: report.job
-    };
-    if (report.cucumber) {
-      // Create chart history data      
-      reportView.history = report.cucumber
-        // Sort by time ascending
-        .sort((a, b) => {
-          return a.timestamp > b.timestamp ? 1 : -1;
-        })
-        // Filter reports that are not in defined interval
-        .filter((report, idx, arr) => {
-          // Latest test case = last in list
-          const latestTestTime = moment(arr[arr.length - 1].timestamp);
-          const currTestTime = moment(report.timestamp);
-          return latestTestTime.diff(currTestTime, 'days') <= daysInterval;
-        })
-        .reduce((acc, c) => {
-          const errors = [];
-          let passed = 0;
-          let failed = 0;
-          c.features.forEach((feature) => {
-            feature.scenarios.forEach((scenario) => {
-              scenario.steps.forEach((step) => {
-                if (step.result === 'passed') {
-                  passed++;
-                } else {
-                  failed++;
-                  errors.push({
-                    test: scenario.name,
-                    message: step.error,
-                  });
-                }
-              })
-            })
-          })
-          acc.push({
-            passed: passed,
-            failed: failed,
-            errors: errors,
-            when: c.timestamp
-          });
-          return acc;
-        }, []);
-
-    }
-    return reportView;
-  }
-
   resetMessage() {
     this.setState({
       msg: ''
@@ -169,7 +113,7 @@ export default class TestResults extends React.Component {
    * Add test reports for a pipeline
    */
   addTest() {
-    this.socket.emit('tests:add', this.state.selectedPipeline);
+    publishTestResultAdd(this.state.selectedPipeline);
     this.closeAddTest();
   }
 
@@ -179,7 +123,7 @@ export default class TestResults extends React.Component {
    * @param {Object} report The report to remove
    */
   removeTest(report) {
-    this.socket.emit('tests:remove', report.id);
+    publishTestResultRemove(report.id);
   }
 
   /**
@@ -190,18 +134,18 @@ export default class TestResults extends React.Component {
   }
 
   render() {
+    const styles = createStyles(this.props.darkTheme);
     const { testReports, pipelines, selectedPipeline, addTestDialogOpened, msg } = this.state;
     // In adminMode tests can be added
     const adminMode = window.location.search.indexOf('admin') >= 0
 
     const addBtn = adminMode ? (
-      <Button
-        variant="fab"
+      <Fab
         color="primary"
         style={styles.addTestBtn}
-        onClick={this.openAddTest.bind(this) }>
+        onClick={this.openAddTest.bind(this)}>
         <AddIcon />
-      </Button>
+      </Fab>
     ) : null;
 
     const addTestActions = [
@@ -250,7 +194,7 @@ export default class TestResults extends React.Component {
           open={msg.length > 0}
           message={this.state.msg}
           autoHideDuration={5000}
-          onRequestClose={this.resetMessage.bind(this)} />
+          onClose={this.resetMessage.bind(this)} />
         {addBtn}
       </div>
     );
