@@ -64,13 +64,12 @@ export default class GoBuildService {
    * }
    */
   getPipelinesPauseInfo() {
-    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/dashboard`, this.conf, true, {'Accept' : 'application/vnd.go.cd.v1+json'});
-
+    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/dashboard`, this.conf, true, {'Accept' : 'application/vnd.go.cd.v3+json'});
     return rp(options)
       .then((res) => {
         // Return map with pipeline name as key.
         return res._embedded.pipeline_groups.reduce((acc, curr) => {
-          curr._embedded.pipelines.forEach((cp) => {
+          curr.pipelines.forEach((cp) => {
             acc[cp.name] = cp.pause_info;
           });
           return acc;
