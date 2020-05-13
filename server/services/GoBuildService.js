@@ -64,7 +64,7 @@ export default class GoBuildService {
    * }
    */
   getPipelinesPauseInfo() {
-    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/dashboard`, this.conf, true, {'Accept' : 'application/vnd.go.cd.v1+json'});
+    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/dashboard`, this.conf, true, {'Accept' : 'application/vnd.go.cd.v3+json'});
 
     return rp(options)
       .then((res) => {
@@ -111,8 +111,7 @@ export default class GoBuildService {
    * }
    */
   getPipelineHistory(name) {
-    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/pipelines/${name}/history/0`, this.conf, true);
-
+    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/pipelines/${name}/history`, this.conf, true, {'Accept' : 'application/vnd.go.cd.v1+json'});
     return rp(options)
       .then(res => GoPipelineParser.parsePipelineResult(res.pipelines.slice(0, 5)))
       .catch((err) => {
