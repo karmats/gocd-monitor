@@ -19,111 +19,109 @@
           }
         },
         "name": "first",
-        "_embedded": {
-          "pipelines": [
-            {
-              "_links": {
-                "self": {
-                  "href": "https://ci.example.com/go/api/pipelines/first/history"
-                },
-                "doc": {
-                  "href": "http://api.go.cd/current/#pipelines"
-                },
-                "settings_path": {
-                  "href": "https://ci.example.com/go/admin/pipelines/first/general"
-                },
-                "trigger": {
-                  "href": "https://ci.example.com/go/api/pipelines/first/schedule"
-                },
-                "trigger_with_options": {
-                  "href": "https://ci.example.com/go/api/pipelines/first/schedule"
-                },
-                "pause": {
-                  "href": "https://ci.example.com/go/api/pipelines/first/pause"
-                },
-                "unpause": {
-                  "href": "https://ci.example.com/go/api/pipelines/first/unpause"
-                }
+        "pipelines": [
+          {
+            "_links": {
+              "self": {
+                "href": "https://ci.example.com/go/api/pipelines/first/history"
               },
-              "name": "first",
-              "locked": false,
-              "pause_info": {
-                "paused": true,
-                "paused_by": "admin",
-                "pause_reason": "under construction"
+              "doc": {
+                "href": "http://api.go.cd/current/#pipelines"
               },
-              "_embedded": {
-                "instances": [
-                  {
-                    "_links": {
-                      "self": {
-                        "href": "https://ci.example.com/go/api/pipelines/first/instance/2"
-                      },
-                      "doc": {
-                        "href": "http://api.go.cd/current/#get-pipeline-instance"
-                      },
-                      "history_url": {
-                        "href": "https://ci.example.com/go/api/pipelines/first/history"
-                      },
-                      "vsm_url": {
-                        "href": "https://ci.example.com/go/pipelines/value_stream_map/first/2"
-                      },
-                      "compare_url": {
-                        "href": "https://ci.example.com/go/compare/first/1/with/2"
-                      },
-                      "build_cause_url": {
-                        "href": "https://ci.example.com/go/pipelines/first/2/build_cause"
-                      }
+              "settings_path": {
+                "href": "https://ci.example.com/go/admin/pipelines/first/general"
+              },
+              "trigger": {
+                "href": "https://ci.example.com/go/api/pipelines/first/schedule"
+              },
+              "trigger_with_options": {
+                "href": "https://ci.example.com/go/api/pipelines/first/schedule"
+              },
+              "pause": {
+                "href": "https://ci.example.com/go/api/pipelines/first/pause"
+              },
+              "unpause": {
+                "href": "https://ci.example.com/go/api/pipelines/first/unpause"
+              }
+            },
+            "name": "first",
+            "locked": false,
+            "pause_info": {
+              "paused": true,
+              "paused_by": "admin",
+              "pause_reason": "under construction"
+            },
+            "_embedded": {
+              "instances": [
+                {
+                  "_links": {
+                    "self": {
+                      "href": "https://ci.example.com/go/api/pipelines/first/instance/2"
                     },
-                    "label": "2",
-                    "schedule_at": "2015-09-18T11:11:36.378Z",
-                    "triggered_by": "admin",
-                    "_embedded": {
-                      "stages": [
-                        {
+                    "doc": {
+                      "href": "http://api.go.cd/current/#get-pipeline-instance"
+                    },
+                    "history_url": {
+                      "href": "https://ci.example.com/go/api/pipelines/first/history"
+                    },
+                    "vsm_url": {
+                      "href": "https://ci.example.com/go/pipelines/value_stream_map/first/2"
+                    },
+                    "compare_url": {
+                      "href": "https://ci.example.com/go/compare/first/1/with/2"
+                    },
+                    "build_cause_url": {
+                      "href": "https://ci.example.com/go/pipelines/first/2/build_cause"
+                    }
+                  },
+                  "label": "2",
+                  "schedule_at": "2015-09-18T11:11:36.378Z",
+                  "triggered_by": "admin",
+                  "_embedded": {
+                    "stages": [
+                      {
+                        "_links": {
+                          "self": {
+                            "href": "https://ci.example.com/go/api/stages/first/2/stage1/2"
+                          },
+                          "doc": {
+                            "href": "http://api.go.cd/current/#get-stage-instance"
+                          }
+                        },
+                        "name": "stage1",
+                        "status": "Building",
+                        "previous_stage": {
                           "_links": {
                             "self": {
-                              "href": "https://ci.example.com/go/api/stages/first/2/stage1/2"
+                              "href": "https://ci.example.com/go/api/stages/first/1/stage1/2"
                             },
                             "doc": {
                               "href": "http://api.go.cd/current/#get-stage-instance"
                             }
                           },
                           "name": "stage1",
-                          "status": "Building",
-                          "previous_stage": {
-                            "_links": {
-                              "self": {
-                                "href": "https://ci.example.com/go/api/stages/first/1/stage1/2"
-                              },
-                              "doc": {
-                                "href": "http://api.go.cd/current/#get-stage-instance"
-                              }
-                            },
-                            "name": "stage1",
-                            "status": "Passed"
-                          }
-                        },
-                        {
-                          "_links": {
-                            "self": {
-                              "href": "https://ci.example.com/go/api/stages/first/2/stage2/1"
-                            },
-                            "doc": {
-                              "href": "http://api.go.cd/current/#get-stage-instance"
-                            }
-                          },
-                          "name": "stage2",
                           "status": "Passed"
                         }
-                      ]
-                    }
+                      },
+                      {
+                        "_links": {
+                          "self": {
+                            "href": "https://ci.example.com/go/api/stages/first/2/stage2/1"
+                          },
+                          "doc": {
+                            "href": "http://api.go.cd/current/#get-stage-instance"
+                          }
+                        },
+                        "name": "stage2",
+                        "status": "Passed"
+                      }
+                    ]
                   }
-                ]
-              }
+                }
+              ]
             }
-          ]
-        }
+          }
+        ]
       }
     ]
   }

@@ -70,7 +70,7 @@ export default class GoBuildService {
       .then((res) => {
         // Return map with pipeline name as key.
         return res._embedded.pipeline_groups.reduce((acc, curr) => {
-          curr._embedded.pipelines.forEach((cp) => {
+          curr.pipelines.forEach((cp) => {
             acc[cp.name] = cp.pause_info;
           });
           return acc;
