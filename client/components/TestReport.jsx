@@ -19,7 +19,7 @@ import teal from '@material-ui/core/colors/teal';
 import pink from '@material-ui/core/colors/pink';
 import Clear from '@material-ui/icons/Clear';
 
-import Chart from 'chart.js'
+import { Chart } from 'chart.js'
 import moment from 'moment';
 
 
