@@ -59,8 +59,8 @@ const styles = {
 }
 
 // Chart.js setup
-Chart.defaults.global.defaultFontColor = white;
-Chart.defaults.global.defaultFontFamily = 'Roboto';
+// Chart.defaults.global.defaultFontColor = 'white';
+// Chart.defaults.global.defaultFontFamily = 'Roboto';
 
 const chartData = (labels, passed, failed) => {
   return {

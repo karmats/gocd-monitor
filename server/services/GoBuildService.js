@@ -14,7 +14,7 @@ export default class GoBuildService {
    * @returns {Promise<Array<string>>} All available pipelines from the go.cd server
    */
   getAllPipelines() {
-    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/pipelines.xml`, this.conf);
+    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/feed/pipelines.xml`, this.conf);
 
     return rp(options)
       .then((res) => {
@@ -35,13 +35,12 @@ export default class GoBuildService {
    * @returns {Promise<Array<Object>>} All available pipeline groups from the go.cd server
    */
   getPipelineGroups() {
-    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/config/pipeline_groups`, this.conf);
+    const options = Util.createRequestOptions(`${this.conf.serverUrl}/go/api/admin/pipeline_groups`, this.conf, true, {'Accept' : 'application/vnd.go.cd.v1+json'});
 
     return rp(options)
-      .then((res) => {
-        return JSON.parse(res);
-      }).catch((err) => {
-        Logger.error('Failed to retrieve pipeline groups');
+      .then(
+          (res) => res._embedded.groups)
+        .catch((err) => {Logger.error('Failed to retrieve pipeline groups');
         throw err
       });
   }

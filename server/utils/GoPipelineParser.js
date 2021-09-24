@@ -16,8 +16,8 @@ export default class GoPipelineParser {
         if (err) {
           throw reject(err);
         }
-        // pipline xml in format {baseUrl}/pipelines/{name}/stages.xml
-        resolve(parsed.pipelines.pipeline.map(p => p.$.href.match(/go\/api\/pipelines\/(.*)\/stages.xml/)[1]));
+        // pipline xml in format {baseUrl}/feed/pipelines/{name}/stages.xml
+        resolve(parsed.pipelines.pipeline.map(p => p.$.href.match(/go\/api\/feed\/pipelines\/(.*)\/stages.xml/)[1]));
       });
     });
   }

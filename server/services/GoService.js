@@ -82,7 +82,7 @@ export default class GoService {
           return pipelinesToFetch
         });
       }});
-  };
+  }
 
   pollGoServer() {
     // Function that refreshes all pipelines
@@ -141,7 +141,7 @@ export default class GoService {
           let pipelineNameToGroupName = new Object();
           pipelineGroups.forEach((pipelineGroup) => {
             pipelineGroup.pipelines.map((pipeline) => {
-              if (pipelineNameToGroupName[pipeline.name] == undefined) {
+              if (pipelineNameToGroupName[pipeline.name] === undefined) {
                 pipelineNameToGroupName[pipeline.name] = pipelineGroup.name;
               }
             });
